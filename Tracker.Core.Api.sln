@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracker.Core.Infrastructure
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.Core.Api.Tests.Unit", "Tracker.Core.Api.Tests.Unit\Tracker.Core.Api.Tests.Unit.csproj", "{77C5A926-D957-4BA9-83BE-5E39BDF366B1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.Core.Api.Tests.Acceptance", "Tracker.Core.Api.Tests.Acceptance\Tracker.Core.Api.Tests.Acceptance.csproj", "{D8C2A2E8-9ABA-4A90-87E9-FC511E0AAAE3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{77C5A926-D957-4BA9-83BE-5E39BDF366B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77C5A926-D957-4BA9-83BE-5E39BDF366B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77C5A926-D957-4BA9-83BE-5E39BDF366B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8C2A2E8-9ABA-4A90-87E9-FC511E0AAAE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8C2A2E8-9ABA-4A90-87E9-FC511E0AAAE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8C2A2E8-9ABA-4A90-87E9-FC511E0AAAE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8C2A2E8-9ABA-4A90-87E9-FC511E0AAAE3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
