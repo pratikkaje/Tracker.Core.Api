@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Tracker.Core.Api.Brokers.Storages
 {
-    internal class StorageBroker : EFxceptionsContext, IStorageBroker
+    internal partial class StorageBroker : EFxceptionsContext, IStorageBroker
     {
         private readonly IConfiguration configuration;
         public StorageBroker(IConfiguration configuration)

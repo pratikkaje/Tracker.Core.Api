@@ -4,7 +4,7 @@
 
 namespace Tracker.Core.Api.Brokers.Storages
 {
-    internal interface IStorageBroker
+    internal partial interface IStorageBroker
     {
     }
 }
