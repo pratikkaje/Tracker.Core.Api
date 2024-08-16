@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Tracker.Core.Api.Brokers.Loggings;
 using Tracker.Core.Api.Brokers.Storages;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddTransient<ILoggingBroker, LoggingBroker>();
 builder.Services.AddDbContext<StorageBroker>();
 builder.Services.AddTransient<IStorageBroker, StorageBroker>();
 
