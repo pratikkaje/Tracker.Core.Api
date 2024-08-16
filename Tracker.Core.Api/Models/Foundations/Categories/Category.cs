@@ -12,7 +12,7 @@ namespace Tracker.Core.Api.Models.Foundations.Categories
         [Required]
         [MaxLength(255)]
         public string Name { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
+        public DateTimeOffset CreatedDate { get; set; }
+        public DateTimeOffset UpdatedDate { get; set; }
     }
 }
