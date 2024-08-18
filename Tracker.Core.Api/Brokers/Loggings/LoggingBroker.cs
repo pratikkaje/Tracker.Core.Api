@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
 
 namespace Tracker.Core.Api.Brokers.Loggings
 {
@@ -10,22 +11,22 @@ namespace Tracker.Core.Api.Brokers.Loggings
         public LoggingBroker(ILogger<LoggingBroker> logger) =>
             this.logger = logger;
 
-        public void LogCritical(Exception exception) =>
-            this.logger.LogCritical(exception, exception.Message);
-
-        public void LogDebug(string message) =>
-            this.logger.LogDebug(message);
-
-        public void LogError(Exception exception) =>
-            this.logger.LogError(exception, exception.Message);
-
-        public void LogInformation(string message) =>
+        public async ValueTask LogInformationAsync(string message) =>
             this.logger.LogInformation(message);
 
-        public void LogTrace(string message) =>
+        public async ValueTask LogTraceAsync(string message) =>
             this.logger.LogTrace(message);
 
-        public void LogWarning(string message) =>
+        public async ValueTask LogDebugAsync(string message) =>
+            this.logger.LogDebug(message);
+
+        public async ValueTask LogWarningAsync(string message) =>
             this.logger.LogWarning(message);
+
+        public async ValueTask LogErrorAsync(Exception exception) =>
+            this.logger.LogError(exception, exception.Message);
+
+        public async ValueTask LogCriticalAsync(Exception exception) =>
+            this.logger.LogCritical(exception, exception.Message);
     }
 }
