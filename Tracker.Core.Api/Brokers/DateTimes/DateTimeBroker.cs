@@ -5,7 +5,7 @@ namespace Tracker.Core.Api.Brokers.DateTimes
 {
     public class DateTimeBroker : IDateTimeBroker
     {
-        public DateTimeOffset GetCurrentDateTimeOffset() =>
+        public async ValueTask<DateTimeOffset> GetCurrentDateTimeOffsetAsync() =>
             DateTimeOffset.UtcNow;
     }
 }
