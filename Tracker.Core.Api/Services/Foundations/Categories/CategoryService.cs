@@ -18,9 +18,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
             this.loggingBroker = loggingBroker;
         }
 
-        public ValueTask<Category> AddCategoryAsync(Category category)
-        {
-            throw new System.NotImplementedException();
-        }
+        public ValueTask<Category> AddCategoryAsync(Category category) =>
+            this.storageBroker.InsertCategoryAsync(category);
     }
 }
