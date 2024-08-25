@@ -5,6 +5,7 @@ using EFxceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Users;
 
 namespace Tracker.Core.Api.Brokers.Storages
 {
