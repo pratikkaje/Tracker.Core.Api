@@ -16,7 +16,7 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             this.loggingBroker = loggingBroker;
         }
 
-        public ValueTask<User> AddCategoryAsync(User user)
+        public ValueTask<User> AddUserAsync(User user)
         {
             throw new System.NotImplementedException();
         }

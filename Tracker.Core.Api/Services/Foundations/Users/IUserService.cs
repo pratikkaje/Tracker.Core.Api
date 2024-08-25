@@ -5,6 +5,6 @@ namespace Tracker.Core.Api.Services.Foundations.Users
 {
     public interface IUserService
     {
-        ValueTask<User> AddCategoryAsync(User user);
+        ValueTask<User> AddUserAsync(User user);
     }
 }
