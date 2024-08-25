@@ -8,5 +8,6 @@ namespace Tracker.Core.Api.Brokers.Storages
     internal partial interface IStorageBroker
     {
         ValueTask<User> InsertUserAsync(User user);
+        ValueTask<IQueryable<User>> SelectAllUsersAsync();
     }
 }
