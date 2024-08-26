@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Tracker.Core.Api.Brokers.Loggings;
 using Tracker.Core.Api.Brokers.Storages;
 using Tracker.Core.Api.Models.Foundations.Users;
@@ -18,5 +19,9 @@ namespace Tracker.Core.Api.Services.Foundations.Users
 
         public async ValueTask<User> AddUserAsync(User user) =>
             await this.storageBroker.InsertUserAsync(user);
+
+        public async ValueTask<IQueryable<User>> RetrieveAllUsersAsync() =>
+            await this.storageBroker.SelectAllUsersAsync();
+
     }
 }

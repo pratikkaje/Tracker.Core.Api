@@ -10,7 +10,7 @@ using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Services.Foundations.Users;
 using Tynamix.ObjectFiller;
 
-namespace Tracker.Core.Api.Tests.Unit.Services.Users
+namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 {
     public partial class UsersServiceTests
     {
@@ -43,7 +43,18 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Users
                 .Use(dates);
 
             return filler;
-        }           
+        }
+
+        private static IQueryable<User> CreateRandomUsers()
+        {
+            return CreateRandomUserFiller(GetRandomDateTimeOffset())
+                .Create(GetRandomNumber()).AsQueryable();
+        }
+
+        private static DateTimeOffset GetRandomDateTimeOffset() =>
+            new DateTimeRange(earliestDate: new DateTime()).GetValue();
+        private static int GetRandomNumber() =>
+            new IntRange(min: 2, max: 10).GetValue();
 
     }
 }
