@@ -20,9 +20,8 @@ namespace Tracker.Core.Api.Services.Foundations.Users
         public async ValueTask<User> AddUserAsync(User user) =>
             await this.storageBroker.InsertUserAsync(user);
 
-        public ValueTask<IQueryable<User>> RetrieveAllUsersAsync()
-        {
-            throw new System.NotImplementedException();
-        }
+        public async ValueTask<IQueryable<User>> RetrieveAllUsersAsync() =>
+            await this.storageBroker.SelectAllUsersAsync();
+
     }
 }
