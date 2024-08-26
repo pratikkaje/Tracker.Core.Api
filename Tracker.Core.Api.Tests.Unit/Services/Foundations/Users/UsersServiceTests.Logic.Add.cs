@@ -11,7 +11,7 @@ using Tracker.Core.Api.Brokers.Storages;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Services.Foundations.Users;
 
-namespace Tracker.Core.Api.Tests.Unit.Services.Users
+namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 {
     public partial class UsersServiceTests
     {
