@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Tracker.Core.Api.Models.Foundations.Users;
 
@@ -8,5 +9,6 @@ namespace Tracker.Core.Api.Services.Foundations.Users
     {
         ValueTask<User> AddUserAsync(User user);
         ValueTask<IQueryable<User>> RetrieveAllUsersAsync();
+        ValueTask<User> RetrieveUserByIdAsync(Guid userId);
     }
 }
