@@ -10,11 +10,14 @@ namespace Tracker.Core.Api.Brokers.Storages
     {
         public DbSet<User> Users { get; set; }
 
-        public ValueTask<User> InsertUserAsync(User user) =>
-            InsertAsync(user);
+        public async ValueTask<User> InsertUserAsync(User user) =>
+            await InsertAsync(user);
 
         public async ValueTask<IQueryable<User>> SelectAllUsersAsync() =>
             await SelectAllAsync<User>();
+
+        public async ValueTask<User> SelectUserByIdAsync(Guid userId) =>
+            await SelectAsync<User>(userId);
 
     }
 }
