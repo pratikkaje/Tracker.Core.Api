@@ -31,7 +31,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     );
         }
 
-        private static User CreateRandomUser =>
+        private static User CreateRandomUser() =>
             CreateRandomUserFiller(DateTimeOffset.UtcNow).Create();
 
         private static Filler<User> CreateRandomUserFiller(DateTimeOffset dates)

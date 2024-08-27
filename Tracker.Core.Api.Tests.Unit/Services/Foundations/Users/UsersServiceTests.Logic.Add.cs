@@ -19,7 +19,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
         public async Task ShouldAddUserAsync()
         {
             // given
-            User RandomUser = CreateRandomUser;
+            User RandomUser = CreateRandomUser();
             User inputUser = RandomUser;
             User returnedUser = inputUser.DeepClone();
 
