@@ -10,5 +10,6 @@ namespace Tracker.Core.Api.Brokers.Storages
         ValueTask<User> InsertUserAsync(User user);
         ValueTask<IQueryable<User>> SelectAllUsersAsync();
         ValueTask<User> SelectUserByIdAsync(Guid userId);
+        ValueTask<User> UpdateUserAsync(User user);
     }
 }
