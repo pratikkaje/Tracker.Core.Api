@@ -27,9 +27,12 @@ namespace Tracker.Core.Api.Services.Foundations.Users
         public async ValueTask<User> RetrieveUserByIdAsync(Guid userId) =>
             await this.storageBroker.SelectUserByIdAsync(userId);
 
-        public ValueTask<User> ModifyUserAsync(User user)
-        {
-            throw new NotImplementedException();
+        public async ValueTask<User> ModifyUserAsync(User user) {
+
+            User maybeUser = await this.storageBroker.SelectUserByIdAsync(user.Id);
+
+            return await this.storageBroker.UpdateUserAsync(user);
         }
+            
     }
 }
