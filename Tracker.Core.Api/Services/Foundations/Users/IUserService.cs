@@ -11,5 +11,6 @@ namespace Tracker.Core.Api.Services.Foundations.Users
         ValueTask<IQueryable<User>> RetrieveAllUsersAsync();
         ValueTask<User> RetrieveUserByIdAsync(Guid userId);
         ValueTask<User> ModifyUserAsync(User user);
+        ValueTask<User> RemoveUserAsync(User user);
     }
 }
