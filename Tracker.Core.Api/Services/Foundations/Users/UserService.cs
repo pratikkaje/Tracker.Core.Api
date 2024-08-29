@@ -34,9 +34,11 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             return await this.storageBroker.UpdateUserAsync(user);
         }
 
-        public ValueTask<User> RemoveUserAsync(User user)
+        public async ValueTask<User> RemoveUserAsync(User user)
         {
-            throw new NotImplementedException();
+            User maybeUser = await this.storageBroker.SelectUserByIdAsync(user.Id);
+
+            return await this.storageBroker.DeleteUserAsync(user);
         }
     }
 }
