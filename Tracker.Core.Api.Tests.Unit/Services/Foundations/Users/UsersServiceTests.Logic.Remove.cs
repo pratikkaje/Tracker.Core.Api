@@ -13,7 +13,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
     public partial class UsersServiceTests
     {
         [Fact]
-        public async Task ShouldRemoveUserAsync()
+        public async Task ShouldRemoveUserByIdAsync()
         {
             //given
             User randomUser = CreateRandomUser();
@@ -30,7 +30,8 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     .ReturnsAsync(deletedUser);
 
             //when
-            User actualUser = await this.userService.RemoveUserAsync(inputUser);
+            User actualUser = 
+                await this.userService.RemoveUserByIdAsync(inputUser.Id);
 
             //then
             actualUser.Should().BeEquivalentTo(deletedUser);
