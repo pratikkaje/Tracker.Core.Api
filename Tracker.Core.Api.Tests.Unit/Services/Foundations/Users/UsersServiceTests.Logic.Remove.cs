@@ -26,22 +26,22 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     .ReturnsAsync(storageUser);
 
             this.storageBrokerMock.Setup(broker => 
-                broker.DeleteUserAsync(inputUser))
+                broker.DeleteUserAsync(storageUser))
                     .ReturnsAsync(deletedUser);
 
             //when
             User actualUser = 
-                await this.userService.RemoveUserByIdAsync(inputUser.Id);
+                await this.userService.RemoveUserByIdAsync(storageUser.Id);
 
             //then
             actualUser.Should().BeEquivalentTo(deletedUser);
 
             this.storageBrokerMock.Verify(broker => 
-                broker.SelectUserByIdAsync(inputUser.Id), 
+                broker.SelectUserByIdAsync(storageUser.Id), 
                     Times.Once());
 
             this.storageBrokerMock.Verify(broker => 
-                broker.DeleteUserAsync(inputUser), 
+                broker.DeleteUserAsync(storageUser), 
                     Times.Once());
 
             this.storageBrokerMock.VerifyNoOtherCalls();
