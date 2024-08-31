@@ -13,7 +13,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
     public partial class UsersServiceTests
     {
         [Fact]
-        public async Task ShouldRemoveUserAsync()
+        public async Task ShouldRemoveUserByIdAsync()
         {
             //given
             User randomUser = CreateRandomUser();
@@ -26,21 +26,22 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     .ReturnsAsync(storageUser);
 
             this.storageBrokerMock.Setup(broker => 
-                broker.DeleteUserAsync(inputUser))
+                broker.DeleteUserAsync(storageUser))
                     .ReturnsAsync(deletedUser);
 
             //when
-            User actualUser = await this.userService.RemoveUserAsync(inputUser);
+            User actualUser = 
+                await this.userService.RemoveUserByIdAsync(storageUser.Id);
 
             //then
             actualUser.Should().BeEquivalentTo(deletedUser);
 
             this.storageBrokerMock.Verify(broker => 
-                broker.SelectUserByIdAsync(inputUser.Id), 
+                broker.SelectUserByIdAsync(storageUser.Id), 
                     Times.Once());
 
             this.storageBrokerMock.Verify(broker => 
-                broker.DeleteUserAsync(inputUser), 
+                broker.DeleteUserAsync(storageUser), 
                     Times.Once());
 
             this.storageBrokerMock.VerifyNoOtherCalls();

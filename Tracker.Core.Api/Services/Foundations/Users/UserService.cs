@@ -34,11 +34,10 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             return await this.storageBroker.UpdateUserAsync(user);
         }
 
-        public async ValueTask<User> RemoveUserAsync(User user)
+        public async ValueTask<User> RemoveUserByIdAsync(Guid userId)
         {
-            User maybeUser = await this.storageBroker.SelectUserByIdAsync(user.Id);
-
-            return await this.storageBroker.DeleteUserAsync(user);
+            User maybeUser = await this.storageBroker.SelectUserByIdAsync(userId);
+            return await this.storageBroker.DeleteUserAsync(maybeUser);
         }
     }
 }
