@@ -22,9 +22,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
         public async ValueTask<Category> AddCategoryAsync(Category category) =>
             await this.storageBroker.InsertCategoryAsync(category);
 
-        public ValueTask<IQueryable<Category>> RetrieveAllCategoriesAsync()
-        {
-            throw new System.NotImplementedException();
-        }
+        public async ValueTask<IQueryable<Category>> RetrieveAllCategoriesAsync() =>
+            await this.storageBroker.SelectAllCategoriesAsync();
     }
 }
