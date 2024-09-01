@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Tracker.Core.Api.Brokers.Loggings;
 using Tracker.Core.Api.Brokers.Storages;
 using Tracker.Core.Api.Models.Foundations.Categories;
@@ -20,5 +21,8 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
 
         public async ValueTask<Category> AddCategoryAsync(Category category) =>
             await this.storageBroker.InsertCategoryAsync(category);
+
+        public async ValueTask<IQueryable<Category>> RetrieveAllCategoriesAsync() =>
+            await this.storageBroker.SelectAllCategoriesAsync();
     }
 }
