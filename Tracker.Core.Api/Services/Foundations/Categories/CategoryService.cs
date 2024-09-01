@@ -35,5 +35,12 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
 
             return await this.storageBroker.UpdateCategoryAsync(category);
         }
+
+        public async ValueTask<Category> RemoveCategoryByIdAsync(Guid categoryId)
+        {
+            Category storageCategory = await this.storageBroker.SelectCategoryByIdAsync(categoryId);
+
+            return await this.storageBroker.DeleteCategoryAsync(storageCategory);
+        }
     }
 }
