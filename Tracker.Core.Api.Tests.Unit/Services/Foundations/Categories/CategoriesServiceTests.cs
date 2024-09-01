@@ -33,6 +33,10 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
         public static Category CreateRandomCategory() =>
             CreateCategoryFiller(DateTimeOffset.UtcNow).Create();
 
+        public static IQueryable<Category> CreateRandomCategories() =>
+            CreateCategoryFiller(GetRandomDateTimeOffset())
+                .Create(GetRandomNumber()).AsQueryable();
+
         private static Filler<Category> CreateCategoryFiller(DateTimeOffset dates)
         {
             var filler = new Filler<Category>();
@@ -42,5 +46,11 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 
             return filler;
         }
+
+        private static DateTimeOffset GetRandomDateTimeOffset() =>
+            new DateTimeRange(earliestDate: new DateTime()).GetValue();
+
+        private static int GetRandomNumber() =>
+            new IntRange(min: 2, max: 10).GetValue();
     }
 }

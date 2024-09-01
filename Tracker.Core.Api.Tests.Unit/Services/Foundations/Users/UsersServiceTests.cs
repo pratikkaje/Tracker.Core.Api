@@ -58,8 +58,5 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             new DateTimeRange(earliestDate: new DateTime()).GetValue();
         private static int GetRandomNumber() =>
             new IntRange(min: 2, max: 10).GetValue();
-
-
-
     }
 }
