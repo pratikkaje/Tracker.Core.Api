@@ -29,9 +29,11 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
         public async ValueTask<Category> RetrieveByIdAsync(Guid categoryId) =>
             await this.storageBroker.SelectCategoryByIdAsync(categoryId);
 
-        public ValueTask<Category> ModifyCategoryAsync(Category category)
+        public async ValueTask<Category> ModifyCategoryAsync(Category category)
         {
-            throw new NotImplementedException();
+            Category maybeCategory = await this.storageBroker.SelectCategoryByIdAsync(category.Id);
+
+            return await this.storageBroker.UpdateCategoryAsync(category);
         }
     }
 }
