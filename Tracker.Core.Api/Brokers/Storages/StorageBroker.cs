@@ -28,6 +28,11 @@ namespace Tracker.Core.Api.Brokers.Storages
             optionsBuilder.UseSqlServer(connectionString);
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            AddUserConfigurations(modelBuilder.Entity<User>());
+        }
+
         private async ValueTask<T> InsertAsync<T>(T @object)
         {
             this.Entry(@object).State = EntityState.Added;

@@ -44,7 +44,7 @@ namespace Tracker.Core.Api.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Tracker.Core.Api.Models.Foundations.Transactions.Transaction", b =>
@@ -82,7 +82,7 @@ namespace Tracker.Core.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", (string)null);
                 });
 
             modelBuilder.Entity("Tracker.Core.Api.Models.Foundations.Users.User", b =>
@@ -116,7 +116,7 @@ namespace Tracker.Core.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 #pragma warning restore 612, 618
         }
