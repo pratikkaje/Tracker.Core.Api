@@ -21,6 +21,8 @@ namespace Tracker.Core.Api.Brokers.Storages
         protected override void OnConfiguring(
             DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+
             string connectionString =
                 this.configuration.GetConnectionString(
                     name: "DefaultConnection");
