@@ -22,7 +22,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             User inputUser = randomUser;
             User storageUser = inputUser;
             User modifiedUser = storageUser;
-            modifiedUser.ModifiedDate = randomDate.AddMinutes(1);
+            modifiedUser.UpdatedDate = randomDate.AddMinutes(1);
             User expectedUser = modifiedUser.DeepClone();
 
             this.storageBrokerMock.Setup(broker => 

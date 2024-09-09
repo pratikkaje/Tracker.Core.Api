@@ -11,6 +11,6 @@ namespace Tracker.Core.Api.Models.Foundations.Users
         public string Email { get; set; }
         public string AvatarUrl { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
-        public DateTimeOffset ModifiedDate { get; set; }
+        public DateTimeOffset UpdatedDate { get; set; }
     }
 }
