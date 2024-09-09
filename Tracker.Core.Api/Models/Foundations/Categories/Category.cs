@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 namespace Tracker.Core.Api.Models.Foundations.Categories
 {
 
-    [Index(nameof(Name), IsUnique = true)]
     public class Category
     {
         public Guid Id { get; set; }
