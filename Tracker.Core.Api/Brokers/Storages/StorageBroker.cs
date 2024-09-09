@@ -33,6 +33,7 @@ namespace Tracker.Core.Api.Brokers.Storages
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             AddUserConfigurations(modelBuilder.Entity<User>());
+            AddCategoryConfigurations(modelBuilder.Entity<Category>());
         }
 
         private async ValueTask<T> InsertAsync<T>(T @object)
