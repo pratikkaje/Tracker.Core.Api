@@ -18,6 +18,9 @@ namespace Tracker.Core.Api.Brokers.Storages
             builder.Property(user => user.Email)
                 .IsRequired()
                 .HasMaxLength(400);
+
+            builder.HasIndex(user => user.UserName).IsUnique();
+            builder.HasIndex(user => user.Email).IsUnique();
         }
     }
 }
