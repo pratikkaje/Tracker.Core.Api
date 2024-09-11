@@ -42,7 +42,8 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             var filler = new Filler<Category>();
 
             filler.Setup()
-                .OnType<DateTimeOffset>().Use(dates);
+                .OnType<DateTimeOffset>().Use(dates)
+                .OnProperty(category => category.User).IgnoreIt();
 
             return filler;
         }
