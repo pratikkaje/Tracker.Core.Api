@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Tracker.Core.Api.Models.Foundations.Categories;
 
 namespace Tracker.Core.Api.Models.Foundations.Users
 {
@@ -12,5 +15,6 @@ namespace Tracker.Core.Api.Models.Foundations.Users
         public string AvatarUrl { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
         public DateTimeOffset UpdatedDate { get; set; }
+        public IEnumerable<Category> Categories { get; set; }
     }
 }

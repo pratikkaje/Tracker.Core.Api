@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Tracker.Core.Api.Models.Foundations.Categories;
 
 namespace Tracker.Core.Api.Brokers.Storages
@@ -13,6 +14,11 @@ namespace Tracker.Core.Api.Brokers.Storages
 
             builder.HasIndex(category => category.Name)
                 .IsUnique();
+
+            builder.HasOne(category => category.User)
+                .WithMany(user => user.Categories)
+                .HasForeignKey(category => category.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
