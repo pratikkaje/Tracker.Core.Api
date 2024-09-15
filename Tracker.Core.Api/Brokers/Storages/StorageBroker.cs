@@ -5,6 +5,7 @@ using EFxceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Users;
 
 namespace Tracker.Core.Api.Brokers.Storages
@@ -34,6 +35,7 @@ namespace Tracker.Core.Api.Brokers.Storages
         {
             AddUserConfigurations(modelBuilder.Entity<User>());
             AddCategoryConfigurations(modelBuilder.Entity<Category>());
+            AddTransactionConfigurations(modelBuilder.Entity<Transaction>());
         }
 
         private async ValueTask<T> InsertAsync<T>(T @object)

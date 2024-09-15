@@ -18,7 +18,7 @@ namespace Tracker.Core.Api.Brokers.Storages
             builder.HasOne(category => category.User)
                 .WithMany(user => user.Categories)
                 .HasForeignKey(category => category.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

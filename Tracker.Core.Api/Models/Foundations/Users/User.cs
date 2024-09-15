@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Transactions;
 
 namespace Tracker.Core.Api.Models.Foundations.Users
 {
@@ -16,5 +17,6 @@ namespace Tracker.Core.Api.Models.Foundations.Users
         public DateTimeOffset CreatedDate { get; set; }
         public DateTimeOffset UpdatedDate { get; set; }
         public IEnumerable<Category> Categories { get; set; }
+        public IEnumerable<Transaction> Transactions { get; set; }
     }
 }
