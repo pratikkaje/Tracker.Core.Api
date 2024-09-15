@@ -10,8 +10,8 @@ namespace Tracker.Core.Api.Brokers.Storages
     {
         public DbSet<Category> Categories { get; set; }
 
-        public ValueTask<Category> InsertCategoryAsync(Category category) =>
-            InsertAsync(category);
+        public async ValueTask<Category> InsertCategoryAsync(Category category) =>
+            await InsertAsync(category);
 
         public async ValueTask<IQueryable<Category>> SelectAllCategoriesAsync() => 
             await SelectAllAsync<Category>();
