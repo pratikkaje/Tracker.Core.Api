@@ -22,9 +22,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             this.dateTimeBroker = dateTimeBroker;
         }
 
-        public ValueTask<Transaction> AddTransactionAsync(Transaction transaction)
-        {
-            throw new System.NotImplementedException();
-        }
+        public async ValueTask<Transaction> AddTransactionAsync(Transaction transaction) =>
+            await this.storageBroker.InsertTransactionAsync(transaction);
     }
 }
