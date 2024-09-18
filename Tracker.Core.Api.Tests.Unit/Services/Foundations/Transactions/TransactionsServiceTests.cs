@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Moq;
@@ -10,6 +11,7 @@ using Tracker.Core.Api.Brokers.Storages;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Services.Foundations.Transactions;
 using Tynamix.ObjectFiller;
+using Xeptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 {
@@ -34,9 +36,15 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     dateTimeBroker: datetimeBrokerMock.Object);
         }
 
-
         public static Transaction CreateRandomTransaction() =>
             CreateTransactionFiller(DateTimeOffset.UtcNow).Create();
+
+        private static Expression<Func<Xeption, bool>> SameExceptionAs(
+            Xeption expectedException)
+        {
+            return actualException =>
+                actualException.SameExceptionAs(expectedException);
+        }
 
         private static Filler<Transaction> CreateTransactionFiller(DateTimeOffset dates)
         {
