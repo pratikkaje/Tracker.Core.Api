@@ -17,11 +17,15 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             }
             catch (NullTransactionException nullTransactionException)
             {
-                throw await CreateAndLogValidationException(nullTransactionException);
+                throw await CreateAndLogValidationExceptionAsync(nullTransactionException);
+            }
+            catch (InvalidTransactionException invalidTransactionException) 
+            {
+                throw await CreateAndLogValidationExceptionAsync(invalidTransactionException);
             }
         }
 
-        private async ValueTask<TransactionValidationException> CreateAndLogValidationException(Xeption exception)
+        private async ValueTask<TransactionValidationException> CreateAndLogValidationExceptionAsync(Xeption exception)
         {
             var transactionValidationException =
                 new TransactionValidationException(

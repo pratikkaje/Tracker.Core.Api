@@ -126,15 +126,16 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             TransactionValidationException expectedTransactionValidationException = 
                 new TransactionValidationException(
-                    message: "Transaction validation error occurred, fix the errors and try again.", 
+                    message: "Transaction validation error occurred, fix errors and try again.", 
                     innerException: invalidTransactionException);
 
             // when
-            ValueTask<Transaction> addTransactionTaskAsync = 
+            ValueTask<Transaction> addTransactionTask = 
                 this.transactionService.AddTransactionAsync(invalidTransaction);
 
             TransactionValidationException actualTransactionValidationException = 
-                await Assert.ThrowsAsync<TransactionValidationException>(addTransactionTaskAsync.AsTask);
+                await Assert.ThrowsAsync<TransactionValidationException>(
+                    addTransactionTask.AsTask);
 
             // then
             actualTransactionValidationException.Should().BeEquivalentTo(
@@ -154,6 +155,5 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
-
     }
 }
