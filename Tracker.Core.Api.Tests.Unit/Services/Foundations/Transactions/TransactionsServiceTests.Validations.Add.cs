@@ -164,6 +164,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             Transaction invalidTransaction = randomTransaction;
 
             invalidTransaction.TransactionType = GetRandomStringWithLengthOf(11);
+            invalidTransaction.Amount = GetRandomDecimalWithPrecisionAndScaleOf(11,5);
             invalidTransaction.Description = GetRandomStringWithLengthOf(401);
 
             var invalidTransactionException = 
@@ -173,6 +174,10 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             invalidTransactionException.AddData(
                 key: nameof(Transaction.TransactionType), 
                 values: $"Text exceeds max length of {invalidTransaction.TransactionType.Length - 1} characters.");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.Amount),
+                values: "Value exceeds 10 digits or 4 decimal places.");
 
             invalidTransactionException.AddData(
                 key: nameof(Transaction.Description),

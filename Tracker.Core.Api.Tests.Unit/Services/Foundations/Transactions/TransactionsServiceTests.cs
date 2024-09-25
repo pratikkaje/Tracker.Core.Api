@@ -36,6 +36,18 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     dateTimeBroker: datetimeBrokerMock.Object);
         }
 
+        private static decimal GetRandomDecimalWithPrecisionAndScaleOf(int precision, int scale)
+        {
+            string left = new IntRange(min: precision, max: precision).GetValue().ToString();
+            string right = new IntRange(min: scale, max: scale).GetValue().ToString();
+            string number = left + "." + right;
+
+            decimal randomDecimalValue = decimal.Parse(number);
+
+            return randomDecimalValue;
+        }
+            
+
         private static string GetRandomStringWithLengthOf(int length) =>
             new MnemonicString(wordCount: 1, wordMinLength: length, wordMaxLength: length).GetValue();
 
