@@ -155,5 +155,57 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnAddIfTransactionHasInvalidLengthPropertiesAndLogItAsync()
+        {
+            // given
+            Transaction randomTransaction = CreateRandomTransaction();
+            Transaction invalidTransaction = randomTransaction;
+
+            invalidTransaction.TransactionType = GetRandomStringWithLengthOf(11);
+            invalidTransaction.Description = GetRandomStringWithLengthOf(400);
+
+            var invalidTransactionException = 
+                new InvalidTransactionException(
+                message: "Transaction is invalid, fix the errors and try again.");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.TransactionType), 
+                values: $"Text exceeds max length of {invalidTransaction.TransactionType.Length - 1} characters.");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.Description),
+                values: $"Text exceeds max length of {invalidTransaction.Description.Length - 1} characters.");
+
+            var expectedTransactionValidationException = new TransactionValidationException(
+                message: "Transaction validation error occurred, fix errors and try again.",
+                innerException: invalidTransactionException);
+
+            // when
+            ValueTask<Transaction> addTransactionTask = 
+                this.transactionService.AddTransactionAsync(invalidTransaction);
+
+            TransactionValidationException actualTransactionValidationException = 
+                await Assert.ThrowsAsync<TransactionValidationException>(addTransactionTask.AsTask);
+
+            // then
+            actualTransactionValidationException.Should().BeEquivalentTo(
+                expectedTransactionValidationException);
+
+            this.loggingBrokerMock.Verify(broker => 
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedTransactionValidationException))), 
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker => 
+                broker.InsertTransactionAsync(
+                    It.IsAny<Transaction>()), 
+                        Times.Never);
+
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }

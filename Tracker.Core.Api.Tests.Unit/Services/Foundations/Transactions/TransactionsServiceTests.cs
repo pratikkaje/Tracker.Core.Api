@@ -36,6 +36,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     dateTimeBroker: datetimeBrokerMock.Object);
         }
 
+        private static string GetRandomStringWithLengthOf(int length) =>
+            new MnemonicString(wordCount: 1, wordMinLength: length, wordMaxLength: length).GetValue();
+
         public static Transaction CreateRandomTransaction() =>
             CreateTransactionFiller(DateTimeOffset.UtcNow).Create();
 
