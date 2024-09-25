@@ -3,6 +3,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Tracker.Core.Api.Services.Foundations.Transactions
 {
@@ -18,11 +19,20 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsInvalidAsync(transaction.CategoryId), Parameter: nameof(Transaction.CategoryId)),
 
                 (Rule: await IsInvalidAsync(
-                    transaction.TransactionType), 
+                    transaction.TransactionType),
+                    Parameter: nameof(Transaction.TransactionType)),
+
+                (Rule: await IsInvalidLengthAsync(
+                    transaction.TransactionType, 10), 
                     Parameter: nameof(Transaction.TransactionType)),
 
                 (Rule: await IsInvalidAsync(transaction.Amount), Parameter: nameof(Transaction.Amount)),
                 (Rule: await IsInvalidAsync(transaction.Description), Parameter: nameof(Transaction.Description)),
+
+                (Rule: await IsInvalidLengthAsync(
+                    transaction.Description, 400),
+                    Parameter: nameof(Transaction.Description)),
+
                 (Rule: await IsInvalidAsync(transaction.TransactionDate), Parameter: nameof(Transaction.TransactionDate)),
                 (Rule: await IsInvalidAsync(transaction.CreatedBy), Parameter: nameof(Transaction.CreatedBy)),
                 (Rule: await IsInvalidAsync(transaction.UpdatedBy), Parameter: nameof(Transaction.UpdatedBy)),
@@ -30,7 +40,16 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsInvalidAsync(transaction.UpdatedDate), Parameter: nameof(Transaction.UpdatedDate)));
         }
 
-        private static async ValueTask<dynamic> IsInvalidAsync(decimal value) => new 
+        private static async ValueTask<dynamic> IsInvalidLengthAsync(string text, int maxLength) => new
+        {
+            Condition = await IsExceedingLengthAsync(text, maxLength),
+            Message = $"Text exceeds max length of {maxLength} characters."
+        };
+
+        private static async ValueTask<bool> IsExceedingLengthAsync(string text, int maxLength) =>
+            (text ?? string.Empty).Length > maxLength;
+
+        private static async ValueTask<dynamic> IsInvalidAsync(decimal value) => new
         {
             Condition = value == default,
             Message = "Value greater than 0 is required."
@@ -74,7 +93,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                     invalidTransactionException.UpsertDataList(
                         key: parameter,
                         value: rule.Message);
-                }                
+                }
             }
 
             invalidTransactionException.ThrowIfContainsErrors();
