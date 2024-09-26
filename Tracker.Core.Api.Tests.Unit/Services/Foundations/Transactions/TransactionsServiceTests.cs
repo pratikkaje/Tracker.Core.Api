@@ -66,6 +66,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             filler.Setup()
                 .OnType<DateTimeOffset>().Use(dates)
+                .OnProperty(transaction => transaction.Amount).Use(GetRandomDecimal(precision: 10, scale: 4))
                 .OnProperty(transaction => transaction.User).IgnoreIt()
                 .OnProperty(transaction => transaction.Category).IgnoreIt();
 
