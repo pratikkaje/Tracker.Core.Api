@@ -36,6 +36,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     dateTimeBroker: datetimeBrokerMock.Object);
         }
 
+        private static string GetRandomString() =>
+            new MnemonicString().GetValue();
+
+        private static DateTimeOffset GetRandomDateTimeOffset() =>
+            new DateTimeRange(earliestDate: new DateTime()).GetValue();
+
         private static decimal GetRandomDecimal(int totaldigits, int scale)
         {
             Random random = new Random();
@@ -44,14 +50,16 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             decimal result = Math.Round(randomValue, scale);
 
             return result;
-        }
-            
+        }            
 
         private static string GetRandomStringWithLengthOf(int length) =>
             new MnemonicString(wordCount: 1, wordMinLength: length, wordMaxLength: length).GetValue();
 
         public static Transaction CreateRandomTransaction() =>
             CreateTransactionFiller(DateTimeOffset.UtcNow).Create();
+
+        public static Transaction CreateRandomTransaction(DateTimeOffset date) =>
+            CreateTransactionFiller(date).Create();
 
         private static Expression<Func<Xeption, bool>> SameExceptionAs(
             Xeption expectedException)
