@@ -36,10 +36,10 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     dateTimeBroker: datetimeBrokerMock.Object);
         }
 
-        private static decimal GetRandomDecimal(int precision, int scale)
+        private static decimal GetRandomDecimal(int totaldigits, int scale)
         {
             Random random = new Random();
-            decimal maxValue = (decimal)Math.Pow(10, precision - scale);
+            decimal maxValue = (decimal)Math.Pow(10, totaldigits - scale);
             decimal randomValue = (decimal)random.NextDouble() * maxValue;
             decimal result = Math.Round(randomValue, scale);
 
@@ -66,7 +66,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             filler.Setup()
                 .OnType<DateTimeOffset>().Use(dates)
-                .OnProperty(transaction => transaction.Amount).Use(GetRandomDecimal(precision: 10, scale: 4))
+                .OnProperty(transaction => transaction.Amount).Use(GetRandomDecimal(totaldigits: 13, scale: 3))
                 .OnProperty(transaction => transaction.User).IgnoreIt()
                 .OnProperty(transaction => transaction.Category).IgnoreIt();
 

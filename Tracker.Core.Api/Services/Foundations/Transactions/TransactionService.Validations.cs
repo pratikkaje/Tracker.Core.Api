@@ -23,14 +23,12 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                     transaction.TransactionType),
                     Parameter: nameof(Transaction.TransactionType)),
 
-                (Rule: await IsInvalidLengthAsync(
-                    transaction.TransactionType, 10), 
-                    Parameter: nameof(Transaction.TransactionType)),
+                (Rule: await IsInvalidLengthAsync(transaction.TransactionType, 10), Parameter: nameof(Transaction.TransactionType)),
 
                 (Rule: await IsInvalidAsync(transaction.Amount), Parameter: nameof(Transaction.Amount)),
 
                 (Rule: await IsInvalidLengthAsync(
-                    transaction.Amount, 10,4),
+                    transaction.Amount, 14, 4),
                     Parameter: nameof(Transaction.Amount)),
 
                 (Rule: await IsInvalidAsync(transaction.Description), Parameter: nameof(Transaction.Description)),
@@ -43,7 +41,8 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsInvalidAsync(transaction.CreatedBy), Parameter: nameof(Transaction.CreatedBy)),
                 (Rule: await IsInvalidAsync(transaction.UpdatedBy), Parameter: nameof(Transaction.UpdatedBy)),
                 (Rule: await IsInvalidAsync(transaction.CreatedDate), Parameter: nameof(Transaction.CreatedDate)),
-                (Rule: await IsInvalidAsync(transaction.UpdatedDate), Parameter: nameof(Transaction.UpdatedDate)));
+                (Rule: await IsInvalidAsync(transaction.UpdatedDate), Parameter: nameof(Transaction.UpdatedDate))
+                );
         }
 
         private static async ValueTask<dynamic> IsInvalidLengthAsync(decimal value, int precision, int scale) => new
@@ -52,15 +51,14 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             Message = "Value exceeds 10 digits or 4 decimal places."
         };
 
-        private static async ValueTask<bool> IsExceedingLengthAsync(decimal value, int precision, int scale) 
+        private static async ValueTask<bool> IsExceedingLengthAsync(decimal value, int totaldigits, int scale) 
         {
             string[] parts = value.ToString().Split('.');
             int integerPartLength = parts[0].Length;
             int fractionalPartLength = parts.Length > 1 ? parts[1].Length : 0;
 
-            return integerPartLength + fractionalPartLength > precision || fractionalPartLength > scale;
+            return integerPartLength + fractionalPartLength > totaldigits || fractionalPartLength > scale;
         }
-
 
         private static async ValueTask<dynamic> IsInvalidLengthAsync(string text, int maxLength) => new
         {
@@ -94,6 +92,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             Condition = id == Guid.Empty,
             Message = "Id is invalid."
         };
+
         private static void ValidateTransactionIsNotNull(Transaction transaction)
         {
             if (transaction is null)
