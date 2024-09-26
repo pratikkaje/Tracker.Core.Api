@@ -36,15 +36,14 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     dateTimeBroker: datetimeBrokerMock.Object);
         }
 
-        private static decimal GetRandomDecimalWithPrecisionAndScaleOf(int precision, int scale)
+        private static decimal GetRandomDecimal(int precision, int scale)
         {
-            string left = new IntRange(min: precision, max: precision).GetValue().ToString();
-            string right = new IntRange(min: scale, max: scale).GetValue().ToString();
-            string number = left + "." + right;
+            Random random = new Random();
+            decimal maxValue = (decimal)Math.Pow(10, precision - scale);
+            decimal randomValue = (decimal)random.NextDouble() * maxValue;
+            decimal result = Math.Round(randomValue, scale);
 
-            decimal randomDecimalValue = decimal.Parse(number);
-
-            return randomDecimalValue;
+            return result;
         }
             
 

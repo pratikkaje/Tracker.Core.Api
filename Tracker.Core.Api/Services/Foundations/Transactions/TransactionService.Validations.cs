@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Numerics;
 using System.Threading.Tasks;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
@@ -27,6 +28,11 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                     Parameter: nameof(Transaction.TransactionType)),
 
                 (Rule: await IsInvalidAsync(transaction.Amount), Parameter: nameof(Transaction.Amount)),
+
+                (Rule: await IsInvalidLengthAsync(
+                    transaction.Amount, 10,4),
+                    Parameter: nameof(Transaction.Amount)),
+
                 (Rule: await IsInvalidAsync(transaction.Description), Parameter: nameof(Transaction.Description)),
 
                 (Rule: await IsInvalidLengthAsync(
@@ -39,6 +45,22 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsInvalidAsync(transaction.CreatedDate), Parameter: nameof(Transaction.CreatedDate)),
                 (Rule: await IsInvalidAsync(transaction.UpdatedDate), Parameter: nameof(Transaction.UpdatedDate)));
         }
+
+        private static async ValueTask<dynamic> IsInvalidLengthAsync(decimal value, int precision, int scale) => new
+        {
+            Condition = await IsExceedingLengthAsync(value, precision, scale),
+            Message = "Value exceeds 10 digits or 4 decimal places."
+        };
+
+        private static async ValueTask<bool> IsExceedingLengthAsync(decimal value, int precision, int scale) 
+        {
+            string[] parts = value.ToString().Split('.');
+            int integerPartLength = parts[0].Length;
+            int fractionalPartLength = parts.Length > 1 ? parts[1].Length : 0;
+
+            return integerPartLength + fractionalPartLength > precision || fractionalPartLength > scale;
+        }
+
 
         private static async ValueTask<dynamic> IsInvalidLengthAsync(string text, int maxLength) => new
         {

@@ -164,7 +164,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             Transaction invalidTransaction = randomTransaction;
 
             invalidTransaction.TransactionType = GetRandomStringWithLengthOf(11);
-            invalidTransaction.Amount = GetRandomDecimalWithPrecisionAndScaleOf(11,5);
+            invalidTransaction.Amount = GetRandomDecimal(11,5);
             invalidTransaction.Description = GetRandomStringWithLengthOf(401);
 
             var invalidTransactionException = 
