@@ -41,9 +41,36 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsInvalidAsync(transaction.CreatedBy), Parameter: nameof(Transaction.CreatedBy)),
                 (Rule: await IsInvalidAsync(transaction.UpdatedBy), Parameter: nameof(Transaction.UpdatedBy)),
                 (Rule: await IsInvalidAsync(transaction.CreatedDate), Parameter: nameof(Transaction.CreatedDate)),
-                (Rule: await IsInvalidAsync(transaction.UpdatedDate), Parameter: nameof(Transaction.UpdatedDate))
-                );
+                (Rule: await IsInvalidAsync(transaction.UpdatedDate), Parameter: nameof(Transaction.UpdatedDate)),
+
+                (Rule: await IsNotSameAsync(
+                    first: transaction.UpdatedBy,
+                    second: transaction.CreatedBy,
+                    secondName: nameof(Transaction.CreatedBy)), Parameter: nameof(Transaction.UpdatedBy)),
+
+                (Rule: await IsNotSameAsync(
+                    firstDate: transaction.UpdatedDate,
+                    secondDate: transaction.CreatedDate,
+                    secondDateName: nameof(Transaction.CreatedDate)), Parameter: nameof(Transaction.UpdatedDate)));
         }
+
+        private static async ValueTask<dynamic> IsNotSameAsync(
+            string first, 
+            string second, 
+            string secondName) => new
+        {
+            Condition = first != second,
+            Message = $"Text is not same as {secondName}"
+        };
+
+        private static async ValueTask<dynamic> IsNotSameAsync(
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
+            string secondDateName) => new
+            {
+                Condition = firstDate != secondDate,
+                Message = $"Date is not same as {secondDateName}"
+            };
 
         private static async ValueTask<dynamic> IsInvalidLengthAsync(decimal value, int precision, int scale) => new
         {

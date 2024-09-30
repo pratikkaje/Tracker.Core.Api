@@ -70,11 +70,14 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
         private static Filler<Transaction> CreateTransactionFiller(DateTimeOffset dates)
         {
+            string someUser = Guid.NewGuid().ToString();
             var filler = new Filler<Transaction>();
 
             filler.Setup()
                 .OnType<DateTimeOffset>().Use(dates)
                 .OnProperty(transaction => transaction.Amount).Use(GetRandomDecimal(totaldigits: 13, scale: 3))
+                .OnProperty(transaction => transaction.CreatedBy).Use(someUser)
+                .OnProperty(transaction => transaction.UpdatedBy).Use(someUser)
                 .OnProperty(transaction => transaction.User).IgnoreIt()
                 .OnProperty(transaction => transaction.Category).IgnoreIt();
 

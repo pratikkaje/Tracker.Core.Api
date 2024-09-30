@@ -16,7 +16,8 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
         public async Task ShouldAddTransactionAsync()
         {
             // given
-            Transaction randomTransaction = CreateRandomTransaction();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Transaction randomTransaction = CreateRandomTransaction(randomDateTimeOffset);
             Transaction inputTransaction = randomTransaction;
             Transaction expectedTransaction = inputTransaction.DeepClone();
 
