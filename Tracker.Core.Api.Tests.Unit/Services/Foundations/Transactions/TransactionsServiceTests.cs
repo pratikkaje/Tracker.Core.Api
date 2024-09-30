@@ -71,6 +71,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             filler.Setup()
                 .OnType<DateTimeOffset>().Use(dates)
+                .OnProperty(transaction => transaction.TransactionType).Use(GetRandomStringWithLengthOf(9))
                 .OnProperty(transaction => transaction.Amount).Use(GetRandomDecimal(totaldigits: 13, scale: 3))
                 .OnProperty(transaction => transaction.CreatedBy).Use(someUser)
                 .OnProperty(transaction => transaction.UpdatedBy).Use(someUser)
