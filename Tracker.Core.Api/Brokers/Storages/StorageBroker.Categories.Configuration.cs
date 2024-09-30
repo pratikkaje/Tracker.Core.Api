@@ -9,7 +9,7 @@ namespace Tracker.Core.Api.Brokers.Storages
         private void AddCategoryConfigurations(EntityTypeBuilder<Category> builder)
         {
             builder.Property(category => category.Name)
-                .IsRequired()                
+                .IsRequired()
                 .HasMaxLength(255);
 
             builder.HasIndex(category => category.Name)

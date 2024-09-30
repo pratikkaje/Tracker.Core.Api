@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Data;
-using System.Numerics;
 using System.Threading.Tasks;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Tracker.Core.Api.Services.Foundations.Transactions
 {
@@ -55,13 +52,13 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
         }
 
         private static async ValueTask<dynamic> IsNotSameAsync(
-            string first, 
-            string second, 
+            string first,
+            string second,
             string secondName) => new
-        {
-            Condition = first != second,
-            Message = $"Text is not same as {secondName}"
-        };
+            {
+                Condition = first != second,
+                Message = $"Text is not same as {secondName}"
+            };
 
         private static async ValueTask<dynamic> IsNotSameAsync(
             DateTimeOffset firstDate,
@@ -78,7 +75,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             Message = "Value exceeds 10 digits or 4 decimal places."
         };
 
-        private static async ValueTask<bool> IsExceedingLengthAsync(decimal value, int totaldigits, int scale) 
+        private static async ValueTask<bool> IsExceedingLengthAsync(decimal value, int totaldigits, int scale)
         {
             string[] parts = value.ToString().Split('.');
             int integerPartLength = parts[0].Length;

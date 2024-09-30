@@ -1,7 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Users;
 

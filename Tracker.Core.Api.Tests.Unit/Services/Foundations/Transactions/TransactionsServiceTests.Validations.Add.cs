@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -28,7 +25,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     innerException: nullTransactionException);
 
             // when
-            ValueTask<Transaction> addTransactionTask = 
+            ValueTask<Transaction> addTransactionTask =
                 this.transactionService.AddTransactionAsync(nullTransaction);
 
             TransactionValidationException actualTransactionValidationException =
@@ -38,13 +35,13 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             actualTransactionValidationException.Should()
                 .BeEquivalentTo(expectedTransactionValidationException);
 
-            this.loggingBrokerMock.Verify(broker => 
+            this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
                     expectedTransactionValidationException))), Times.Once);
 
-            this.storageBrokerMock.Verify(broker => 
+            this.storageBrokerMock.Verify(broker =>
                 broker.InsertTransactionAsync(
-                    It.IsAny<Transaction>()), 
+                    It.IsAny<Transaction>()),
                         Times.Never);
 
             this.loggingBrokerMock.VerifyNoOtherCalls();
@@ -76,12 +73,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                 UpdatedDate = randomDateTimeOffset,
             };
 
-            var invalidTransactionException = 
+            var invalidTransactionException =
                 new InvalidTransactionException(
                     message: "Transaction is invalid, fix the errors and try again.");
 
             invalidTransactionException.AddData(
-                key: nameof(Transaction.Id), 
+                key: nameof(Transaction.Id),
                 values: "Id is invalid.");
 
             invalidTransactionException.AddData(
@@ -105,7 +102,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                 values: "Text is required.");
 
             invalidTransactionException.AddData(
-                key: nameof(Transaction.TransactionDate), 
+                key: nameof(Transaction.TransactionDate),
                 values: "Date is invalid.");
 
             invalidTransactionException.AddData(
@@ -124,16 +121,16 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                 key: nameof(Transaction.UpdatedDate),
                 values: "Date is invalid.");
 
-            TransactionValidationException expectedTransactionValidationException = 
+            TransactionValidationException expectedTransactionValidationException =
                 new TransactionValidationException(
-                    message: "Transaction validation error occurred, fix errors and try again.", 
+                    message: "Transaction validation error occurred, fix errors and try again.",
                     innerException: invalidTransactionException);
 
             // when
-            ValueTask<Transaction> addTransactionTask = 
+            ValueTask<Transaction> addTransactionTask =
                 this.transactionService.AddTransactionAsync(invalidTransaction);
 
-            TransactionValidationException actualTransactionValidationException = 
+            TransactionValidationException actualTransactionValidationException =
                 await Assert.ThrowsAsync<TransactionValidationException>(
                     addTransactionTask.AsTask);
 
@@ -141,14 +138,14 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             actualTransactionValidationException.Should().BeEquivalentTo(
                 expectedTransactionValidationException);
 
-            this.loggingBrokerMock.Verify(broker => 
+            this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
-                    expectedTransactionValidationException))), 
+                    expectedTransactionValidationException))),
                         Times.Once);
 
-            this.storageBrokerMock.Verify(broker => 
+            this.storageBrokerMock.Verify(broker =>
                 broker.InsertTransactionAsync(
-                    It.IsAny<Transaction>()), 
+                    It.IsAny<Transaction>()),
                         Times.Never);
 
             this.loggingBrokerMock.VerifyNoOtherCalls();
@@ -164,15 +161,15 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             Transaction invalidTransaction = randomTransaction;
 
             invalidTransaction.TransactionType = GetRandomStringWithLengthOf(11);
-            invalidTransaction.Amount = GetRandomDecimal(16,5);
+            invalidTransaction.Amount = GetRandomDecimal(16, 5);
             invalidTransaction.Description = GetRandomStringWithLengthOf(401);
 
-            var invalidTransactionException = 
+            var invalidTransactionException =
                 new InvalidTransactionException(
                 message: "Transaction is invalid, fix the errors and try again.");
 
             invalidTransactionException.AddData(
-                key: nameof(Transaction.TransactionType), 
+                key: nameof(Transaction.TransactionType),
                 values: $"Text exceeds max length of {invalidTransaction.TransactionType.Length - 1} characters.");
 
             invalidTransactionException.AddData(
@@ -188,24 +185,24 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                 innerException: invalidTransactionException);
 
             // when
-            ValueTask<Transaction> addTransactionTask = 
+            ValueTask<Transaction> addTransactionTask =
                 this.transactionService.AddTransactionAsync(invalidTransaction);
 
-            TransactionValidationException actualTransactionValidationException = 
+            TransactionValidationException actualTransactionValidationException =
                 await Assert.ThrowsAsync<TransactionValidationException>(addTransactionTask.AsTask);
 
             // then
             actualTransactionValidationException.Should().BeEquivalentTo(
                 expectedTransactionValidationException);
 
-            this.loggingBrokerMock.Verify(broker => 
+            this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
-                    expectedTransactionValidationException))), 
+                    expectedTransactionValidationException))),
                         Times.Once);
 
-            this.storageBrokerMock.Verify(broker => 
+            this.storageBrokerMock.Verify(broker =>
                 broker.InsertTransactionAsync(
-                    It.IsAny<Transaction>()), 
+                    It.IsAny<Transaction>()),
                         Times.Never);
 
             this.loggingBrokerMock.VerifyNoOtherCalls();
@@ -226,7 +223,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             invalidTransaction.CreatedDate = now;
             invalidTransaction.UpdatedDate = GetRandomDateTimeOffset();
 
-            var invalidTransactionException = 
+            var invalidTransactionException =
                 new InvalidTransactionException(
                     message: "Transaction is invalid, fix the errors and try again.");
 
@@ -244,7 +241,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     innerException: invalidTransactionException);
 
             // when
-            ValueTask<Transaction> addTransactionTask = 
+            ValueTask<Transaction> addTransactionTask =
                 this.transactionService.AddTransactionAsync(invalidTransaction);
 
             TransactionValidationException actualTransactionValidationException =
@@ -255,18 +252,18 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             actualTransactionValidationException.Should().BeEquivalentTo(
                 expectedTransactionValidationException);
 
-            this.loggingBrokerMock.Verify(broker => 
+            this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
-                    expectedTransactionValidationException))), 
+                    expectedTransactionValidationException))),
                         Times.Once);
 
-            this.datetimeBrokerMock.Verify(broker => 
-                broker.GetCurrentDateTimeOffsetAsync(), 
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
                     Times.Never);
 
-            this.storageBrokerMock.Verify(broker => 
+            this.storageBrokerMock.Verify(broker =>
                 broker.InsertTransactionAsync(
-                    It.IsAny<Transaction>()), 
+                    It.IsAny<Transaction>()),
                         Times.Never);
 
             this.datetimeBrokerMock.VerifyNoOtherCalls();

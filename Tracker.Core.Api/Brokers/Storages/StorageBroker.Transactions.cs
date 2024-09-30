@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using System;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 

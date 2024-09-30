@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Force.DeepCloner;
@@ -24,26 +21,26 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             Category modifiedCategory = storageCategory.DeepClone();
             Category expectedCategory = modifiedCategory.DeepClone();
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.SelectCategoryByIdAsync(inputCategory.Id))
                     .ReturnsAsync(storageCategory);
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.UpdateCategoryAsync(modifiedCategory))
                     .ReturnsAsync(expectedCategory);
 
             // when
-            Category actualCategory = 
+            Category actualCategory =
                 await this.categoryService.ModifyCategoryAsync(modifiedCategory);
 
             // then
             actualCategory.Should().BeEquivalentTo(expectedCategory);
 
-            this.storageBrokerMock.Verify(broker => 
-                broker.SelectCategoryByIdAsync(inputCategory.Id), 
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectCategoryByIdAsync(inputCategory.Id),
                     Times.Once());
 
-            this.storageBrokerMock.Verify(broker => 
+            this.storageBrokerMock.Verify(broker =>
                 broker.UpdateCategoryAsync(modifiedCategory),
                     Times.Once);
 

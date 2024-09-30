@@ -19,7 +19,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             {
                 throw await CreateAndLogValidationExceptionAsync(nullTransactionException);
             }
-            catch (InvalidTransactionException invalidTransactionException) 
+            catch (InvalidTransactionException invalidTransactionException)
             {
                 throw await CreateAndLogValidationExceptionAsync(invalidTransactionException);
             }

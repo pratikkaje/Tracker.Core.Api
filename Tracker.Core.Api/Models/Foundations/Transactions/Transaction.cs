@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Users;
 
@@ -16,7 +13,7 @@ namespace Tracker.Core.Api.Models.Foundations.Transactions
         public decimal Amount { get; set; }
         public string Description { get; set; }
         public DateTimeOffset TransactionDate { get; set; }
-        public string CreatedBy {  get; set; }
+        public string CreatedBy { get; set; }
         public string UpdatedBy { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
         public DateTimeOffset UpdatedDate { get; set; }

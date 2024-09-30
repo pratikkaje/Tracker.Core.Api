@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Moq;
 using Tracker.Core.Api.Brokers.DateTimes;
 using Tracker.Core.Api.Brokers.Loggings;
@@ -29,7 +25,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.loggingBrokerMock = new Mock<ILoggingBroker>();
             this.datetimeBrokerMock = new Mock<IDateTimeBroker>();
 
-            this.transactionService = 
+            this.transactionService =
                 new TransactionService(
                     storageBroker: storageBrokerMock.Object,
                     loggingBroker: loggingBrokerMock.Object,
@@ -50,7 +46,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             decimal result = Math.Round(randomValue, scale);
 
             return result;
-        }            
+        }
 
         private static string GetRandomStringWithLengthOf(int length) =>
             new MnemonicString(wordCount: 1, wordMinLength: length, wordMaxLength: length).GetValue();
