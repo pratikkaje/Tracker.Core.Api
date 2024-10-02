@@ -127,6 +127,10 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     message: "Transaction validation error occurred, fix errors and try again.",
                     innerException: invalidTransactionException);
 
+            this.datetimeBrokerMock.Setup(broker => 
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
             // when
             ValueTask<Transaction> addTransactionTask =
                 this.transactionService.AddTransactionAsync(invalidTransaction);
@@ -139,6 +143,10 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             actualTransactionValidationException.Should().BeEquivalentTo(
                 expectedTransactionValidationException);
 
+            this.datetimeBrokerMock.Verify(broker => 
+                broker.GetCurrentDateTimeOffsetAsync(), 
+                    Times.Once);
+
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
                     expectedTransactionValidationException))),
@@ -149,9 +157,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     It.IsAny<Transaction>()),
                         Times.Never);
 
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
-            this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
 
         [Fact]
