@@ -42,9 +42,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                 broker.InsertTransactionAsync(inputTransaction),
                     Times.Once);
 
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
-            this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
     }
 }
