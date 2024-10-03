@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using Microsoft.Data.SqlClient;
 using Moq;
 using Tracker.Core.Api.Brokers.DateTimes;
 using Tracker.Core.Api.Brokers.Loggings;
@@ -18,7 +20,6 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
         private readonly Mock<IDateTimeBroker> datetimeBrokerMock;
         private readonly TransactionService transactionService;
 
-
         public TransactionsServiceTests()
         {
             this.storageBrokerMock = new Mock<IStorageBroker>();
@@ -30,6 +31,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     storageBroker: storageBrokerMock.Object,
                     loggingBroker: loggingBrokerMock.Object,
                     dateTimeBroker: datetimeBrokerMock.Object);
+        }
+
+        private SqlException CreateSqlException()
+        {
+            return (SqlException)RuntimeHelpers.GetUninitializedObject(
+                type: typeof(SqlException));
         }
 
         private static string GetRandomString() =>
