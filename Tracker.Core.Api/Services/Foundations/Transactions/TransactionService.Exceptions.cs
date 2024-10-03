@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Xeptions;
@@ -23,6 +24,28 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             {
                 throw await CreateAndLogValidationExceptionAsync(invalidTransactionException);
             }
+            catch (SqlException sqlException)
+            {
+                var failedStorageTransactionException =
+                    new FailedStorageTransactionException(
+                        message: "Transaction storage failed, contact support.",
+                        innerException: sqlException);
+
+                throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageTransactionException);
+            }
+        }
+
+        private async ValueTask<TransactionDependencyException> CreateAndLogCriticalDependencyExceptionAsync(
+            Xeption exception)
+        {
+            var transactionDependencyException = 
+                new TransactionDependencyException(
+                    message: "Transaction dependency error occurred, contact support.", 
+                    innerException: exception);
+
+            await this.loggingBroker.LogCriticalAsync(transactionDependencyException);
+
+            return transactionDependencyException;
         }
 
         private async ValueTask<TransactionValidationException> CreateAndLogValidationExceptionAsync(Xeption exception)
