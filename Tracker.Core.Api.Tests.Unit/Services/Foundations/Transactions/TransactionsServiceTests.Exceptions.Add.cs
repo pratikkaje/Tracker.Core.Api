@@ -73,10 +73,16 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                 new DuplicateKeyException(
                     message: "Transaction already exists error occurred.");
 
+            var alreadyExistsTransactionException =
+                new AlreadyExistsTransactionException(
+                    message: "Transaction already exists error occurred.",
+                    innerException: duplicateKeyException,
+                    data: duplicateKeyException.Data);
+
             var expectedTransactionDependencyValidationException =
                 new TransactionDependencyValidationException(
                     message: "Transaction dependency validation error occurred. Please fix errors and try again.",
-                    innerException: duplicateKeyException);
+                    innerException: alreadyExistsTransactionException);
 
             this.datetimeBrokerMock.Setup(broker => 
                 broker.GetCurrentDateTimeOffsetAsync())

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
