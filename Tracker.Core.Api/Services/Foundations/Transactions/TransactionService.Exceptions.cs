@@ -34,6 +34,29 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
                 throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageTransactionException);
             }
+            catch (DuplicateKeyException duplicateKeyException)
+            {
+                var alreadyExistsTransactionException =
+                    new AlreadyExistsTransactionException(
+                        message: "Transaction already exists error occurred.",
+                        innerException: duplicateKeyException,
+                        data: duplicateKeyException.Data);
+
+                throw await CreateAndLogDependencyValidationException(alreadyExistsTransactionException);
+            }
+        }
+
+        private async ValueTask<TransactionDependencyValidationException> CreateAndLogDependencyValidationException(
+            Xeption exception)
+        {
+            var transactionDependencyValidationException =
+                new TransactionDependencyValidationException(
+                    message: "Transaction dependency validation error occurred. Please fix errors and try again.",
+                    innerException: exception);
+
+            await this.loggingBroker.LogErrorAsync(transactionDependencyValidationException);
+
+            return transactionDependencyValidationException;
         }
 
         private async ValueTask<TransactionDependencyException> CreateAndLogCriticalDependencyExceptionAsync(
