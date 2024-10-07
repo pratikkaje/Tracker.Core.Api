@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Transactions;
@@ -112,6 +113,57 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.storageBrokerMock.Verify(broker => 
                 broker.InsertTransactionAsync(
                     It.IsAny<Transaction>()), 
+                        Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyExceptionOnAddIfDependencyErrorOccursAndLogItAsync()
+        {
+            // given
+            Transaction someTransaction = CreateRandomTransaction();
+            var dbUpdateException = new DbUpdateException();
+
+            var failedOperationTransactionException =
+                new FailedOperationTransactionException(
+                    message: "Failed operation transaction error occurred, contact support",
+                    innerException: dbUpdateException);
+
+            TransactionDependencyException expectedTransactionDependencyException =
+                new TransactionDependencyException(
+                    message:"Transaction dependency error occured, contact support.",
+                    innerException: failedOperationTransactionException);
+
+            this.datetimeBrokerMock.Setup(broker => 
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ThrowsAsync(dbUpdateException);
+
+            // when
+            ValueTask<Transaction> addTransactionTask = 
+                this.transactionService.AddTransactionAsync(someTransaction);
+
+            TransactionDependencyException actualTransactionDependencyException =
+                await Assert.ThrowsAsync<TransactionDependencyException>(
+                    addTransactionTask.AsTask);
+
+            // then
+            actualTransactionDependencyException.Should().BeEquivalentTo(
+                expectedTransactionDependencyException);
+
+            this.datetimeBrokerMock.Verify(broker => 
+                broker.GetCurrentDateTimeOffsetAsync(), 
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker => 
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedTransactionDependencyException))), 
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker => 
+                broker.InsertTransactionAsync(It.IsAny<Transaction>()), 
                         Times.Never);
 
             this.datetimeBrokerMock.VerifyNoOtherCalls();
