@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Xeptions;
@@ -44,6 +45,27 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
                 throw await CreateAndLogDependencyValidationException(alreadyExistsTransactionException);
             }
+            catch (DbUpdateException dbUpdateException)
+            {
+                var failedOperationTransactionException =
+                    new FailedOperationTransactionException(
+                        message: "Failed operation transaction error occurred, contact support",
+                        innerException: dbUpdateException);
+
+                throw await CreateAndLogDependencyExceptionAsync(failedOperationTransactionException);
+            }
+        }
+
+        private async ValueTask<TransactionDependencyException> CreateAndLogDependencyExceptionAsync(Xeption exception)
+        {
+            TransactionDependencyException transactionDependencyException = 
+                new TransactionDependencyException(
+                    message: "Transaction dependency error occured, contact support.", 
+                    innerException: exception);
+
+            await this.loggingBroker.LogErrorAsync(transactionDependencyException);
+
+            return transactionDependencyException;
         }
 
         private async ValueTask<TransactionDependencyValidationException> CreateAndLogDependencyValidationException(
