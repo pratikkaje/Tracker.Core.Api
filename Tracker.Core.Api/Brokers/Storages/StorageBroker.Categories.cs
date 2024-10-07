@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using System;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Core.Api.Models.Foundations.Categories;
 
@@ -13,7 +13,7 @@ namespace Tracker.Core.Api.Brokers.Storages
         public async ValueTask<Category> InsertCategoryAsync(Category category) =>
             await InsertAsync(category);
 
-        public async ValueTask<IQueryable<Category>> SelectAllCategoriesAsync() => 
+        public async ValueTask<IQueryable<Category>> SelectAllCategoriesAsync() =>
             await SelectAllAsync<Category>();
 
         public async ValueTask<Category> SelectCategoryByIdAsync(Guid categoryId) =>

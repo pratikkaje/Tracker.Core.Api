@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Force.DeepCloner;
@@ -20,19 +17,19 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             IQueryable<Category> storageCategories = randomCategories.DeepClone();
             IQueryable<Category> expectedCategories = storageCategories.DeepClone();
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.SelectAllCategoriesAsync())
                     .ReturnsAsync(storageCategories);
 
             //when
-            IQueryable<Category> actualCategories = 
+            IQueryable<Category> actualCategories =
                 await this.categoryService.RetrieveAllCategoriesAsync();
 
             //then
             actualCategories.Should().BeEquivalentTo(expectedCategories);
 
-            this.storageBrokerMock.Verify(broker => 
-                broker.SelectAllCategoriesAsync(), 
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectAllCategoriesAsync(),
                     Times.Once());
 
             this.storageBrokerMock.VerifyNoOtherCalls();

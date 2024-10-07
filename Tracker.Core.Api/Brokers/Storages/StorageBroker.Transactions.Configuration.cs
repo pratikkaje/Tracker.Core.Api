@@ -15,7 +15,7 @@ namespace Tracker.Core.Api.Brokers.Storages
 
             builder
                 .Property(transaction => transaction.Amount)
-                .HasPrecision(10,4)
+                .HasPrecision(10, 4)
                 .IsRequired();
 
             builder

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Force.DeepCloner;
@@ -20,19 +17,19 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             IQueryable<User> storageUsers = randomUsers.DeepClone();
             IQueryable<User> expectedUsers = storageUsers.DeepClone();
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.SelectAllUsersAsync())
                     .ReturnsAsync(storageUsers);
 
             // when
-            IQueryable<User> actualUsers = 
+            IQueryable<User> actualUsers =
                 await this.userService.RetrieveAllUsersAsync();
 
             // then
             expectedUsers.Should().BeEquivalentTo(actualUsers);
 
-            this.storageBrokerMock.Verify(broker => 
-                broker.SelectAllUsersAsync(), 
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectAllUsersAsync(),
                     Times.Once());
 
             this.storageBrokerMock.VerifyNoOtherCalls();

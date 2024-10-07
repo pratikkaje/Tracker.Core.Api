@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using Force.DeepCloner;
 using Moq;
@@ -21,27 +17,27 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             User storageUser = inputUser.DeepClone();
             User deletedUser = storageUser.DeepClone();
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.SelectUserByIdAsync(inputUser.Id))
                     .ReturnsAsync(storageUser);
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.DeleteUserAsync(storageUser))
                     .ReturnsAsync(deletedUser);
 
             //when
-            User actualUser = 
+            User actualUser =
                 await this.userService.RemoveUserByIdAsync(storageUser.Id);
 
             //then
             actualUser.Should().BeEquivalentTo(deletedUser);
 
-            this.storageBrokerMock.Verify(broker => 
-                broker.SelectUserByIdAsync(storageUser.Id), 
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectUserByIdAsync(storageUser.Id),
                     Times.Once());
 
-            this.storageBrokerMock.Verify(broker => 
-                broker.DeleteUserAsync(storageUser), 
+            this.storageBrokerMock.Verify(broker =>
+                broker.DeleteUserAsync(storageUser),
                     Times.Once());
 
             this.storageBrokerMock.VerifyNoOtherCalls();

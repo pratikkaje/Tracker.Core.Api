@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using System;
 using Tracker.Core.Api.Models.Foundations.Users;
 
 namespace Tracker.Core.Api.Brokers.Storages

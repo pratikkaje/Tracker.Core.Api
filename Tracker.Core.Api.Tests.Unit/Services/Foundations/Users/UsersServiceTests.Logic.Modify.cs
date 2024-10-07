@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Force.DeepCloner;
-using Microsoft.Identity.Client;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Users;
 
@@ -25,11 +21,11 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             modifiedUser.UpdatedDate = randomDate.AddMinutes(1);
             User expectedUser = modifiedUser.DeepClone();
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.SelectUserByIdAsync(inputUser.Id))
                     .ReturnsAsync(storageUser);
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.UpdateUserAsync(modifiedUser))
                     .ReturnsAsync(expectedUser);
 
@@ -39,12 +35,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             // then
             actualUser.Should().BeEquivalentTo(expectedUser);
 
-            this.storageBrokerMock.Verify(broker => 
-                broker.SelectUserByIdAsync(It.IsAny<Guid>()), 
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectUserByIdAsync(It.IsAny<Guid>()),
                     Times.Once);
 
-            this.storageBrokerMock.Verify(broker => 
-                broker.UpdateUserAsync(It.IsAny<User>()), 
+            this.storageBrokerMock.Verify(broker =>
+                broker.UpdateUserAsync(It.IsAny<User>()),
                     Times.Once);
 
             this.storageBrokerMock.VerifyNoOtherCalls();
