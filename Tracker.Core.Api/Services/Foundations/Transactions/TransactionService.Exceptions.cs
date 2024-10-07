@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -54,7 +55,29 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
                 throw await CreateAndLogDependencyExceptionAsync(failedOperationTransactionException);
             }
+            catch (Exception serviceException)
+            {
+                var failedServiceTransactionException =
+                    new FailedServiceTransactionException(
+                        message: "Failed service error occurred, contact support.",
+                        innerException: serviceException);
+
+                throw await CreateAndLogServiceExceptionAsync(failedServiceTransactionException);
+            }
         }
+
+        private async ValueTask<TransactionServiceException> CreateAndLogServiceExceptionAsync(Xeption exception)
+        {
+            var transactionServiceException = 
+                new TransactionServiceException(
+                    message: "Transaction service error occurred, contact support.",
+                    innerException: exception);
+
+            await this.loggingBroker.LogErrorAsync(transactionServiceException);
+
+            return transactionServiceException;
+        }
+
 
         private async ValueTask<TransactionDependencyException> CreateAndLogDependencyExceptionAsync(Xeption exception)
         {

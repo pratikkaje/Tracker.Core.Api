@@ -185,7 +185,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             TransactionServiceException expectedTransactionServiceException =
                 new TransactionServiceException(
-                    message: "Transaction service error occurred, contact support",
+                    message: "Transaction service error occurred, contact support.",
                     innerException: failedServiceTransactionException);
 
             this.datetimeBrokerMock.Setup(broker => 
