@@ -31,9 +31,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             return await this.storageBroker.InsertTransactionAsync(transaction);
         });
 
-        public ValueTask<IQueryable<Transaction>> RetrieveAllTransactionsAsync()
-        {
-            throw new System.NotImplementedException();
-        }
+        public async ValueTask<IQueryable<Transaction>> RetrieveAllTransactionsAsync() =>
+            await this.storageBroker.SelectAllTransactionsAsync();
     }
 }
