@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using Microsoft.Data.SqlClient;
@@ -58,8 +59,14 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
         private static string GetRandomStringWithLengthOf(int length) =>
             new MnemonicString(wordCount: 1, wordMinLength: length, wordMaxLength: length).GetValue();
 
+        private static int GetRandomCount() =>
+            new IntRange(min: 2, max: 10).GetValue();
+
         public static Transaction CreateRandomTransaction() =>
             CreateTransactionFiller(DateTimeOffset.UtcNow).Create();
+
+        public static IQueryable<Transaction> CreateRandomTransactions() =>
+            CreateTransactionFiller(GetRandomDateTimeOffset()).Create(GetRandomCount()).AsQueryable();
 
         public static Transaction CreateRandomTransaction(DateTimeOffset date) =>
             CreateTransactionFiller(date).Create();

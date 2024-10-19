@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Tracker.Core.Api.Brokers.DateTimes;
 using Tracker.Core.Api.Brokers.Loggings;
 using Tracker.Core.Api.Brokers.Storages;
@@ -29,5 +30,10 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
             return await this.storageBroker.InsertTransactionAsync(transaction);
         });
+
+        public ValueTask<IQueryable<Transaction>> RetrieveAllTransactionsAsync()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
