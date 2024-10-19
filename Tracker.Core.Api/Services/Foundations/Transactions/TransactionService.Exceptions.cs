@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
@@ -12,6 +13,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
     internal partial class TransactionService
     {
         private delegate ValueTask<Transaction> ReturningTransactionFunction();
+        private delegate ValueTask<IQueryable<Transaction>> ReturningTransactionsFunction();
 
         private async ValueTask<Transaction> TryCatch(ReturningTransactionFunction returningTransactionFunction)
         {
@@ -63,6 +65,23 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                         innerException: serviceException);
 
                 throw await CreateAndLogServiceExceptionAsync(failedServiceTransactionException);
+            }
+        }
+
+        private async ValueTask<IQueryable<Transaction>> TryCatch(ReturningTransactionsFunction returningTransactionsFunction)
+        {
+            try
+            {
+                return await returningTransactionsFunction();
+            }
+            catch (SqlException sqlException)
+            {
+                var failedStorageTransactionException =
+                    new FailedStorageTransactionException(
+                        message: "Failed Transaction storage error occurred, contact support.",
+                        innerException: sqlException);
+
+                throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageTransactionException);
             }
         }
 
