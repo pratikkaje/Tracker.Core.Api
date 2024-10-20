@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using Force.DeepCloner;
 using Moq;
-using Tracker.Core.Api.Brokers.Loggings;
-using Tracker.Core.Api.Brokers.Storages;
 using Tracker.Core.Api.Models.Foundations.Users;
-using Tracker.Core.Api.Services.Foundations.Users;
 
 namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 {
@@ -23,7 +16,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             User inputUser = RandomUser;
             User returnedUser = inputUser.DeepClone();
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.InsertUserAsync(inputUser))
                     .ReturnsAsync(returnedUser);
 
@@ -33,12 +26,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             // then
             actualUser.Should().BeEquivalentTo(returnedUser);
 
-            this.storageBrokerMock.Verify(broker => 
+            this.storageBrokerMock.Verify(broker =>
                 broker.InsertUserAsync(inputUser)
                     , Times.Once());
 
             this.storageBrokerMock.VerifyNoOtherCalls();
-            this.loggingBrokerMock.VerifyNoOtherCalls();            
+            this.loggingBrokerMock.VerifyNoOtherCalls();
         }
     }
 }

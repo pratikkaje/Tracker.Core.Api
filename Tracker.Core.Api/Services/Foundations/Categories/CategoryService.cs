@@ -13,7 +13,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
         private readonly ILoggingBroker loggingBroker;
 
         public CategoryService(
-            IStorageBroker storageBroker, 
+            IStorageBroker storageBroker,
             ILoggingBroker loggingBroker)
         {
             this.storageBroker = storageBroker;
