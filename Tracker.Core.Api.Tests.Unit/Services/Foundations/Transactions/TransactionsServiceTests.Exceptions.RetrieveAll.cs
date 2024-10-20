@@ -71,12 +71,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             var failedServiceTransactionException =
                 new FailedServiceTransactionException(
-                    message: "Failed service Transaction error occurred, contact support.",
+                    message: "Failed service transaction error occurred, contact support.",
                     innerException: serviceError);
 
             var expectedTransactionServiceException =
                 new TransactionServiceException(
-                    message: "Service error occurred, contact support.",
+                    message: "Transaction service error occurred, contact support.",
                     innerException: failedServiceTransactionException);
 
             this.storageBrokerMock.Setup(broker =>

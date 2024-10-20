@@ -83,6 +83,15 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
                 throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageTransactionException);
             }
+            catch (Exception exception)
+            {
+                var failedServiceTransactionException =
+                    new FailedServiceTransactionException(
+                        message: "Failed service transaction error occurred, contact support.",
+                        innerException: exception);
+
+                throw await CreateAndLogServiceExceptionAsync(failedServiceTransactionException);
+            }
         }
 
         private async ValueTask<TransactionServiceException> CreateAndLogServiceExceptionAsync(Xeption exception)
