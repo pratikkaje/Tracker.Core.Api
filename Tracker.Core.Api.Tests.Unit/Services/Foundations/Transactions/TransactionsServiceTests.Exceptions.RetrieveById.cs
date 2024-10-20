@@ -21,7 +21,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             var failedStorageTransactionException =
                 new FailedStorageTransactionException(
-                    message: "Failed transaction storage error occurred, contact support.",
+                    message: "Transaction storage failed, contact support.",
                     innerException: sqlException);
 
             var expectedTransactionDependencyException =
