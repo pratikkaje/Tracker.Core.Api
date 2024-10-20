@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Tracker.Core.Api.Brokers.DateTimes;
 using Tracker.Core.Api.Brokers.Loggings;
@@ -35,6 +36,11 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
         TryCatch(async () => 
         { 
             return await this.storageBroker.SelectAllTransactionsAsync();
-        });            
+        });
+
+        public ValueTask<Transaction> RetrieveTransactionByIdAsync(Guid transactionId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

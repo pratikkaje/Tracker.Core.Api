@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 
 namespace Tracker.Core.Api.Brokers.Storages
@@ -14,5 +16,8 @@ namespace Tracker.Core.Api.Brokers.Storages
 
         public async ValueTask<IQueryable<Transaction>> SelectAllTransactionsAsync() =>
             await SelectAllAsync<Transaction>();
+
+        public async ValueTask<Transaction> SelectTransactionByIdAsync(Guid transactionId) =>
+            await SelectAsync<Transaction>(transactionId);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 
@@ -8,5 +9,6 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
     {
         ValueTask<Transaction> AddTransactionAsync(Transaction transaction);
         ValueTask<IQueryable<Transaction>> RetrieveAllTransactionsAsync();
+        ValueTask<Transaction> RetrieveTransactionByIdAsync(Guid transactionId);
     }
 }
