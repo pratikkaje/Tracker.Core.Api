@@ -19,5 +19,8 @@ namespace Tracker.Core.Api.Brokers.Storages
 
         public async ValueTask<Transaction> SelectTransactionByIdAsync(Guid transactionId) =>
             await SelectAsync<Transaction>(transactionId);
+
+        public async ValueTask<Transaction> UpdateTransactionAsync(Transaction transaction) =>
+            await UpdateAsync<Transaction>(transaction);
     }
 }

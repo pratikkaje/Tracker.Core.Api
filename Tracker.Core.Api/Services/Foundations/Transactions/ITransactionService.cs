@@ -10,5 +10,6 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
         ValueTask<Transaction> AddTransactionAsync(Transaction transaction);
         ValueTask<IQueryable<Transaction>> RetrieveAllTransactionsAsync();
         ValueTask<Transaction> RetrieveTransactionByIdAsync(Guid transactionId);
+        ValueTask<Transaction> ModifyTransactionAsync(Transaction transaction);
     }
 }

@@ -10,5 +10,6 @@ namespace Tracker.Core.Api.Brokers.Storages
         ValueTask<Transaction> InsertTransactionAsync(Transaction transaction);
         ValueTask<IQueryable<Transaction>> SelectAllTransactionsAsync();
         ValueTask<Transaction> SelectTransactionByIdAsync(Guid transactionId);
+        ValueTask<Transaction> UpdateTransactionAsync(Transaction transaction);
     }
 }
