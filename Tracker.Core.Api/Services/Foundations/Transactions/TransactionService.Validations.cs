@@ -94,6 +94,16 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsNotRecentAsync(transaction.UpdatedDate),
                 Parameter: nameof(transaction.UpdatedDate)));
         }
+        
+        private static async ValueTask ValidateStorageTransactionAsync(
+            Transaction transaction, Guid id)
+        {
+            if (transaction is null)
+            {
+                throw new NotFoundTransactionException(
+                    message: $"Transaction not found with id: {id}");
+            }
+        }
 
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
         {

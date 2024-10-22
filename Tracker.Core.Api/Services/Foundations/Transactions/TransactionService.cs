@@ -52,6 +52,8 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             Transaction maybeTransaction =
                 await this.storageBroker.SelectTransactionByIdAsync(transaction.Id);
 
+            await ValidateStorageTransactionAsync(maybeTransaction, transaction.Id);
+
             return await this.storageBroker.UpdateTransactionAsync(transaction);
         });
     }

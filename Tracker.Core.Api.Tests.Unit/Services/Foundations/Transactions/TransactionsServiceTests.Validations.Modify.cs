@@ -310,7 +310,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             var expectedTransactionValidationException =
                 new TransactionValidationException(
-                    message: "Transaction validation error occurred, fix the errors and try again.",
+                    message: "Transaction validation error occurred, fix errors and try again.",
                     innerException: notFoundTransactionException);
 
             this.datetimeBrokerMock.Setup(broker =>
