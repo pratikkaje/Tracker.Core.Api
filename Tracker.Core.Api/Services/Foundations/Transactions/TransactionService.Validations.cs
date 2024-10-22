@@ -89,12 +89,10 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsSameAsync(
                     firstDate: transaction.UpdatedDate,
                     secondDate: transaction.CreatedDate,
-                    secondDateName: nameof(Transaction.CreatedDate)), Parameter: nameof(Transaction.UpdatedDate))
+                    secondDateName: nameof(Transaction.CreatedDate)), Parameter: nameof(Transaction.UpdatedDate)),
 
-                
-
-                );
-
+                (Rule: await IsNotRecentAsync(transaction.UpdatedDate),
+                Parameter: nameof(transaction.UpdatedDate)));
         }
 
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
