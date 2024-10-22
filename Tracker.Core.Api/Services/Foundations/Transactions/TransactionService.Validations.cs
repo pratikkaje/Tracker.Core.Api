@@ -68,9 +68,17 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                     transaction.TransactionType),
                     Parameter: nameof(Transaction.TransactionType)),
 
+                (Rule: await IsInvalidLengthAsync(transaction.TransactionType, 10), Parameter: nameof(Transaction.TransactionType)),
+
                 (Rule: await IsInvalidAsync(transaction.Amount), Parameter: nameof(Transaction.Amount)),
 
+                (Rule: await IsInvalidLengthAsync(
+                    transaction.Amount, 14, 4),
+                    Parameter: nameof(Transaction.Amount)),
+
                 (Rule: await IsInvalidAsync(transaction.Description), Parameter: nameof(Transaction.Description)),
+
+                (Rule: await IsInvalidLengthAsync(transaction.Description, 400), Parameter: nameof(Transaction.Description)),
 
                 (Rule: await IsInvalidAsync(transaction.TransactionDate), Parameter: nameof(Transaction.TransactionDate)),
                 (Rule: await IsInvalidAsync(transaction.CreatedBy), Parameter: nameof(Transaction.CreatedBy)),
@@ -81,7 +89,12 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsSameAsync(
                     firstDate: transaction.UpdatedDate,
                     secondDate: transaction.CreatedDate,
-                    secondDateName: nameof(Transaction.CreatedDate)), Parameter: nameof(Transaction.UpdatedDate)));
+                    secondDateName: nameof(Transaction.CreatedDate)), Parameter: nameof(Transaction.UpdatedDate))
+
+                
+
+                );
+
         }
 
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
