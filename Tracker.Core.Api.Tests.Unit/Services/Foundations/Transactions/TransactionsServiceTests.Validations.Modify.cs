@@ -292,5 +292,63 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfStorageConfigurationDoesNotExistAndLogItAsync()
+        {
+            // given
+            int randomNegative = CreateRandomNegativeNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Transaction randomTransaction = CreateRandomTransaction(randomDateTimeOffset);
+            Transaction nonExistingTransaction = randomTransaction;
+            nonExistingTransaction.CreatedDate = randomDateTimeOffset.AddMinutes(randomNegative);
+            Transaction nullTransaction = null;
+
+            var notFoundTransactionException =
+                new NotFoundTransactionException(
+                    message: $"Transaction not found with id: {nonExistingTransaction.Id}");
+
+            var expectedTransactionValidationException =
+                new TransactionValidationException(
+                    message: "Transaction validation error occurred, fix the errors and try again.",
+                    innerException: notFoundTransactionException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectTransactionByIdAsync(nonExistingTransaction.Id))
+                    .ReturnsAsync(nullTransaction);
+
+            // when
+            ValueTask<Transaction> modifyTransactionTask =
+                this.transactionService.ModifyTransactionAsync(nonExistingTransaction);
+
+            TransactionValidationException actualTransactionValidationException =
+                await Assert.ThrowsAsync<TransactionValidationException>(
+                    testCode: modifyTransactionTask.AsTask);
+
+            // then
+            actualTransactionValidationException.Should()
+                .BeEquivalentTo(expectedTransactionValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectTransactionByIdAsync(nonExistingTransaction.Id),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedTransactionValidationException))),
+                    Times.Once);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
