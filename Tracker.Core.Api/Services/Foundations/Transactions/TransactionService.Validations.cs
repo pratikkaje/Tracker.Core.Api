@@ -58,6 +58,30 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
         public async ValueTask ValidateTransactionOnModifyAsync(Transaction transaction)
         {
             ValidateTransactionIsNotNull(transaction);
+
+            Validate(
+                (Rule: await IsInvalidAsync(transaction.Id), Parameter: nameof(Transaction.Id)),
+                (Rule: await IsInvalidAsync(transaction.UserId), Parameter: nameof(Transaction.UserId)),
+                (Rule: await IsInvalidAsync(transaction.CategoryId), Parameter: nameof(Transaction.CategoryId)),
+
+                (Rule: await IsInvalidAsync(
+                    transaction.TransactionType),
+                    Parameter: nameof(Transaction.TransactionType)),
+
+                (Rule: await IsInvalidAsync(transaction.Amount), Parameter: nameof(Transaction.Amount)),
+
+                (Rule: await IsInvalidAsync(transaction.Description), Parameter: nameof(Transaction.Description)),
+
+                (Rule: await IsInvalidAsync(transaction.TransactionDate), Parameter: nameof(Transaction.TransactionDate)),
+                (Rule: await IsInvalidAsync(transaction.CreatedBy), Parameter: nameof(Transaction.CreatedBy)),
+                (Rule: await IsInvalidAsync(transaction.UpdatedBy), Parameter: nameof(Transaction.UpdatedBy)),
+                (Rule: await IsInvalidAsync(transaction.CreatedDate), Parameter: nameof(Transaction.CreatedDate)),
+                (Rule: await IsInvalidAsync(transaction.UpdatedDate), Parameter: nameof(Transaction.UpdatedDate)),
+
+                (Rule: await IsSameAsync(
+                    firstDate: transaction.UpdatedDate,
+                    secondDate: transaction.CreatedDate,
+                    secondDateName: nameof(Transaction.CreatedDate)), Parameter: nameof(Transaction.UpdatedDate)));
         }
 
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
@@ -93,6 +117,15 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
             return (isNotRecent, startDate, endDate);
         }
+
+        private static async ValueTask<dynamic> IsSameAsync(
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
+            string secondDateName) => new
+            {
+                Condition = firstDate == secondDate,
+                Message = $"Date is same as {secondDateName}"
+            };
 
         private static async ValueTask<dynamic> IsNotSameAsync(
             string first,
