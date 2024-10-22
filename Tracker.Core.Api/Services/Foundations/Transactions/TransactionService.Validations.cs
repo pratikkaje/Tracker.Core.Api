@@ -55,6 +55,11 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsNotRecentAsync(transaction.CreatedDate), Parameter: nameof(Transaction.CreatedDate)));
         }
 
+        public async ValueTask ValidateTransactionOnModifyAsync(Transaction transaction)
+        {
+            ValidateTransactionIsNotNull(transaction);
+        }
+
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
         {
             var (isNotRecent, startDate, endDate) = await IsDateNotRecentAsync(date);

@@ -44,12 +44,15 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             return await this.storageBroker.SelectTransactionByIdAsync(transactionId);
         });
 
-        public async ValueTask<Transaction> ModifyTransactionAsync(Transaction transaction)
+        public ValueTask<Transaction> ModifyTransactionAsync(Transaction transaction) =>
+        TryCatch(async () =>
         {
-            Transaction maybeTransaction = 
+            await ValidateTransactionOnModifyAsync(transaction);
+
+            Transaction maybeTransaction =
                 await this.storageBroker.SelectTransactionByIdAsync(transaction.Id);
 
             return await this.storageBroker.UpdateTransactionAsync(transaction);
-        }
+        });
     }
 }

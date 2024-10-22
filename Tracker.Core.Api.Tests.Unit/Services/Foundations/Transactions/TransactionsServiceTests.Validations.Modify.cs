@@ -20,11 +20,11 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             var nullTransactionException =
                 new NullTransactionException(
-                    message: "Transaction is null");
+                    message: "Transaction is null.");
 
             TransactionValidationException expectedTransactionValidationException =
                 new TransactionValidationException(
-                    message: "Transaction validation error occurred, fix the errors and try again.",
+                    message: "Transaction validation error occurred, fix errors and try again.",
                     innerException: nullTransactionException);
 
             // when
