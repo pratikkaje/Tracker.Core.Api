@@ -146,9 +146,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             actualTransactionValidationException.Should().BeEquivalentTo(
                 expectedTransactionValidationException);
 
-            /*this.datetimeBrokerMock.Verify(broker =>
+            this.datetimeBrokerMock.Verify(broker =>
                 broker.GetCurrentDateTimeOffsetAsync(),
-                    Times.Once);*/
+                    Times.Once);
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(
