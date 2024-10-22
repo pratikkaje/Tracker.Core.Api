@@ -46,9 +46,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             // then
             actualTransaction.Should().BeEquivalentTo(expectedTransaction);
 
-            /*this.datetimeBrokerMock.Verify(broker =>
+            this.datetimeBrokerMock.Verify(broker =>
                 broker.GetCurrentDateTimeOffsetAsync(),
-                    Times.Once);*/
+                    Times.Once);
 
             this.storageBrokerMock.Verify(broker =>
                 broker.SelectTransactionByIdAsync(inputTransaction.Id),
