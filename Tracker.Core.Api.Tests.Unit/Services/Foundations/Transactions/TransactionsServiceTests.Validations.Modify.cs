@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
@@ -224,6 +225,68 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                 broker.InsertTransactionAsync(
                     It.IsAny<Transaction>()),
                         Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(-61)]
+        public async Task ShouldThrowValidationExceptionOnModifyIfUpdatedDateIsNotRecentAndLogItAsync(
+            int invalidSeconds)
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            DateTimeOffset now = randomDateTimeOffset;
+            DateTimeOffset startDate = now.AddSeconds(-60);
+            DateTimeOffset endDate = now.AddSeconds(0);
+            Transaction randomTransaction = CreateRandomTransaction(randomDateTimeOffset);
+            randomTransaction.UpdatedDate = randomDateTimeOffset.AddSeconds(invalidSeconds);
+
+            var invalidTransactionException =
+                new InvalidTransactionException(
+                message: "Transaction is invalid, fix the errors and try again.");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.UpdatedDate),
+                values: $"Date is not recent." +
+                $" Expected a value between {startDate} and {endDate} but found {randomTransaction.UpdatedDate}");
+
+            var expectedTransactionValidationException =
+                new TransactionValidationException(
+                    message: "Transaction validation error occurred, fix the errors and try again.",
+                    innerException: invalidTransactionException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            // when
+            ValueTask<Transaction> modifyTransactionTask =
+                this.transactionService.ModifyTransactionAsync(randomTransaction);
+
+            TransactionValidationException actualTransactionValidationException =
+                await Assert.ThrowsAsync<TransactionValidationException>(
+                    testCode: modifyTransactionTask.AsTask);
+
+            // then
+            actualTransactionValidationException.Should()
+                .BeEquivalentTo(expectedTransactionValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(
+                    SameExceptionAs(expectedTransactionValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.UpdateTransactionAsync(It.IsAny<Transaction>()),
+                    Times.Never);
 
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
