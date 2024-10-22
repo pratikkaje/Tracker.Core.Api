@@ -44,9 +44,12 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             return await this.storageBroker.SelectTransactionByIdAsync(transactionId);
         });
 
-        public ValueTask<Transaction> ModifyTransactionAsync(Transaction transaction)
+        public async ValueTask<Transaction> ModifyTransactionAsync(Transaction transaction)
         {
-            throw new NotImplementedException();
+            Transaction maybeTransaction = 
+                await this.storageBroker.SelectTransactionByIdAsync(transaction.Id);
+
+            return await this.storageBroker.UpdateTransactionAsync(transaction);
         }
     }
 }
