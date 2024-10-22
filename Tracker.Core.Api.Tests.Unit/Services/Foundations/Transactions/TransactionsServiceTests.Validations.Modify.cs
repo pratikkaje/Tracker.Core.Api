@@ -162,5 +162,72 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfTransactionHasInvalidLengthPropertiesAndLogItAsync()
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Transaction randomTransaction = CreateRandomModifyTransaction(dateTimeOffset: randomDateTimeOffset);
+            Transaction invalidTransaction = randomTransaction;
+
+            invalidTransaction.TransactionType = GetRandomStringWithLengthOf(11);
+            invalidTransaction.Amount = GetRandomDecimal(16, 5);
+            invalidTransaction.Description = GetRandomStringWithLengthOf(401);
+
+            var invalidTransactionException =
+                new InvalidTransactionException(
+                message: "Transaction is invalid, fix the errors and try again.");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.TransactionType),
+                values: $"Text exceeds max length of {invalidTransaction.TransactionType.Length - 1} characters.");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.Amount),
+                values: "Value exceeds 10 digits or 4 decimal places.");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.Description),
+                values: $"Text exceeds max length of {invalidTransaction.Description.Length - 1} characters.");
+
+            var expectedTransactionValidationException = new TransactionValidationException(
+                message: "Transaction validation error occurred, fix errors and try again.",
+                innerException: invalidTransactionException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            // when
+            ValueTask<Transaction> modifyTransactionTask =
+                this.transactionService.ModifyTransactionAsync(invalidTransaction);
+
+            TransactionValidationException actualTransactionValidationException =
+                await Assert.ThrowsAsync<TransactionValidationException>(
+                    modifyTransactionTask.AsTask);
+
+            // then
+            actualTransactionValidationException.Should().BeEquivalentTo(
+                expectedTransactionValidationException);
+
+            /*this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);*/
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedTransactionValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertTransactionAsync(
+                    It.IsAny<Transaction>()),
+                        Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
