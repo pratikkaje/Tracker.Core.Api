@@ -94,7 +94,33 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsNotRecentAsync(transaction.UpdatedDate),
                 Parameter: nameof(transaction.UpdatedDate)));
         }
-        
+
+        private static async ValueTask ValidateAgainstStorageTransactionOnModifyAsync(
+            Transaction inputTransaction, Transaction storageTransaction)
+        {
+            Validate(
+                (Rule: await IsNotSameAsync(
+                    first: inputTransaction.CreatedBy,
+                    second: storageTransaction.CreatedBy,
+                    secondName: nameof(Transaction.CreatedBy)),
+
+                Parameter: nameof(Transaction.CreatedBy)),
+
+                (Rule: await IsNotSameAsync(
+                    firstDate: inputTransaction.CreatedDate,
+                    secondDate: storageTransaction.CreatedDate,
+                    secondDateName: nameof(Transaction.CreatedDate)),
+
+                Parameter: nameof(Transaction.CreatedDate)),
+
+                (Rule: await IsSameAsync(
+                    firstDate: inputTransaction.UpdatedDate,
+                    secondDate: storageTransaction.UpdatedDate,
+                    secondDateName: nameof(Transaction.UpdatedDate)),
+
+                Parameter: nameof(Transaction.UpdatedDate)));
+        }
+
         private static async ValueTask ValidateStorageTransactionAsync(
             Transaction transaction, Guid id)
         {

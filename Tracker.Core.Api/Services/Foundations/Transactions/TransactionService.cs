@@ -53,6 +53,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 await this.storageBroker.SelectTransactionByIdAsync(transaction.Id);
 
             await ValidateStorageTransactionAsync(maybeTransaction, transaction.Id);
+            await ValidateAgainstStorageTransactionOnModifyAsync(transaction, maybeTransaction);
 
             return await this.storageBroker.UpdateTransactionAsync(transaction);
         });
