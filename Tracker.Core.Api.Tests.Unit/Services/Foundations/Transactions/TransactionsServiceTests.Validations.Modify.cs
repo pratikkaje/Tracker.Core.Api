@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.IdentityModel.Protocols.Configuration;
+using Force.DeepCloner;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
@@ -350,5 +350,73 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfCreatedAuditInfoHasChangedAndLogItAsync()
+        {
+            //given
+            int randomMinutes = CreateRandomNegativeNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Transaction randomTransaction = CreateRandomModifyTransaction(randomDateTimeOffset);
+            Transaction invalidTransaction = randomTransaction;
+            Transaction storedTransaction = randomTransaction.DeepClone();
+            storedTransaction.CreatedBy = GetRandomString();
+            storedTransaction.CreatedDate = storedTransaction.CreatedDate.AddMinutes(randomMinutes);
+            storedTransaction.UpdatedDate = storedTransaction.UpdatedDate.AddMinutes(randomMinutes);
+            Guid TransactionId = invalidTransaction.Id;
+
+            var invalidTransactionException = new InvalidTransactionException(
+                message: "Transaction is invalid, fix the errors and try again.");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.CreatedBy),
+                values: $"Text is not same as {nameof(Transaction.CreatedBy)}");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.CreatedDate),
+                values: $"Date is not same as {nameof(Transaction.CreatedDate)}");
+
+            var expectedTransactionValidationException = new TransactionValidationException(
+                message: "Transaction validation error occurred, fix the errors and try again.",
+                innerException: invalidTransactionException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectTransactionByIdAsync(TransactionId))
+                    .ReturnsAsync(storedTransaction);
+
+            // when
+            ValueTask<Transaction> modifyTransactionTask =
+                this.transactionService.ModifyTransactionAsync(invalidTransaction);
+
+            TransactionValidationException actualTransactionValidationException =
+                await Assert.ThrowsAsync<TransactionValidationException>(
+                    testCode: modifyTransactionTask.AsTask);
+
+            // then
+            actualTransactionValidationException.Should().BeEquivalentTo(
+                expectedTransactionValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectTransactionByIdAsync(invalidTransaction.Id),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(
+                    SameExceptionAs(expectedTransactionValidationException))),
+                        Times.Once);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
     }
 }
