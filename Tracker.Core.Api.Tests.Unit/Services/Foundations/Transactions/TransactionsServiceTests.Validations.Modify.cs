@@ -418,5 +418,66 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.loggingBrokerMock.VerifyNoOtherCalls();
         }
 
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfStorageUpdatedDateSameAsUpdatedDateAndLogItAsync()
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Transaction randomTransaction = CreateRandomModifyTransaction(randomDateTimeOffset);
+            Transaction invalidTransaction = randomTransaction;
+
+            Transaction storageTransaction = randomTransaction.DeepClone();
+            invalidTransaction.UpdatedDate = storageTransaction.UpdatedDate;
+
+            var invalidTransactionException = new InvalidTransactionException(
+                message: "Transaction is invalid, fix the errors and try again.");
+
+            invalidTransactionException.AddData(
+                key: nameof(Transaction.UpdatedDate),
+                values: $"Date is same as {nameof(Transaction.UpdatedDate)}");
+
+            var expectedTransactionValidationException =
+                new TransactionValidationException(
+                    message: "Transaction validation error occurred, fix errors and try again.",
+                    innerException: invalidTransactionException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectTransactionByIdAsync(invalidTransaction.Id))
+                .ReturnsAsync(storageTransaction);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            // when
+            ValueTask<Transaction> modifyTransactionTask =
+                this.transactionService.ModifyTransactionAsync(invalidTransaction);
+
+            TransactionValidationException actualTransactionValidationException =
+               await Assert.ThrowsAsync<TransactionValidationException>(
+                   testCode: modifyTransactionTask.AsTask);
+
+            // then
+            actualTransactionValidationException.Should().BeEquivalentTo(
+                expectedTransactionValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedTransactionValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectTransactionByIdAsync(invalidTransaction.Id),
+                    Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
     }
 }
