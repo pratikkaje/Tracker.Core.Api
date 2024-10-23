@@ -34,6 +34,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     dateTimeBroker: datetimeBrokerMock.Object);
         }
 
+        private static int CreateRandomNegativeNumber() => 
+            -1 * new IntRange(min: 2, max: 10).GetValue();
+
         private SqlException CreateSqlException()
         {
             return (SqlException)RuntimeHelpers.GetUninitializedObject(
@@ -70,6 +73,16 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
         public static Transaction CreateRandomTransaction(DateTimeOffset date) =>
             CreateTransactionFiller(date).Create();
+
+        private static Transaction CreateRandomModifyTransaction(DateTimeOffset dateTimeOffset)
+        {
+            int randomDaysInThePast = CreateRandomNegativeNumber();
+            Transaction randomTransaction = CreateRandomTransaction(dateTimeOffset);
+
+            randomTransaction.CreatedDate = dateTimeOffset.AddDays(randomDaysInThePast);
+
+            return randomTransaction;
+        }
 
         private static Expression<Func<Xeption, bool>> SameExceptionAs(
             Xeption expectedException)

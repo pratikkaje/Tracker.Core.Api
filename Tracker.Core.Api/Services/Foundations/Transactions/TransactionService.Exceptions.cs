@@ -29,6 +29,10 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             {
                 throw await CreateAndLogValidationExceptionAsync(invalidTransactionException);
             }
+            catch (NotFoundTransactionException notFoundTransactionException)
+            {
+                throw await CreateAndLogValidationExceptionAsync(notFoundTransactionException);
+            }
             catch (SqlException sqlException)
             {
                 var failedStorageTransactionException =

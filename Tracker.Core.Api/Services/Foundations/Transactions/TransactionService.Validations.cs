@@ -55,6 +55,82 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                 (Rule: await IsNotRecentAsync(transaction.CreatedDate), Parameter: nameof(Transaction.CreatedDate)));
         }
 
+        public async ValueTask ValidateTransactionOnModifyAsync(Transaction transaction)
+        {
+            ValidateTransactionIsNotNull(transaction);
+
+            Validate(
+                (Rule: await IsInvalidAsync(transaction.Id), Parameter: nameof(Transaction.Id)),
+                (Rule: await IsInvalidAsync(transaction.UserId), Parameter: nameof(Transaction.UserId)),
+                (Rule: await IsInvalidAsync(transaction.CategoryId), Parameter: nameof(Transaction.CategoryId)),
+
+                (Rule: await IsInvalidAsync(
+                    transaction.TransactionType),
+                    Parameter: nameof(Transaction.TransactionType)),
+
+                (Rule: await IsInvalidLengthAsync(transaction.TransactionType, 10), Parameter: nameof(Transaction.TransactionType)),
+
+                (Rule: await IsInvalidAsync(transaction.Amount), Parameter: nameof(Transaction.Amount)),
+
+                (Rule: await IsInvalidLengthAsync(
+                    transaction.Amount, 14, 4),
+                    Parameter: nameof(Transaction.Amount)),
+
+                (Rule: await IsInvalidAsync(transaction.Description), Parameter: nameof(Transaction.Description)),
+
+                (Rule: await IsInvalidLengthAsync(transaction.Description, 400), Parameter: nameof(Transaction.Description)),
+
+                (Rule: await IsInvalidAsync(transaction.TransactionDate), Parameter: nameof(Transaction.TransactionDate)),
+                (Rule: await IsInvalidAsync(transaction.CreatedBy), Parameter: nameof(Transaction.CreatedBy)),
+                (Rule: await IsInvalidAsync(transaction.UpdatedBy), Parameter: nameof(Transaction.UpdatedBy)),
+                (Rule: await IsInvalidAsync(transaction.CreatedDate), Parameter: nameof(Transaction.CreatedDate)),
+                (Rule: await IsInvalidAsync(transaction.UpdatedDate), Parameter: nameof(Transaction.UpdatedDate)),
+
+                (Rule: await IsSameAsync(
+                    firstDate: transaction.UpdatedDate,
+                    secondDate: transaction.CreatedDate,
+                    secondDateName: nameof(Transaction.CreatedDate)), Parameter: nameof(Transaction.UpdatedDate)),
+
+                (Rule: await IsNotRecentAsync(transaction.UpdatedDate),
+                Parameter: nameof(transaction.UpdatedDate)));
+        }
+
+        private static async ValueTask ValidateAgainstStorageTransactionOnModifyAsync(
+            Transaction inputTransaction, Transaction storageTransaction)
+        {
+            Validate(
+                (Rule: await IsNotSameAsync(
+                    first: inputTransaction.CreatedBy,
+                    second: storageTransaction.CreatedBy,
+                    secondName: nameof(Transaction.CreatedBy)),
+
+                Parameter: nameof(Transaction.CreatedBy)),
+
+                (Rule: await IsNotSameAsync(
+                    firstDate: inputTransaction.CreatedDate,
+                    secondDate: storageTransaction.CreatedDate,
+                    secondDateName: nameof(Transaction.CreatedDate)),
+
+                Parameter: nameof(Transaction.CreatedDate)),
+
+                (Rule: await IsSameAsync(
+                    firstDate: inputTransaction.UpdatedDate,
+                    secondDate: storageTransaction.UpdatedDate,
+                    secondDateName: nameof(Transaction.UpdatedDate)),
+
+                Parameter: nameof(Transaction.UpdatedDate)));
+        }
+
+        private static async ValueTask ValidateStorageTransactionAsync(
+            Transaction transaction, Guid id)
+        {
+            if (transaction is null)
+            {
+                throw new NotFoundTransactionException(
+                    message: $"Transaction not found with id: {id}");
+            }
+        }
+
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
         {
             var (isNotRecent, startDate, endDate) = await IsDateNotRecentAsync(date);
@@ -88,6 +164,15 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
             return (isNotRecent, startDate, endDate);
         }
+
+        private static async ValueTask<dynamic> IsSameAsync(
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
+            string secondDateName) => new
+            {
+                Condition = firstDate == secondDate,
+                Message = $"Date is same as {secondDateName}"
+            };
 
         private static async ValueTask<dynamic> IsNotSameAsync(
             string first,
