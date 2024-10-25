@@ -11,5 +11,6 @@ namespace Tracker.Core.Api.Brokers.Storages
         ValueTask<IQueryable<Transaction>> SelectAllTransactionsAsync();
         ValueTask<Transaction> SelectTransactionByIdAsync(Guid transactionId);
         ValueTask<Transaction> UpdateTransactionAsync(Transaction transaction);
+        ValueTask<Transaction> DeleteTransactionAsync(Transaction transaction);
     }
 }
