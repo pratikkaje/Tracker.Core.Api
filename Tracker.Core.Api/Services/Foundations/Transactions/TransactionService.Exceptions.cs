@@ -98,6 +98,9 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             }
         }
 
+        private static async ValueTask ValidateTransactionIdAsync(Guid transactionId) =>
+            Validate((Rule: await IsInvalidAsync(transactionId), Parameter: nameof(Transaction.Id)));
+
         private async ValueTask<TransactionServiceException> CreateAndLogServiceExceptionAsync(Xeption exception)
         {
             var transactionServiceException = 
