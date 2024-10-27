@@ -60,5 +60,56 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnRemoveByIdIfNotFoundAndLogItAsync()
+        {
+            // given
+            Guid someTransactionId = Guid.NewGuid();
+            Transaction noTransaction = null;
+
+            var notFoundTransactionException =
+                new NotFoundTransactionException(
+                    message: $"Transaction not found with id: {someTransactionId}");
+
+            var expectedTransactionValidationException =
+                new TransactionValidationException(
+                    message: "Transaction validation error occurred, fix errors and try again.",
+                    innerException: notFoundTransactionException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectTransactionByIdAsync(someTransactionId))
+                    .ReturnsAsync(noTransaction);
+
+            // when
+            ValueTask<Transaction> removeTransactionByIdTask =
+                this.transactionService.RemoveTransactionByIdAsync(someTransactionId);
+
+            TransactionValidationException actualTransactionValidationException =
+                await Assert.ThrowsAsync<TransactionValidationException>(
+                    removeTransactionByIdTask.AsTask);
+
+            // then
+            actualTransactionValidationException.Should().BeEquivalentTo(
+                expectedTransactionValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectTransactionByIdAsync(someTransactionId),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedTransactionValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.DeleteTransactionAsync(
+                    It.IsAny<Transaction>()),
+                        Times.Never);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
