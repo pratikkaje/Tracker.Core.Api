@@ -22,5 +22,8 @@ namespace Tracker.Core.Api.Brokers.Storages
 
         public async ValueTask<Transaction> UpdateTransactionAsync(Transaction transaction) =>
             await UpdateAsync<Transaction>(transaction);
+
+        public async ValueTask<Transaction> DeleteTransactionAsync(Transaction transaction) =>
+            await DeleteAsync<Transaction>(transaction);
     }
 }

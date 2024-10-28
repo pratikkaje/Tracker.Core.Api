@@ -50,7 +50,17 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
                         innerException: duplicateKeyException,
                         data: duplicateKeyException.Data);
 
-                throw await CreateAndLogDependencyValidationException(alreadyExistsTransactionException);
+                throw await CreateAndLogDependencyValidationExceptionAsync(alreadyExistsTransactionException);
+            }
+            catch (DbUpdateConcurrencyException dbUpdateConcurrencyException)
+            {
+                var lockedTransactionException =
+                    new LockedTransactionException(
+                        message: "Locked transaction record error occurred, please try again.",
+                        innerException: dbUpdateConcurrencyException,
+                        data: dbUpdateConcurrencyException.Data);
+
+                throw await CreateAndLogDependencyValidationExceptionAsync(lockedTransactionException);
             }
             catch (DbUpdateException dbUpdateException)
             {
@@ -98,6 +108,9 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             }
         }
 
+        private static async ValueTask ValidateTransactionIdAsync(Guid transactionId) =>
+            Validate((Rule: await IsInvalidAsync(transactionId), Parameter: nameof(Transaction.Id)));
+
         private async ValueTask<TransactionServiceException> CreateAndLogServiceExceptionAsync(Xeption exception)
         {
             var transactionServiceException = 
@@ -109,7 +122,6 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
             return transactionServiceException;
         }
-
 
         private async ValueTask<TransactionDependencyException> CreateAndLogDependencyExceptionAsync(Xeption exception)
         {
@@ -123,7 +135,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
             return transactionDependencyException;
         }
 
-        private async ValueTask<TransactionDependencyValidationException> CreateAndLogDependencyValidationException(
+        private async ValueTask<TransactionDependencyValidationException> CreateAndLogDependencyValidationExceptionAsync(
             Xeption exception)
         {
             var transactionDependencyValidationException =
