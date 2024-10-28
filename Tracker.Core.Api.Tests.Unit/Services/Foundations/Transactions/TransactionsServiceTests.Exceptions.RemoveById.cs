@@ -82,7 +82,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 
             var expectedTransactionDependencyValidationException =
                 new TransactionDependencyValidationException(
-                    message: "Transaction dependency validation error occurred, fix errors and try again.",
+                    message: "Transaction dependency validation error occurred. Please fix errors and try again.",
                     innerException: lockedTransactionException);
 
             this.storageBrokerMock.Setup(broker =>
