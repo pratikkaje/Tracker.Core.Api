@@ -19,7 +19,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpPost]
         public async ValueTask<ActionResult<Transaction>> PostTransactionAsync(Transaction transaction)
         {
-            throw new NotImplementedException();
+            Transaction addedTransaction =
+                await this.transactionService.AddTransactionAsync(transaction);
+
+            return Created(addedTransaction);
         }
     }
 }
