@@ -7,10 +7,12 @@ using Moq;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Controllers;
 using Tracker.Core.Api.Models.Foundations.Transactions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Transactions;
 using Tynamix.ObjectFiller;
+using Xeptions;
 
-namespace Tracker.Core.Api.Tests.Unit.Transactions
+namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
 {
     public partial class TransactionsControllerTests : RESTFulController
     {
@@ -24,6 +26,23 @@ namespace Tracker.Core.Api.Tests.Unit.Transactions
             this.transactionsController = 
                 new TransactionsController(
                     transactionService: this.transactionServiceMock.Object);
+        }
+
+        public static TheoryData<Xeption> ValidationExceptions()
+        {
+            var someInnerException = new Xeption();
+            string someMessage = GetRandomString();
+
+            return new TheoryData<Xeption>
+            {
+                new TransactionValidationException(
+                    message: someMessage,
+                    innerException: someInnerException),
+
+                new TransactionDependencyValidationException(
+                    message: someMessage,
+                    innerException: someInnerException)
+            };
         }
 
         private static IQueryable<Transaction> CreateRandomTransactions() =>

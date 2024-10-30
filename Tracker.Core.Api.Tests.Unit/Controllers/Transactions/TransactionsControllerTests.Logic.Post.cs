@@ -10,7 +10,7 @@ using RESTFulSense.Clients.Extensions;
 using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 
-namespace Tracker.Core.Api.Tests.Unit.Transactions
+namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
 {
     public partial class TransactionsControllerTests
     {
