@@ -9,6 +9,7 @@ using Moq;
 using RESTFulSense.Clients.Extensions;
 using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Transactions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Xeptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
@@ -63,6 +64,49 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
             this.transactionServiceMock.Setup(service =>
                 service.AddTransactionAsync(It.IsAny<Transaction>()))
                     .ThrowsAsync(serverException);
+
+            // when
+            ActionResult<Transaction> actualActionResult =
+                await this.transactionsController.PostTransactionAsync(someTransaction);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.transactionServiceMock.Verify(service =>
+                service.AddTransactionAsync(It.IsAny<Transaction>()),
+                    Times.Once);
+
+            this.transactionServiceMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldReturnConflictOnPostIfAlreadyExistsTransactionErrorOccurredAsync()
+        {
+            // given
+            Transaction someTransaction = CreateRandomTransaction();
+            var someInnerException = new Exception();
+            string someMessage = GetRandomString();
+
+            var alreadyExistsTransactionException =
+                new AlreadyExistsTransactionException(
+                    message: someMessage,
+                    innerException: someInnerException,
+                    data: someInnerException.Data);
+
+            var transactionDependencyValidationException =
+                new TransactionDependencyValidationException(
+                    message: someMessage,
+                    innerException: alreadyExistsTransactionException);
+
+            ConflictObjectResult expectedConflictObjectResult =
+                Conflict(alreadyExistsTransactionException);
+
+            var expectedActionResult =
+                new ActionResult<Transaction>(expectedConflictObjectResult);
+
+            this.transactionServiceMock.Setup(service =>
+                service.AddTransactionAsync(It.IsAny<Transaction>()))
+                    .ThrowsAsync(transactionDependencyValidationException);
 
             // when
             ActionResult<Transaction> actualActionResult =
