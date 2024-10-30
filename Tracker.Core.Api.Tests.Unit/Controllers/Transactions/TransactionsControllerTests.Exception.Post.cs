@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using RESTFulSense.Clients.Extensions;
+using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Xeptions;
 
@@ -30,6 +31,38 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
             this.transactionServiceMock.Setup(service =>
                 service.AddTransactionAsync(It.IsAny<Transaction>()))
                     .ThrowsAsync(validationException);
+
+            // when
+            ActionResult<Transaction> actualActionResult =
+                await this.transactionsController.PostTransactionAsync(someTransaction);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.transactionServiceMock.Verify(service =>
+                service.AddTransactionAsync(It.IsAny<Transaction>()),
+                    Times.Once);
+
+            this.transactionServiceMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [MemberData(nameof(ServerExceptions))]
+        public async Task ShouldReturnInternalServerErrorOnPostIfServerErrorOccurredAsync(
+            Xeption serverException)
+        {
+            // given
+            Transaction someTransaction = CreateRandomTransaction();
+
+            InternalServerErrorObjectResult expectedInternalServerErrorObjectResult =
+                InternalServerError(serverException);
+
+            var expectedActionResult =
+                new ActionResult<Transaction>(expectedInternalServerErrorObjectResult);
+
+            this.transactionServiceMock.Setup(service =>
+                service.AddTransactionAsync(It.IsAny<Transaction>()))
+                    .ThrowsAsync(serverException);
 
             // when
             ActionResult<Transaction> actualActionResult =

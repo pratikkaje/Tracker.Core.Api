@@ -45,6 +45,23 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
             };
         }
 
+        public static TheoryData<Xeption> ServerExceptions()
+        {
+            var someInnerException = new Xeption();
+            string someMessage = GetRandomString();
+
+            return new TheoryData<Xeption>
+            {
+                new TransactionDependencyException(
+                    message: someMessage,
+                    innerException: someInnerException),
+
+                new TransactionServiceException(
+                    message: someMessage,
+                    innerException: someInnerException)
+            };
+        }
+
         private static IQueryable<Transaction> CreateRandomTransactions() =>
             CreateTransactionFiller().Create(count: GetRandomNumber()).AsQueryable();
 
