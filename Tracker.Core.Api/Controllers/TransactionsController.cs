@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Transactions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Transactions;
 
 namespace Tracker.Core.Api.Controllers
@@ -19,10 +20,26 @@ namespace Tracker.Core.Api.Controllers
         [HttpPost]
         public async ValueTask<ActionResult<Transaction>> PostTransactionAsync(Transaction transaction)
         {
-            Transaction addedTransaction =
-                await this.transactionService.AddTransactionAsync(transaction);
+            try
+            {
+                Transaction addedTransaction =
+                    await this.transactionService.AddTransactionAsync(transaction);
 
-            return Created(addedTransaction);
+                return Created(addedTransaction);
+            }
+            catch (TransactionValidationException transactionValidationException)
+            {
+                return BadRequest(transactionValidationException.InnerException);
+            }
+            catch (TransactionDependencyValidationException transactionDependencyValidationException)
+                when (transactionDependencyValidationException.InnerException is AlreadyExistsTransactionException)
+            {
+                return Conflict(transactionDependencyValidationException.InnerException);
+            }
+            catch (TransactionDependencyValidationException transactionDependencyValidationException)
+            {
+                return BadRequest(transactionDependencyValidationException.InnerException);
+            }
         }
     }
 }
