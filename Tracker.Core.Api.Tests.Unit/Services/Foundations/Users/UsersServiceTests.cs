@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using Moq;
 using Tracker.Core.Api.Brokers.Loggings;
 using Tracker.Core.Api.Brokers.Storages;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Services.Foundations.Users;
 using Tynamix.ObjectFiller;
+using Xeptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 {
@@ -26,6 +28,13 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     storageBroker: this.storageBrokerMock.Object,
                     loggingBroker: this.loggingBrokerMock.Object
                     );
+        }
+
+        private static Expression<Func<Xeption, bool>> SameExceptionAs(
+            Xeption expectedException)
+        {
+            return actualException =>
+                actualException.SameExceptionAs(expectedException);
         }
 
         private static User CreateRandomUser(DateTimeOffset dates) =>
