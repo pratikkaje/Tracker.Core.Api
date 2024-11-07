@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Xeptions;
@@ -18,6 +19,10 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             catch (NullUserException nullUserException)
             {
                 throw await CreateAndLogValidationExceptionAsync(nullUserException);
+            }
+            catch (InvalidUserException invalidationUserException)
+            {
+                throw await CreateAndLogValidationExceptionAsync(invalidationUserException);
             }
         }
 
