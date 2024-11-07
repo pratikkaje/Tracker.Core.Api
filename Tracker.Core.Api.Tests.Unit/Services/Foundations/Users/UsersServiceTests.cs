@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using Moq;
+using Tracker.Core.Api.Brokers.DateTimes;
 using Tracker.Core.Api.Brokers.Loggings;
 using Tracker.Core.Api.Brokers.Storages;
 using Tracker.Core.Api.Models.Foundations.Users;
@@ -16,17 +17,20 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 
         private readonly Mock<IStorageBroker> storageBrokerMock;
         private readonly Mock<ILoggingBroker> loggingBrokerMock;
+        private readonly Mock<IDateTimeBroker> datetimeBrokerMock;
         private readonly UserService userService;
 
         public UsersServiceTests()
         {
             this.storageBrokerMock = new Mock<IStorageBroker>();
             this.loggingBrokerMock = new Mock<ILoggingBroker>();
+            this.datetimeBrokerMock = new Mock<IDateTimeBroker>();
 
             this.userService =
                 new UserService(
                     storageBroker: this.storageBrokerMock.Object,
-                    loggingBroker: this.loggingBrokerMock.Object
+                    loggingBroker: this.loggingBrokerMock.Object,
+                    dateTimeBroker: this.datetimeBrokerMock.Object
                     );
         }
 
