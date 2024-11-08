@@ -172,6 +172,14 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                 key: nameof(User.Name),
                 values: $"Text exceed max length of {invalidUser.Name.Length - 1} characters");
 
+            invalidUserException.AddData(
+                key: nameof(User.UserName),
+                values: $"Text exceed max length of {invalidUser.UserName.Length - 1} characters");
+
+            invalidUserException.AddData(
+                key: nameof(User.Email),
+                values: $"Text exceed max length of {invalidUser.Email.Length - 1} characters");
+
             var expectedUserValidationException =
                 new UserValidationException(
                     message: "User validation error occurred, fix errors and try again.",
