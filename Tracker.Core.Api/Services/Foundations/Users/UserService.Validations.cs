@@ -20,8 +20,20 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                 (Rule: await IsInvalidAsync(user.CreatedBy), Parameter: nameof(user.CreatedBy)),
                 (Rule: await IsInvalidAsync(user.ModifiedBy), Parameter: nameof(user.ModifiedBy)),
                 (Rule: await IsInvalidAsync(user.CreatedDate), Parameter: nameof(user.CreatedDate)),                
-                (Rule: await IsInvalidAsync(user.UpdatedDate), Parameter: nameof(user.UpdatedDate)));
+                (Rule: await IsInvalidAsync(user.UpdatedDate), Parameter: nameof(user.UpdatedDate)),
+                (Rule: IsInvalidLength(user.UserName, 300), Parameter: nameof(User.UserName)),
+                (Rule: IsInvalidLength(user.Name, 400), Parameter: nameof(User.Name)),
+                (Rule: IsInvalidLength(user.Email, 400), Parameter: nameof(User.Email)));
         }
+
+        private static dynamic IsInvalidLength(string text, int maxLength) => new
+        {
+            Condition = IsExceedingLength(text, maxLength),
+            Message = $"Text exceed max length of {maxLength} characters"
+        };
+
+        private static bool IsExceedingLength(string text, int maxLength) =>
+            (text ?? string.Empty).Length > maxLength;
 
         private static async ValueTask<dynamic> IsInvalidAsync(Guid id) => new
         {

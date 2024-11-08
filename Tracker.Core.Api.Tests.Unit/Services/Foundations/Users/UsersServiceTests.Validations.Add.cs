@@ -160,8 +160,8 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             // given
             DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
             var invalidUser = CreateRandomUser(randomDateTimeOffset);
-            invalidUser.Name = GetRandomStringWithLengthOf(301);
-            invalidUser.UserName = GetRandomStringWithLengthOf(401);
+            invalidUser.UserName = GetRandomStringWithLengthOf(301);
+            invalidUser.Name = GetRandomStringWithLengthOf(401);
             invalidUser.Email = GetRandomStringWithLengthOf(401);
 
             var invalidUserException =
@@ -182,7 +182,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 
             var expectedUserValidationException =
                 new UserValidationException(
-                    message: "User validation error occurred, fix errors and try again.",
+                    message: "User validation error occurred, fix the errors and try again.",
                     innerException: invalidUserException);
 
             this.datetimeBrokerMock.Setup(broker =>
