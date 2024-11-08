@@ -34,6 +34,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     );
         }
 
+        private static string GetRandomStringWithLengthOf(int length)
+        {
+            return new MnemonicString(wordCount: 1, wordMinLength: length, wordMaxLength: length)
+                .GetValue();
+        }
+
         private static Expression<Func<Xeption, bool>> SameExceptionAs(
             Xeption expectedException)
         {
