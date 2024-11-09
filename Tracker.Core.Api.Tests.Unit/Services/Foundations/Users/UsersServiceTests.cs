@@ -62,10 +62,13 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
         private static Filler<User> CreateRandomUserFiller(DateTimeOffset dates)
         {
             var filler = new Filler<User>();
+            string user = Guid.NewGuid().ToString();
 
             filler.Setup()
                 .OnType<DateTimeOffset>().Use(dates)
                 .OnProperty(user => user.Email).Use(GetRandomEmail())
+                .OnProperty(user => user.CreatedBy).Use(user)
+                .OnProperty(user => user.ModifiedBy).Use(user)
                 .OnProperty(user => user.Categories).IgnoreIt();
 
             return filler;

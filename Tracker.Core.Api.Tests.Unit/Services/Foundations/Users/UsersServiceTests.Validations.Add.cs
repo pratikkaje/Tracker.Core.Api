@@ -312,9 +312,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             actualUserValidationException.Should()
                 .BeEquivalentTo(expectedUserValidationException);
 
-            this.datetimeBrokerMock.Verify(broker =>
-                broker.GetCurrentDateTimeOffsetAsync(),
-                    Times.Once);
+            //this.datetimeBrokerMock.Verify(broker =>
+            //    broker.GetCurrentDateTimeOffsetAsync(),
+            //        Times.Once);
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(

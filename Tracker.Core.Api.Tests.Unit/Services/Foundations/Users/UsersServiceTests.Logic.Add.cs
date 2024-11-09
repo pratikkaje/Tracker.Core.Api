@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Force.DeepCloner;
 using Moq;
@@ -12,9 +13,15 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
         public async Task ShouldAddUserAsync()
         {
             // given
-            User RandomUser = CreateRandomUser();
+            DateTimeOffset randomDateTime = GetRandomDateTimeOffset();
+
+            User RandomUser = CreateRandomUser(randomDateTime);
             User inputUser = RandomUser;
             User returnedUser = inputUser.DeepClone();
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTime);
 
             this.storageBrokerMock.Setup(broker =>
                 broker.InsertUserAsync(inputUser))
@@ -26,10 +33,15 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             // then
             actualUser.Should().BeEquivalentTo(returnedUser);
 
-            this.storageBrokerMock.Verify(broker =>
-                broker.InsertUserAsync(inputUser)
-                    , Times.Once());
+            //this.datetimeBrokerMock.Verify(broker =>
+            //    broker.GetCurrentDateTimeOffsetAsync(),
+            //        Times.Once);
 
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertUserAsync(inputUser),
+                    Times.Once());
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
         }

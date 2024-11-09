@@ -27,8 +27,38 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                 (Rule: IsInvalidLength(user.UserName, 300), Parameter: nameof(User.UserName)),
                 (Rule: IsInvalidLength(user.Name, 400), Parameter: nameof(User.Name)),
                 (Rule: IsInvalidLength(user.Email, 400), Parameter: nameof(User.Email)),
-                (Rule: IsInvalidEmail(user.Email), Parameter: nameof(User.Email)));
+                (Rule: IsInvalidEmail(user.Email), Parameter: nameof(User.Email)),
+
+                (Rule: await IsNotSameAsync(
+                    first: user.CreatedBy,
+                    second: user.ModifiedBy,
+                    secondName: nameof(user.CreatedBy)),
+                    Parameter: nameof(user.ModifiedBy)),
+
+                (Rule: await IsNotSameAsync(
+                    firstDate: user.CreatedDate,
+                    secondDate: user.UpdatedDate,
+                    secondDateName: nameof(user.CreatedDate)),
+                    Parameter: nameof(user.UpdatedDate)));
         }
+
+        private static async ValueTask<dynamic> IsNotSameAsync(
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
+            string secondDateName) => new
+            {
+                Condition = firstDate != secondDate,
+                Message = $"Date is not same as {secondDateName}"
+            };
+
+        private static async ValueTask<dynamic> IsNotSameAsync(
+            string first,
+            string second,
+            string secondName) => new
+            {
+                Condition = first != second,
+                Message = $"Text is not same as {secondName}"
+            };
 
         private static readonly Regex EmailRegex = 
             new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
