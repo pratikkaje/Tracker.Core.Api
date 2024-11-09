@@ -57,7 +57,6 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
-        [InlineData("test")]
         public async Task ShouldThrowValidationExceptionOnAddIfUserIsInvalidAndLogItAsync(string invalidString)
         {
             // given
@@ -94,7 +93,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 
             invalidUserException.AddData(
                 key: nameof(User.Email),
-                values: "Text is required.");
+                values: ["Text is required.", "Email not in valid format."]);
 
             invalidUserException.AddData(
                 key: nameof(User.AvatarUrl),
@@ -163,7 +162,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             var invalidUser = CreateRandomUser(randomDateTimeOffset);
             invalidUser.UserName = GetRandomStringWithLengthOf(301);
             invalidUser.Name = GetRandomStringWithLengthOf(401);
-            invalidUser.Email = GetRandomStringWithLengthOf(401);
+            invalidUser.Email = GetRandomStringWithLengthOf(392) + "@" + GetRandomStringWithLengthOf(4) + ".com"; //401 length
 
             var invalidUserException =
                 new InvalidUserException(

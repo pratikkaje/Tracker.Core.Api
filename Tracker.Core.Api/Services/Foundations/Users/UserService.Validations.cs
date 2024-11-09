@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Drawing.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Tracker.Core.Api.Services.Foundations.Users
 {
@@ -19,11 +22,29 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                 (Rule: await IsInvalidAsync(user.AvatarUrl), Parameter: nameof(user.AvatarUrl)),
                 (Rule: await IsInvalidAsync(user.CreatedBy), Parameter: nameof(user.CreatedBy)),
                 (Rule: await IsInvalidAsync(user.ModifiedBy), Parameter: nameof(user.ModifiedBy)),
-                (Rule: await IsInvalidAsync(user.CreatedDate), Parameter: nameof(user.CreatedDate)),                
+                (Rule: await IsInvalidAsync(user.CreatedDate), Parameter: nameof(user.CreatedDate)),
                 (Rule: await IsInvalidAsync(user.UpdatedDate), Parameter: nameof(user.UpdatedDate)),
                 (Rule: IsInvalidLength(user.UserName, 300), Parameter: nameof(User.UserName)),
                 (Rule: IsInvalidLength(user.Name, 400), Parameter: nameof(User.Name)),
-                (Rule: IsInvalidLength(user.Email, 400), Parameter: nameof(User.Email)));
+                (Rule: IsInvalidLength(user.Email, 400), Parameter: nameof(User.Email)),
+                (Rule: IsInvalidEmail(user.Email), Parameter: nameof(User.Email)));
+        }
+
+        private static readonly Regex EmailRegex = 
+            new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static dynamic IsInvalidEmail(string emailAddress) => new
+        {
+            Condition = IsInValidEmailFormat(emailAddress),
+            Message = "Email not in valid format."
+        };
+
+        private static bool IsInValidEmailFormat(string emailAddress)
+        {            
+            if (EmailRegex.IsMatch((emailAddress ?? string.Empty)))
+                return false;
+
+            return true;
         }
 
         private static dynamic IsInvalidLength(string text, int maxLength) => new
