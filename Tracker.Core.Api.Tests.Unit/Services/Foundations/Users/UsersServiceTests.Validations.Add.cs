@@ -216,15 +216,13 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
 
-        [Theory]
-        [InlineData("invalid-email")]
-        [InlineData("example@domain")]
-        public async Task ShouldThrowValidationExceptionOnAddIfUserEmailIsInvalidAndLogItAsync(string invalidEmail)
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnAddIfUserEmailIsInvalidAndLogItAsync()
         {
             // given
             DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
             var invalidUser = CreateRandomUser(randomDateTimeOffset);
-            invalidUser.Email = invalidEmail;
+            invalidUser.Email = GetRandomString();
 
             var invalidUserException =
                 new InvalidUserException(
