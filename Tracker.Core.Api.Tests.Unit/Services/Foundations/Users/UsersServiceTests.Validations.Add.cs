@@ -57,6 +57,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
+        [InlineData("test")]
         public async Task ShouldThrowValidationExceptionOnAddIfUserIsInvalidAndLogItAsync(string invalidString)
         {
             // given
@@ -179,6 +180,59 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             invalidUserException.AddData(
                 key: nameof(User.Email),
                 values: $"Text exceed max length of {invalidUser.Email.Length - 1} characters");
+
+            var expectedUserValidationException =
+                new UserValidationException(
+                    message: "User validation error occurred, fix the errors and try again.",
+                    innerException: invalidUserException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            // when
+            ValueTask<User> addUserTask =
+                this.userService.AddUserAsync(invalidUser);
+
+            UserValidationException actualUserValidationException =
+                await Assert.ThrowsAsync<UserValidationException>(
+                    testCode: addUserTask.AsTask);
+
+            // then
+            actualUserValidationException.Should()
+                .BeEquivalentTo(expectedUserValidationException);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedUserValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertUserAsync(It.IsAny<User>()),
+                    Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [InlineData("invalid-email")]
+        [InlineData("example@domain")]
+        public async Task ShouldThrowValidationExceptionOnAddIfUserEmailIsInvalidAndLogItAsync(string invalidEmail)
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            var invalidUser = CreateRandomUser(randomDateTimeOffset);
+            invalidUser.Email = invalidEmail;
+
+            var invalidUserException =
+                new InvalidUserException(
+                    message: "User is invalid, fix the errors and try again.");
+
+            invalidUserException.AddData(
+                key: nameof(User.Email),
+                values: "Email not in valid format.");
 
             var expectedUserValidationException =
                 new UserValidationException(
