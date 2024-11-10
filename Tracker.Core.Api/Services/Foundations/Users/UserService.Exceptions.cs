@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.IdentityModel.Protocols.Configuration;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Xeptions;

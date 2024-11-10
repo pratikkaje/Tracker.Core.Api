@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -200,8 +197,8 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             actualUserValidationException.Should()
                 .BeEquivalentTo(expectedUserValidationException);
 
-            this.datetimeBrokerMock.Verify(broker => 
-                broker.GetCurrentDateTimeOffsetAsync(), 
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
                     Times.Once());
 
             this.loggingBrokerMock.Verify(broker =>

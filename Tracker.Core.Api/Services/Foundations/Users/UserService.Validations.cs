@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Drawing.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Tracker.Core.Api.Services.Foundations.Users
 {
@@ -96,7 +94,7 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                 Message = $"Text is not same as {secondName}"
             };
 
-        private static readonly Regex EmailRegex = 
+        private static readonly Regex EmailRegex =
             new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static dynamic IsInvalidEmail(string emailAddress) => new
@@ -106,7 +104,7 @@ namespace Tracker.Core.Api.Services.Foundations.Users
         };
 
         private static bool IsInValidEmailFormat(string emailAddress)
-        {            
+        {
             if (EmailRegex.IsMatch((emailAddress ?? string.Empty)))
                 return false;
 

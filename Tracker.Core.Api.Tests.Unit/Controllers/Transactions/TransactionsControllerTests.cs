@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Moq;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Controllers;
@@ -23,7 +20,7 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
         {
             this.transactionServiceMock = new Mock<ITransactionService>();
 
-            this.transactionsController = 
+            this.transactionsController =
                 new TransactionsController(
                     transactionService: this.transactionServiceMock.Object);
         }

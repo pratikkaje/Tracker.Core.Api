@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Force.DeepCloner;
@@ -27,24 +24,24 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                 broker.SelectTransactionByIdAsync(someTransactionId))
                     .ReturnsAsync(storageTransaction);
 
-            this.storageBrokerMock.Setup(broker => 
+            this.storageBrokerMock.Setup(broker =>
                 broker.DeleteTransactionAsync(inputTransaction))
                     .ReturnsAsync(removedTransaction);
 
             // when
-            Transaction actualTransaction = 
+            Transaction actualTransaction =
                 await this.transactionService.RemoveTransactionByIdAsync(someTransactionId);
 
             // then
             actualTransaction.Should().BeEquivalentTo(expectedTransaction);
 
-            this.storageBrokerMock.Verify(broker => 
-                broker.SelectTransactionByIdAsync(someTransactionId), 
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectTransactionByIdAsync(someTransactionId),
                     Times.Once);
 
-            this.storageBrokerMock.Verify(broker => 
+            this.storageBrokerMock.Verify(broker =>
                 broker.DeleteTransactionAsync(
-                    It.IsAny<Transaction>()), 
+                    It.IsAny<Transaction>()),
                         Times.Once);
 
             this.storageBrokerMock.VerifyNoOtherCalls();

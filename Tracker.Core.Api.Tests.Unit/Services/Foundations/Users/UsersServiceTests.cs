@@ -34,7 +34,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     );
         }
 
-        private static string GetRandomString() => 
+        private static string GetRandomString() =>
             new MnemonicString().GetValue();
 
         private static string GetRandomStringWithLengthOf(int length)

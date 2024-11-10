@@ -113,7 +113,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
         private async ValueTask<TransactionServiceException> CreateAndLogServiceExceptionAsync(Xeption exception)
         {
-            var transactionServiceException = 
+            var transactionServiceException =
                 new TransactionServiceException(
                     message: "Transaction service error occurred, contact support.",
                     innerException: exception);
@@ -125,9 +125,9 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
 
         private async ValueTask<TransactionDependencyException> CreateAndLogDependencyExceptionAsync(Xeption exception)
         {
-            TransactionDependencyException transactionDependencyException = 
+            TransactionDependencyException transactionDependencyException =
                 new TransactionDependencyException(
-                    message: "Transaction dependency error occured, contact support.", 
+                    message: "Transaction dependency error occured, contact support.",
                     innerException: exception);
 
             await this.loggingBroker.LogErrorAsync(transactionDependencyException);
@@ -151,9 +151,9 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
         private async ValueTask<TransactionDependencyException> CreateAndLogCriticalDependencyExceptionAsync(
             Xeption exception)
         {
-            var transactionDependencyException = 
+            var transactionDependencyException =
                 new TransactionDependencyException(
-                    message: "Transaction dependency error occurred, contact support.", 
+                    message: "Transaction dependency error occurred, contact support.",
                     innerException: exception);
 
             await this.loggingBroker.LogCriticalAsync(transactionDependencyException);
