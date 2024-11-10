@@ -33,9 +33,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             // then
             actualUser.Should().BeEquivalentTo(returnedUser);
 
-            //this.datetimeBrokerMock.Verify(broker =>
-            //    broker.GetCurrentDateTimeOffsetAsync(),
-            //        Times.Once);
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
 
             this.storageBrokerMock.Verify(broker =>
                 broker.InsertUserAsync(inputUser),
