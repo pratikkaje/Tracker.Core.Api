@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Xeptions;
@@ -23,6 +24,27 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             {
                 throw await CreateAndLogValidationExceptionAsync(invalidationUserException);
             }
+            catch (SqlException sqlException)
+            {
+                var failedStorageUserException =
+                    new FailedStorageUserException(
+                        message: "Failed user storage error occurred, contact support.",
+                        innerException: sqlException);
+
+                throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageUserException);
+            }
+        }
+
+        private async ValueTask<UserDependencyException> CreateAndLogCriticalDependencyExceptionAsync(Xeption exception)
+        {
+            var userDependencyException =
+                new UserDependencyException(
+                    message: "User dependency error occurred, contact support.",
+                    innerException: exception);
+
+            await this.loggingBroker.LogCriticalAsync(userDependencyException);
+
+            return userDependencyException;
         }
 
         private async ValueTask<UserValidationException>
