@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Xeptions;
@@ -44,10 +45,30 @@ namespace Tracker.Core.Api.Services.Foundations.Users
 
                 throw await CreateAndLogDependencyValidationExceptionAsync(alreadyExistsUserException);
             }
+            catch (DbUpdateException dbUpdateException)
+            {
+                var failedOperationUserException =
+                    new FailedOperationUserException(
+                        message: "Failed operation user error occurred, contact support.",
+                        innerException: dbUpdateException);
+
+                throw await CreateAndLogDependencyExceptionAsync(failedOperationUserException);
+            }
         }
 
-        private async ValueTask<UserDependencyValidationException>
-            CreateAndLogDependencyValidationExceptionAsync(Xeption exception)
+        private async ValueTask<UserDependencyException> CreateAndLogDependencyExceptionAsync(Xeption exception)
+        {
+            var userDependencyException =
+                new UserDependencyException(
+                    message: "User dependency error occurred, contact support.",
+                    innerException: exception);
+
+            await this.loggingBroker.LogErrorAsync(userDependencyException);
+
+            return userDependencyException;
+        }
+
+        private async ValueTask<UserDependencyValidationException> CreateAndLogDependencyValidationExceptionAsync(Xeption exception)
         {
             var userDependencyValidationException =
                 new UserDependencyValidationException(
