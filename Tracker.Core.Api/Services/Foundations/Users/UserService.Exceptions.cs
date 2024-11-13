@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
@@ -33,6 +34,29 @@ namespace Tracker.Core.Api.Services.Foundations.Users
 
                 throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageUserException);
             }
+            catch (DuplicateKeyException duplicateKeyException)
+            {
+                var alreadyExistsUserException =
+                    new AlreadyExistsUserException(
+                        message: "User already exists error occurred.",
+                        innerException: duplicateKeyException,
+                        data: duplicateKeyException.Data);
+
+                throw await CreateAndLogDependencyValidationExceptionAsync(alreadyExistsUserException);
+            }
+        }
+
+        private async ValueTask<UserDependencyValidationException>
+            CreateAndLogDependencyValidationExceptionAsync(Xeption exception)
+        {
+            var userDependencyValidationException =
+                new UserDependencyValidationException(
+                    message: "User dependency validation error occurred, fix errors and try again.",
+                    innerException: exception);
+
+            await this.loggingBroker.LogErrorAsync(userDependencyValidationException);
+
+            return userDependencyValidationException;
         }
 
         private async ValueTask<UserDependencyException> CreateAndLogCriticalDependencyExceptionAsync(Xeption exception)
