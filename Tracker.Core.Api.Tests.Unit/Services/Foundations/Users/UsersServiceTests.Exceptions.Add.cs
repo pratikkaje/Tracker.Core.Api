@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EFxceptions.Models.Exceptions;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Moq;
@@ -55,6 +56,61 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogCriticalAsync(It.Is(SameExceptionAs(
                     expectedUserDependencyException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertUserAsync(It.IsAny<User>()),
+                    Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyValidationExceptionOnAddIfUserAlreadyExistsAndLogItAsync()
+        {
+            // given
+            DateTimeOffset someDate = GetRandomDateTimeOffset();
+            User someUser = CreateRandomUser(someDate);
+
+            var duplicateKeyException =
+                new DuplicateKeyException(message: "Duplicate key error occurred");
+
+            var alreadyExistsUserException =
+                new AlreadyExistsUserException(
+                    message: "User already exists error occurred.",
+                    innerException: duplicateKeyException,
+                    data: duplicateKeyException.Data);
+
+            var expectedUserDependencyValidationException =
+                new UserDependencyValidationException(
+                    message: "User dependency validation error occurred, fix errors and try again.",
+                    innerException: alreadyExistsUserException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ThrowsAsync(duplicateKeyException);
+
+            // when
+            ValueTask<User> addUserTask =
+                this.userService.AddUserAsync(someUser);
+
+            UserDependencyValidationException actualUserDependencyValidationException =
+                await Assert.ThrowsAsync<UserDependencyValidationException>(
+                    testCode: addUserTask.AsTask);
+
+            // then
+            actualUserDependencyValidationException.Should()
+                .BeEquivalentTo(expectedUserDependencyValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once());
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedUserDependencyValidationException))),
                         Times.Once);
 
             this.storageBrokerMock.Verify(broker =>
