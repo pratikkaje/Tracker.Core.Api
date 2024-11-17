@@ -149,6 +149,15 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             }
         }
 
+        private static async ValueTask ValidateStorageUserAsync(User user, Guid id)
+        {
+            if (user is null)
+            {
+                throw new NotFoundUserException(
+                    message: $"User not found with id: {id}");
+            }
+        }
+
         private static void Validate(params (dynamic Rule, string Parameter)[] validations)
         {
             var invalidUserException = new InvalidUserException(
