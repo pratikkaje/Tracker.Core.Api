@@ -45,13 +45,15 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             return maybeUser;
         });            
 
-        public async ValueTask<User> ModifyUserAsync(User user)
-        {
+        public ValueTask<User> ModifyUserAsync(User user) =>
+        TryCatch(async () => {
+            await ValidateUserOnModify(user);
 
-            User maybeUser = await this.storageBroker.SelectUserByIdAsync(user.Id);
+            User maybeUser = 
+                await this.storageBroker.SelectUserByIdAsync(user.Id);
 
             return await this.storageBroker.UpdateUserAsync(user);
-        }
+        });
 
         public async ValueTask<User> RemoveUserByIdAsync(Guid userId)
         {
