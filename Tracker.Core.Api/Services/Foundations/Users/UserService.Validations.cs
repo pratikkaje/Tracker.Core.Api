@@ -43,6 +43,9 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                     Parameter: nameof(user.CreatedDate)));
         }
 
+        private static async ValueTask ValidateUserIdAsync(Guid userId) =>
+            Validate((Rule: await IsInvalidAsync(userId), Parameter: nameof(User.Id)));
+
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
         {
             var (isNotRecent, startDate, endDate) = await IsDateNotRecentAsync(date);
