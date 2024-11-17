@@ -33,13 +33,13 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
         });
 
         public ValueTask<IQueryable<Transaction>> RetrieveAllTransactionsAsync() =>
-        TryCatch(async () => 
-        { 
+        TryCatch(async () =>
+        {
             return await this.storageBroker.SelectAllTransactionsAsync();
         });
 
         public ValueTask<Transaction> RetrieveTransactionByIdAsync(Guid transactionId) =>
-        TryCatch(async () => 
+        TryCatch(async () =>
         {
             return await this.storageBroker.SelectTransactionByIdAsync(transactionId);
         });
@@ -63,7 +63,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
         {
             await ValidateTransactionIdAsync(transactionId);
 
-            Transaction maybeTransaction = 
+            Transaction maybeTransaction =
                 await this.storageBroker.SelectTransactionByIdAsync(transactionId);
 
             await ValidateStorageTransactionAsync(maybeTransaction, transactionId);

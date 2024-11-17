@@ -12,6 +12,8 @@ namespace Tracker.Core.Api.Models.Foundations.Users
         public string Name { get; set; }
         public string Email { get; set; }
         public string AvatarUrl { get; set; }
+        public string CreatedBy { get; set; }
+        public string ModifiedBy { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
         public DateTimeOffset UpdatedDate { get; set; }
         public IEnumerable<Category> Categories { get; set; }

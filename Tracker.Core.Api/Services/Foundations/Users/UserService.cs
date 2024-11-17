@@ -1,25 +1,34 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Tracker.Core.Api.Brokers.DateTimes;
 using Tracker.Core.Api.Brokers.Loggings;
 using Tracker.Core.Api.Brokers.Storages;
 using Tracker.Core.Api.Models.Foundations.Users;
 
 namespace Tracker.Core.Api.Services.Foundations.Users
 {
-    internal class UserService : IUserService
+    internal partial class UserService : IUserService
     {
         private readonly IStorageBroker storageBroker;
         private readonly ILoggingBroker loggingBroker;
+        private readonly IDateTimeBroker dateTimeBroker;
 
-        public UserService(IStorageBroker storageBroker, ILoggingBroker loggingBroker)
+        public UserService(IStorageBroker storageBroker,
+            ILoggingBroker loggingBroker,
+            IDateTimeBroker dateTimeBroker)
         {
             this.storageBroker = storageBroker;
             this.loggingBroker = loggingBroker;
+            this.dateTimeBroker = dateTimeBroker;
         }
 
-        public async ValueTask<User> AddUserAsync(User user) =>
-            await this.storageBroker.InsertUserAsync(user);
+        public ValueTask<User> AddUserAsync(User user) =>
+        TryCatch(async () =>
+        {
+            await ValidateUserOnAddAsync(user);
+            return await this.storageBroker.InsertUserAsync(user);
+        });
 
         public async ValueTask<IQueryable<User>> RetrieveAllUsersAsync() =>
             await this.storageBroker.SelectAllUsersAsync();

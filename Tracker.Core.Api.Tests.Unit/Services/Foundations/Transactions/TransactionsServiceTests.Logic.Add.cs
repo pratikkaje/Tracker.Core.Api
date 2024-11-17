@@ -19,7 +19,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             Transaction inputTransaction = randomTransaction;
             Transaction expectedTransaction = inputTransaction.DeepClone();
 
-            this.datetimeBrokerMock.Setup(broker => 
+            this.datetimeBrokerMock.Setup(broker =>
                 broker.GetCurrentDateTimeOffsetAsync())
                     .ReturnsAsync(now);
 
@@ -34,8 +34,8 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             // then
             actualTransaction.Should().BeEquivalentTo(expectedTransaction);
 
-            this.datetimeBrokerMock.Verify(broker => 
-                broker.GetCurrentDateTimeOffsetAsync(), 
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
                     Times.Once);
 
             this.storageBrokerMock.Verify(broker =>
