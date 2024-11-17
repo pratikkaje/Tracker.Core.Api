@@ -59,5 +59,51 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnRetrieveByIdIfUserIdNotFoundAndLogItAsync()
+        {
+            // given
+            Guid someUserId = Guid.NewGuid();
+            User nullUser = null;
+
+            var notFoundUserException =
+                new NotFoundUserException(
+                    message: $"User not found with id: {someUserId}");
+
+            var expectedUserValidationException =
+                new UserValidationException(
+                    message: "User validation error occurred, fix the errors and try again.",
+                    innerException: notFoundUserException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectUserByIdAsync(someUserId))
+                    .ReturnsAsync(nullUser);
+
+            // when
+            ValueTask<User> retrieveUserByIdTask =
+                this.userService.RetrieveUserByIdAsync(someUserId);
+
+            UserValidationException actualUserValidationException =
+                await Assert.ThrowsAsync<UserValidationException>(
+                    testCode: retrieveUserByIdTask.AsTask);
+
+            // then
+            actualUserValidationException.Should().BeEquivalentTo(
+                expectedUserValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectUserByIdAsync(someUserId),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedUserValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
