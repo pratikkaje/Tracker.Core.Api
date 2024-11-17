@@ -28,12 +28,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     innerException: nullUserException);
 
             // when
-            ValueTask<User> addUserTask =
+            ValueTask<User> modifyUserTask =
                 this.userService.ModifyUserAsync(nullUser);
 
             UserValidationException actualUserValidationException =
                 await Assert.ThrowsAsync<UserValidationException>(
-                    testCode: addUserTask.AsTask);
+                    testCode: modifyUserTask.AsTask);
 
             // then
             actualUserValidationException.Should().BeEquivalentTo(

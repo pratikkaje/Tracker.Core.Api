@@ -43,6 +43,12 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                     Parameter: nameof(user.CreatedDate)));
         }
 
+        private async ValueTask ValidateUserOnModify(User user)
+        {
+            ValidateUserIsNotNull(user);
+        }
+
+
         private static async ValueTask ValidateUserIdAsync(Guid userId) =>
             Validate((Rule: await IsInvalidAsync(userId), Parameter: nameof(User.Id)));
 
