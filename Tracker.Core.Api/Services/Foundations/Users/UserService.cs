@@ -30,8 +30,8 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             return await this.storageBroker.InsertUserAsync(user);
         });
 
-        public async ValueTask<IQueryable<User>> RetrieveAllUsersAsync() =>
-            await this.storageBroker.SelectAllUsersAsync();
+        public ValueTask<IQueryable<User>> RetrieveAllUsersAsync() =>
+        TryCatch(async () => await this.storageBroker.SelectAllUsersAsync());            
 
         public async ValueTask<User> RetrieveUserByIdAsync(Guid userId) =>
             await this.storageBroker.SelectUserByIdAsync(userId);

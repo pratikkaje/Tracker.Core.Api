@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
@@ -12,6 +13,33 @@ namespace Tracker.Core.Api.Services.Foundations.Users
     internal partial class UserService
     {
         private delegate ValueTask<User> ReturningUserFunction();
+        private delegate ValueTask<IQueryable<User>> ReturningUsersFunction();
+
+        private async ValueTask<IQueryable<User>> TryCatch(ReturningUsersFunction returningUsersFunction)
+        {
+            try
+            {
+                return await returningUsersFunction();
+            }
+            catch (SqlException sqlException)
+            {
+                var failedStorageUserException =
+                    new FailedStorageUserException(
+                        message: "Failed user storage error occurred, contact support.",
+                        innerException: sqlException);
+
+                throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageUserException);
+            }
+            catch (Exception exception)
+            {
+                var failedServiceUserException =
+                    new FailedServiceUserException(
+                        message: "Failed service user error occurred, contact support.",
+                        innerException: exception);
+
+                throw await CreateAndLogServiceExceptionAsync(failedServiceUserException);
+            }
+        }
 
         private async ValueTask<User> TryCatch(ReturningUserFunction returningUserFunction)
         {
