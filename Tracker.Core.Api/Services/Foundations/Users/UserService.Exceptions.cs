@@ -30,6 +30,15 @@ namespace Tracker.Core.Api.Services.Foundations.Users
 
                 throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageUserException);
             }
+            catch (Exception exception)
+            {
+                var failedServiceUserException =
+                    new FailedServiceUserException(
+                        message: "Failed service user error occurred, contact support.",
+                        innerException: exception);
+
+                throw await CreateAndLogServiceExceptionAsync(failedServiceUserException);
+            }
         }
 
         private async ValueTask<User> TryCatch(ReturningUserFunction returningUserFunction)
