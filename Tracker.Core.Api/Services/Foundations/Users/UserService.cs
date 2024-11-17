@@ -31,10 +31,19 @@ namespace Tracker.Core.Api.Services.Foundations.Users
         });
 
         public ValueTask<IQueryable<User>> RetrieveAllUsersAsync() =>
-        TryCatch(async () => await this.storageBroker.SelectAllUsersAsync());            
+        TryCatch(async () => await this.storageBroker.SelectAllUsersAsync());
 
-        public async ValueTask<User> RetrieveUserByIdAsync(Guid userId) =>
-            await this.storageBroker.SelectUserByIdAsync(userId);
+        public ValueTask<User> RetrieveUserByIdAsync(Guid userId) =>
+        TryCatch(async () => {
+            await ValidateUserIdAsync(userId);
+
+            User maybeUser =
+                await this.storageBroker.SelectUserByIdAsync(userId);
+
+            await ValidateStorageUserAsync(maybeUser, userId);
+
+            return maybeUser;
+        });            
 
         public async ValueTask<User> ModifyUserAsync(User user)
         {

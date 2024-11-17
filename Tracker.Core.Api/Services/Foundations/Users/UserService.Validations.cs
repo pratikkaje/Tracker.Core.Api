@@ -43,6 +43,9 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                     Parameter: nameof(user.CreatedDate)));
         }
 
+        private static async ValueTask ValidateUserIdAsync(Guid userId) =>
+            Validate((Rule: await IsInvalidAsync(userId), Parameter: nameof(User.Id)));
+
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
         {
             var (isNotRecent, startDate, endDate) = await IsDateNotRecentAsync(date);
@@ -143,6 +146,15 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             if (user is null)
             {
                 throw new NullUserException(message: "User is null");
+            }
+        }
+
+        private static async ValueTask ValidateStorageUserAsync(User user, Guid id)
+        {
+            if (user is null)
+            {
+                throw new NotFoundUserException(
+                    message: $"User not found with id: {id}");
             }
         }
 

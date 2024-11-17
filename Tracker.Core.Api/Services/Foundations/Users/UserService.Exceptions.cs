@@ -55,6 +55,10 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             {
                 throw await CreateAndLogValidationExceptionAsync(invalidationUserException);
             }
+            catch (NotFoundUserException notFoundUserException)
+            {
+                throw await CreateAndLogValidationExceptionAsync(notFoundUserException);
+            }
             catch (SqlException sqlException)
             {
                 var failedStorageUserException =
