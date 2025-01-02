@@ -275,5 +275,67 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(-61)]
+        public async Task ShouldThrowValidationExceptionOnModifyIfUpdatedDateIsNotRecentAndLogItAsync(
+            int invalidSeconds)
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            DateTimeOffset now = randomDateTimeOffset;
+            DateTimeOffset startDate = now.AddSeconds(-60);
+            DateTimeOffset endDate = now.AddSeconds(0);
+            User randomUser = CreateRandomUser(randomDateTimeOffset);
+            randomUser.UpdatedDate = randomDateTimeOffset.AddSeconds(invalidSeconds);
+
+            var invalidUserException =
+                new InvalidUserException(
+                message: "User is invalid, fix the errors and try again.");
+
+            invalidUserException.AddData(
+                key: nameof(User.UpdatedDate),
+                values: $"Date is not recent." +
+                $" Expected a value between {startDate} and {endDate} but found {randomUser.UpdatedDate}");
+
+            var expectedUserValidationException =
+                new UserValidationException(
+                    message: "User validation error occurred, fix the errors and try again.",
+                    innerException: invalidUserException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            // when
+            ValueTask<User> modifyUserTask =
+                this.userService.ModifyUserAsync(randomUser);
+
+            UserValidationException actualUserValidationException =
+                await Assert.ThrowsAsync<UserValidationException>(
+                    testCode: modifyUserTask.AsTask);
+
+            // then
+            actualUserValidationException.Should()
+                .BeEquivalentTo(expectedUserValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(
+                    SameExceptionAs(expectedUserValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.UpdateUserAsync(It.IsAny<User>()),
+                    Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
