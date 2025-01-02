@@ -100,13 +100,13 @@ namespace Tracker.Core.Api.Services.Foundations.Users
         }
 
         private static async ValueTask<dynamic> IsSameAsync(
-            DateTimeOffset firstDate, 
-            DateTimeOffset secondDate, 
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
             string secondDateName) => new
-        {
-            Condition = firstDate == secondDate,
-            Message = $"Date is same as {secondDateName}"
-        };
+            {
+                Condition = firstDate == secondDate,
+                Message = $"Date is same as {secondDateName}"
+            };
 
         private static async ValueTask ValidateUserIdAsync(Guid userId) =>
             Validate((Rule: await IsInvalidAsync(userId), Parameter: nameof(User.Id)));

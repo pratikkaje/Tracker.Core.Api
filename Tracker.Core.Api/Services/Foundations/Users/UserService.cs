@@ -34,7 +34,8 @@ namespace Tracker.Core.Api.Services.Foundations.Users
         TryCatch(async () => await this.storageBroker.SelectAllUsersAsync());
 
         public ValueTask<User> RetrieveUserByIdAsync(Guid userId) =>
-        TryCatch(async () => {
+        TryCatch(async () =>
+        {
             await ValidateUserIdAsync(userId);
 
             User maybeUser =
@@ -43,13 +44,14 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             await ValidateStorageUserAsync(maybeUser, userId);
 
             return maybeUser;
-        });            
+        });
 
         public ValueTask<User> ModifyUserAsync(User user) =>
-        TryCatch(async () => {
+        TryCatch(async () =>
+        {
             await ValidateUserOnModify(user);
 
-            User maybeUser = 
+            User maybeUser =
                 await this.storageBroker.SelectUserByIdAsync(user.Id);
 
             await ValidateStorageUserAsync(maybeUser, user.Id);
