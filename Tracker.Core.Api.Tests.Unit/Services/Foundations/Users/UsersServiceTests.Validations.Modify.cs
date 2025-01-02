@@ -423,7 +423,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                 values: $"Date is not same as {nameof(User.CreatedDate)}");
 
             var expectedUserValidationException = new UserValidationException(
-                message: "User validation error occurred, fix errors and try again.",
+                message: "User validation error occurred, fix the errors and try again.",
                 innerException: invalidUserException);
 
             this.datetimeBrokerMock.Setup(broker =>

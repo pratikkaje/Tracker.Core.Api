@@ -73,6 +73,32 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                 Parameter: nameof(user.UpdatedDate)));
         }
 
+        private static async ValueTask ValidateAgainstStorageUserOnModifyAsync(
+            User inputUser, User storageUser)
+        {
+            Validate(
+                (Rule: await IsNotSameAsync(
+                    first: inputUser.CreatedBy,
+                    second: storageUser.CreatedBy,
+                    secondName: nameof(User.CreatedBy)),
+
+                Parameter: nameof(User.CreatedBy)),
+
+                (Rule: await IsNotSameAsync(
+                    firstDate: inputUser.CreatedDate,
+                    secondDate: storageUser.CreatedDate,
+                    secondDateName: nameof(User.CreatedDate)),
+
+                Parameter: nameof(User.CreatedDate)),
+
+                (Rule: await IsSameAsync(
+                    firstDate: inputUser.UpdatedDate,
+                    secondDate: storageUser.UpdatedDate,
+                    secondDateName: nameof(User.UpdatedDate)),
+
+                Parameter: nameof(User.UpdatedDate)));
+        }
+
         private static async ValueTask<dynamic> IsSameAsync(
             DateTimeOffset firstDate, 
             DateTimeOffset secondDate, 
