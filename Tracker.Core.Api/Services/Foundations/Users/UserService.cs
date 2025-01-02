@@ -52,6 +52,8 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             User maybeUser = 
                 await this.storageBroker.SelectUserByIdAsync(user.Id);
 
+            await ValidateStorageUserAsync(maybeUser, user.Id);
+
             return await this.storageBroker.UpdateUserAsync(user);
         });
 
