@@ -62,7 +62,6 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                 (Rule: await IsInvalidLengthAsync(user.UserName, 300), Parameter: nameof(User.UserName)),
                 (Rule: await IsInvalidLengthAsync(user.Name, 400), Parameter: nameof(User.Name)),
                 (Rule: await IsInvalidLengthAsync(user.Email, 400), Parameter: nameof(User.Email)),
-                //(Rule: await IsInvalidEmailAsync(user.Email), Parameter: nameof(User.Email)),
 
                 (Rule: await IsSameAsync(
                     firstDate: user.UpdatedDate,
