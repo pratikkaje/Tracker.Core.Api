@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Force.DeepCloner;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
@@ -390,6 +391,73 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
                     expectedUserValidationException))),
                     Times.Once);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfCreatedAuditInfoHasChangedAndLogItAsync()
+        {
+            //given
+            int randomMinutes = CreateRandomNegativeNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            User randomUser = CreateRandomModifyUser(randomDateTimeOffset);
+            User invalidUser = randomUser;
+            User storedUser = randomUser.DeepClone();
+            storedUser.CreatedBy = GetRandomString();
+            storedUser.CreatedDate = storedUser.CreatedDate.AddMinutes(randomMinutes);
+            storedUser.UpdatedDate = storedUser.UpdatedDate.AddMinutes(randomMinutes);
+            Guid UserId = invalidUser.Id;
+
+            var invalidUserException = new InvalidUserException(
+                message: "User is invalid, fix the errors and try again.");
+
+            invalidUserException.AddData(
+                key: nameof(User.CreatedBy),
+                values: $"Text is not same as {nameof(User.CreatedBy)}");
+
+            invalidUserException.AddData(
+                key: nameof(User.CreatedDate),
+                values: $"Date is not same as {nameof(User.CreatedDate)}");
+
+            var expectedUserValidationException = new UserValidationException(
+                message: "User validation error occurred, fix errors and try again.",
+                innerException: invalidUserException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectUserByIdAsync(UserId))
+                    .ReturnsAsync(storedUser);
+
+            // when
+            ValueTask<User> modifyUserTask =
+                this.userService.ModifyUserAsync(invalidUser);
+
+            UserValidationException actualUserValidationException =
+                await Assert.ThrowsAsync<UserValidationException>(
+                    testCode: modifyUserTask.AsTask);
+
+            // then
+            actualUserValidationException.Should().BeEquivalentTo(
+                expectedUserValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectUserByIdAsync(invalidUser.Id),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(
+                    SameExceptionAs(expectedUserValidationException))),
+                        Times.Once);
 
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
