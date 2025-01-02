@@ -337,5 +337,64 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfStorageConfigurationDoesNotExistAndLogItAsync()
+        {
+            // given
+            int randomNegative = CreateRandomNegativeNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            User randomUser = CreateRandomUser(randomDateTimeOffset);
+            User nonExistingUser = randomUser;
+            nonExistingUser.CreatedDate = randomDateTimeOffset.AddMinutes(randomNegative);
+            User nullUser = null;
+
+            var notFoundUserException =
+                new NotFoundUserException(
+                    message: $"User not found with id: {nonExistingUser.Id}");
+
+            var expectedUserValidationException =
+                new UserValidationException(
+                    message: "User validation error occurred, fix errors and try again.",
+                    innerException: notFoundUserException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectUserByIdAsync(nonExistingUser.Id))
+                    .ReturnsAsync(nullUser);
+
+            // when
+            ValueTask<User> modifyUserTask =
+                this.userService.ModifyUserAsync(nonExistingUser);
+
+            UserValidationException actualUserValidationException =
+                await Assert.ThrowsAsync<UserValidationException>(
+                    testCode: modifyUserTask.AsTask);
+
+            // then
+            actualUserValidationException.Should()
+                .BeEquivalentTo(expectedUserValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectUserByIdAsync(nonExistingUser.Id),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedUserValidationException))),
+                    Times.Once);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
     }
 }
