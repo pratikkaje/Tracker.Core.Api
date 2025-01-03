@@ -133,7 +133,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
         }
 
         [Fact]
-        private async Task ShouldThrowDependencyValidationExceptionOnModifyIfDbUpdateConcurrencyOccursAndLogItAsync()
+        public async Task ShouldThrowDependencyValidationExceptionOnModifyIfDbUpdateConcurrencyOccursAndLogItAsync()
         {
             // given
             DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
@@ -186,6 +186,69 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowServiceExceptionOnModifyIfServiceErrorOccursAndLogItAsync()
+        {
+            // given
+            int minutesInPast = CreateRandomNegativeNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+
+            User randomUser =
+                CreateRandomUser(randomDateTimeOffset);
+
+            randomUser.CreatedDate =
+                randomDateTimeOffset.AddMinutes(minutesInPast);
+
+            var serviceException = new Exception();
+
+            var failedServiceUserException =
+                new FailedServiceUserException(
+                    message: "Failed service user error occurred, contact support.",
+                    innerException: serviceException);
+
+            var expectedUserServiceException =
+                new UserServiceException(
+                    message: "Service error occurred, contact support.",
+                    innerException: failedServiceUserException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectUserByIdAsync(randomUser.Id))
+                    .ThrowsAsync(serviceException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            // when
+            ValueTask<User> modifyUserTask =
+                this.userService.ModifyUserAsync(randomUser);
+
+            UserServiceException actualUserServiceException =
+                await Assert.ThrowsAsync<UserServiceException>(
+                    testCode: modifyUserTask.AsTask);
+
+            // then
+            actualUserServiceException.Should().BeEquivalentTo(
+                expectedUserServiceException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectUserByIdAsync(randomUser.Id),
+                    Times.Once());
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedUserServiceException))),
+                        Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
         }
     }
 }
