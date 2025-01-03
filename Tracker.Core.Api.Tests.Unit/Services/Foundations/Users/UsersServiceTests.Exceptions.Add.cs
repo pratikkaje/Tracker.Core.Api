@@ -84,7 +84,8 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             var expectedUserDependencyValidationException =
                 new UserDependencyValidationException(
                     message: "User dependency validation error occurred, fix errors and try again.",
-                    innerException: alreadyExistsUserException);
+                    innerException: alreadyExistsUserException,
+                    data: alreadyExistsUserException.Data);
 
             this.datetimeBrokerMock.Setup(broker =>
                 broker.GetCurrentDateTimeOffsetAsync())

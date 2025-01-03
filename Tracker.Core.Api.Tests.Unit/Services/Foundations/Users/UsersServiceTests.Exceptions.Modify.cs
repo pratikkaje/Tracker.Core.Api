@@ -131,5 +131,61 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        private async Task ShouldThrowDependencyValidationExceptionOnModifyIfDbUpdateConcurrencyOccursAndLogItAsync()
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            User randomUser = CreateRandomUser(randomDateTimeOffset);
+
+            var dbUpdateConcurrencyException =
+                new DbUpdateConcurrencyException();
+
+            var lockedUserException =
+                new LockedUserException(
+                    message: "Locked user record error occurred, please try again.",
+                    innerException: dbUpdateConcurrencyException,
+                    data: dbUpdateConcurrencyException.Data);
+
+            var expectedUserDependencyValidationException =
+                new UserDependencyValidationException(
+                    message: "User dependency validation error occurred, fix errors and try again.",
+                    innerException: lockedUserException,
+                    data: lockedUserException.Data);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ThrowsAsync(dbUpdateConcurrencyException);
+
+            // when
+            ValueTask<User> modifyUserTask =
+                this.userService.ModifyUserAsync(randomUser);
+
+            UserDependencyValidationException actualUserDependencyValidationException =
+                await Assert.ThrowsAsync<UserDependencyValidationException>(
+                    testCode: modifyUserTask.AsTask);
+
+            // then
+            actualUserDependencyValidationException.Should().BeEquivalentTo(
+                expectedUserDependencyValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedUserDependencyValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectUserByIdAsync(randomUser.Id),
+                    Times.Never());
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
