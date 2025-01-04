@@ -74,7 +74,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 
             var expectedUserValidationException =
                 new UserValidationException(
-                    message: "User validation error occurred, fix errors and try again.",
+                    message: "User validation error occurred, fix the errors and try again.",
                     innerException: notFoundUserException);
 
             this.storageBrokerMock.Setup(broker =>
