@@ -120,7 +120,57 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
 
+        [Fact]
+        public async Task ShouldThrowServiceExceptionOnRemoveByIdIfServiceErrorOccursAndLogItAsync()
+        {
+            // given
+            Guid someUserId = Guid.NewGuid();
+            var serviceException = new Exception();
 
+            var failedUserServiceException =
+                new FailedServiceUserException(
+                    message: "Failed service user error occurred, contact support.",
+                    innerException: serviceException);
+
+            var expectedUserServiceException =
+                new UserServiceException(
+                    message: "Service error occurred, contact support.",
+                    innerException: failedUserServiceException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectUserByIdAsync(someUserId))
+                    .ThrowsAsync(serviceException);
+
+            // when
+            ValueTask<User> removeUserByIdTask =
+                this.userService.RemoveUserByIdAsync(
+                    someUserId);
+
+            UserServiceException actualUserServiceException =
+                await Assert.ThrowsAsync<UserServiceException>(
+                    removeUserByIdTask.AsTask);
+
+            // then
+            actualUserServiceException.Should()
+                .BeEquivalentTo(expectedUserServiceException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectUserByIdAsync(It.IsAny<Guid>()),
+                        Times.Once());
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedUserServiceException))),
+                        Times.Once);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Never);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+        }
 
     }
 }
