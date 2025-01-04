@@ -82,7 +82,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 
             var expectedUserDependencyValidationException =
                 new UserDependencyValidationException(
-                    message: "User dependency validation error occurred. Please fix errors and try again.",
+                    message: "User dependency validation error occurred, fix errors and try again.",
                     innerException: lockedUserException,
                     data: lockedUserException.Data);
 
@@ -119,5 +119,8 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
+
+
+
     }
 }
