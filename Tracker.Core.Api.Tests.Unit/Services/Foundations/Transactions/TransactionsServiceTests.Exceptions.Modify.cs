@@ -125,5 +125,62 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 			this.datetimeBrokerMock.VerifyNoOtherCalls();
 			this.loggingBrokerMock.VerifyNoOtherCalls();
 		}
+
+		[Fact]
+		public async Task ShouldThrowDependencyValidationExceptionOnModifyIfDbUpdateConcurrencyOccursAndLogItAsync()
+		{
+			// given
+			DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+			Transaction randomTransaction = CreateRandomTransaction(randomDateTimeOffset);
+
+			var dbUpdateConcurrencyException =
+				new DbUpdateConcurrencyException();
+
+			var lockedTransactionException =
+				new LockedTransactionException(
+					message: "Locked transaction record error occurred, please try again.",
+					innerException: dbUpdateConcurrencyException,
+					data: dbUpdateConcurrencyException.Data);
+
+			var expectedTransactionDependencyValidationException =
+				new TransactionDependencyValidationException(
+					message: "Transaction dependency validation error occurred, fix errors and try again.",
+					innerException: lockedTransactionException,
+					data: lockedTransactionException.Data);
+
+			this.datetimeBrokerMock.Setup(broker =>
+				broker.GetCurrentDateTimeOffsetAsync())
+					.ThrowsAsync(dbUpdateConcurrencyException);
+
+			// when
+			ValueTask<Transaction> modifyTransactionTask =
+				this.transactionService.ModifyTransactionAsync(randomTransaction);
+
+			TransactionDependencyValidationException actualTransactionDependencyValidationException =
+				await Assert.ThrowsAsync<TransactionDependencyValidationException>(
+					testCode: modifyTransactionTask.AsTask);
+
+			// then
+			actualTransactionDependencyValidationException.Should().BeEquivalentTo(
+				expectedTransactionDependencyValidationException);
+
+			this.datetimeBrokerMock.Verify(broker =>
+				broker.GetCurrentDateTimeOffsetAsync(),
+					Times.Once);
+
+			this.loggingBrokerMock.Verify(broker =>
+				broker.LogErrorAsync(It.Is(SameExceptionAs(
+					expectedTransactionDependencyValidationException))),
+						Times.Once);
+
+			this.storageBrokerMock.Verify(broker =>
+				broker.SelectTransactionByIdAsync(randomTransaction.Id),
+					Times.Never());
+
+			this.datetimeBrokerMock.VerifyNoOtherCalls();
+			this.loggingBrokerMock.VerifyNoOtherCalls();
+			this.storageBrokerMock.VerifyNoOtherCalls();
+		}
+
 	}
 }
