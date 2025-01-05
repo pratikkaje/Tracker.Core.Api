@@ -58,6 +58,19 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                 actualException.SameExceptionAs(expectedException);
         }
 
+        private static User CreateRandomModifyUser(DateTimeOffset dateTimeOffset)
+        {
+            int randomDaysInThePast = CreateRandomNegativeNumber();
+            User randomUser = CreateRandomUser(dateTimeOffset);
+
+            randomUser.CreatedDate = dateTimeOffset.AddDays(randomDaysInThePast);
+
+            return randomUser;
+        }
+
+        private static int CreateRandomNegativeNumber() =>
+            -1 * new IntRange(min: 2, max: 10).GetValue();
+
         private static User CreateRandomUser(DateTimeOffset dates) =>
             CreateRandomUserFiller(dates).Create();
 

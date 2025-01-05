@@ -78,6 +78,16 @@ namespace Tracker.Core.Api.Services.Foundations.Users
 
                 throw await CreateAndLogDependencyValidationExceptionAsync(alreadyExistsUserException);
             }
+            catch (DbUpdateConcurrencyException dbUpdateConcurrencyException)
+            {
+                var lockedUserException =
+                    new LockedUserException(
+                        message: "Locked user record error occurred, please try again.",
+                        innerException: dbUpdateConcurrencyException,
+                        data: dbUpdateConcurrencyException.Data);
+
+                throw await CreateAndLogDependencyValidationExceptionAsync(lockedUserException);
+            }
             catch (DbUpdateException dbUpdateException)
             {
                 var failedOperationUserException =
@@ -127,7 +137,8 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             var userDependencyValidationException =
                 new UserDependencyValidationException(
                     message: "User dependency validation error occurred, fix errors and try again.",
-                    innerException: exception);
+                    innerException: exception,
+                    data: exception.Data);
 
             await this.loggingBroker.LogErrorAsync(userDependencyValidationException);
 

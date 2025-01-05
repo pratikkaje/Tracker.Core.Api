@@ -34,7 +34,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
                     dateTimeBroker: datetimeBrokerMock.Object);
         }
 
-        private static int CreateRandomNegativeNumber() => 
+        private static int CreateRandomNegativeNumber() =>
             -1 * new IntRange(min: 2, max: 10).GetValue();
 
         private SqlException CreateSqlException()

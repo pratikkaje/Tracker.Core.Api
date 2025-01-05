@@ -22,10 +22,10 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                 (Rule: await IsInvalidAsync(user.ModifiedBy), Parameter: nameof(user.ModifiedBy)),
                 (Rule: await IsInvalidAsync(user.CreatedDate), Parameter: nameof(user.CreatedDate)),
                 (Rule: await IsInvalidAsync(user.UpdatedDate), Parameter: nameof(user.UpdatedDate)),
-                (Rule: IsInvalidLength(user.UserName, 300), Parameter: nameof(User.UserName)),
-                (Rule: IsInvalidLength(user.Name, 400), Parameter: nameof(User.Name)),
-                (Rule: IsInvalidLength(user.Email, 400), Parameter: nameof(User.Email)),
-                (Rule: IsInvalidEmail(user.Email), Parameter: nameof(User.Email)),
+                (Rule: await IsInvalidLengthAsync(user.UserName, 300), Parameter: nameof(User.UserName)),
+                (Rule: await IsInvalidLengthAsync(user.Name, 400), Parameter: nameof(User.Name)),
+                (Rule: await IsInvalidLengthAsync(user.Email, 400), Parameter: nameof(User.Email)),
+                (Rule: await IsInvalidEmailAsync(user.Email), Parameter: nameof(User.Email)),
 
                 (Rule: await IsNotSameAsync(
                     first: user.CreatedBy,
@@ -42,6 +42,71 @@ namespace Tracker.Core.Api.Services.Foundations.Users
                 (Rule: await IsNotRecentAsync(user.CreatedDate),
                     Parameter: nameof(user.CreatedDate)));
         }
+
+        private async ValueTask ValidateUserOnModify(User user)
+        {
+            ValidateUserIsNotNull(user);
+
+            Validate(
+                (Rule: await IsInvalidAsync(user.Id), Parameter: nameof(user.Id)),
+                (Rule: await IsInvalidAsync(user.UserName), Parameter: nameof(user.UserName)),
+                (Rule: await IsInvalidAsync(user.Name), Parameter: nameof(user.Name)),
+                (Rule: await IsInvalidAsync(user.Email), Parameter: nameof(user.Email)),
+                (Rule: await IsInvalidEmailAsync(user.Email), Parameter: nameof(User.Email)),
+                (Rule: await IsInvalidAsync(user.AvatarUrl), Parameter: nameof(user.AvatarUrl)),
+                (Rule: await IsInvalidAsync(user.CreatedBy), Parameter: nameof(user.CreatedBy)),
+                (Rule: await IsInvalidAsync(user.ModifiedBy), Parameter: nameof(user.ModifiedBy)),
+                (Rule: await IsInvalidAsync(user.CreatedDate), Parameter: nameof(user.CreatedDate)),
+                (Rule: await IsInvalidAsync(user.UpdatedDate), Parameter: nameof(user.UpdatedDate)),
+
+                (Rule: await IsInvalidLengthAsync(user.UserName, 300), Parameter: nameof(User.UserName)),
+                (Rule: await IsInvalidLengthAsync(user.Name, 400), Parameter: nameof(User.Name)),
+                (Rule: await IsInvalidLengthAsync(user.Email, 400), Parameter: nameof(User.Email)),
+
+                (Rule: await IsSameAsync(
+                    firstDate: user.UpdatedDate,
+                    secondDate: user.CreatedDate,
+                    secondDateName: nameof(User.CreatedDate)),
+                    Parameter: nameof(user.UpdatedDate)),
+
+                (Rule: await IsNotRecentAsync(user.UpdatedDate),
+                Parameter: nameof(user.UpdatedDate)));
+        }
+
+        private static async ValueTask ValidateAgainstStorageUserOnModifyAsync(
+            User inputUser, User storageUser)
+        {
+            Validate(
+                (Rule: await IsNotSameAsync(
+                    first: inputUser.CreatedBy,
+                    second: storageUser.CreatedBy,
+                    secondName: nameof(User.CreatedBy)),
+
+                Parameter: nameof(User.CreatedBy)),
+
+                (Rule: await IsNotSameAsync(
+                    firstDate: inputUser.CreatedDate,
+                    secondDate: storageUser.CreatedDate,
+                    secondDateName: nameof(User.CreatedDate)),
+
+                Parameter: nameof(User.CreatedDate)),
+
+                (Rule: await IsSameAsync(
+                    firstDate: inputUser.UpdatedDate,
+                    secondDate: storageUser.UpdatedDate,
+                    secondDateName: nameof(User.UpdatedDate)),
+
+                Parameter: nameof(User.UpdatedDate)));
+        }
+
+        private static async ValueTask<dynamic> IsSameAsync(
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
+            string secondDateName) => new
+            {
+                Condition = firstDate == secondDate,
+                Message = $"Date is same as {secondDateName}"
+            };
 
         private static async ValueTask ValidateUserIdAsync(Guid userId) =>
             Validate((Rule: await IsInvalidAsync(userId), Parameter: nameof(User.Id)));
@@ -100,13 +165,13 @@ namespace Tracker.Core.Api.Services.Foundations.Users
         private static readonly Regex EmailRegex =
             new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static dynamic IsInvalidEmail(string emailAddress) => new
+        private static async ValueTask<dynamic> IsInvalidEmailAsync(string emailAddress) => new
         {
-            Condition = IsInValidEmailFormat(emailAddress),
+            Condition = await IsInValidEmailFormatAsync(emailAddress),
             Message = "Email not in valid format."
         };
 
-        private static bool IsInValidEmailFormat(string emailAddress)
+        private static async ValueTask<bool> IsInValidEmailFormatAsync(string emailAddress)
         {
             if (EmailRegex.IsMatch((emailAddress ?? string.Empty)))
                 return false;
@@ -114,13 +179,13 @@ namespace Tracker.Core.Api.Services.Foundations.Users
             return true;
         }
 
-        private static dynamic IsInvalidLength(string text, int maxLength) => new
+        private static async ValueTask<dynamic> IsInvalidLengthAsync(string text, int maxLength) => new
         {
-            Condition = IsExceedingLength(text, maxLength),
+            Condition = await IsExceedingLengthAsync(text, maxLength),
             Message = $"Text exceed max length of {maxLength} characters"
         };
 
-        private static bool IsExceedingLength(string text, int maxLength) =>
+        private static async ValueTask<bool> IsExceedingLengthAsync(string text, int maxLength) =>
             (text ?? string.Empty).Length > maxLength;
 
         private static async ValueTask<dynamic> IsInvalidAsync(Guid id) => new
