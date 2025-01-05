@@ -182,5 +182,67 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
 			this.storageBrokerMock.VerifyNoOtherCalls();
 		}
 
+		[Fact]
+		public async Task ShouldThrowServiceExceptionOnModifyIfServiceErrorOccursAndLogItAsync()
+		{
+			// given
+			int minutesInPast = CreateRandomNegativeNumber();
+			DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+
+			Transaction randomTransaction =
+				CreateRandomTransaction(randomDateTimeOffset);
+
+			randomTransaction.CreatedDate =
+				randomDateTimeOffset.AddMinutes(minutesInPast);
+
+			var serviceException = new Exception();
+
+			var failedServiceTransactionException =
+				new FailedServiceTransactionException(
+					message: "Failed service transaction error occurred, contact support.",
+					innerException: serviceException);
+
+			var expectedTransactionServiceException =
+				new TransactionServiceException(
+					message: "Service error occurred, contact support.",
+					innerException: failedServiceTransactionException);
+
+			this.storageBrokerMock.Setup(broker =>
+				broker.SelectTransactionByIdAsync(randomTransaction.Id))
+					.ThrowsAsync(serviceException);
+
+			this.datetimeBrokerMock.Setup(broker =>
+				broker.GetCurrentDateTimeOffsetAsync())
+					.ReturnsAsync(randomDateTimeOffset);
+
+			// when
+			ValueTask<Transaction> modifyTransactionTask =
+				this.transactionService.ModifyTransactionAsync(randomTransaction);
+
+			TransactionServiceException actualTransactionServiceException =
+				await Assert.ThrowsAsync<TransactionServiceException>(
+					testCode: modifyTransactionTask.AsTask);
+
+			// then
+			actualTransactionServiceException.Should().BeEquivalentTo(
+				expectedTransactionServiceException);
+
+			this.storageBrokerMock.Verify(broker =>
+				broker.SelectTransactionByIdAsync(randomTransaction.Id),
+					Times.Once());
+
+			this.datetimeBrokerMock.Verify(broker =>
+				broker.GetCurrentDateTimeOffsetAsync(),
+					Times.Once);
+
+			this.loggingBrokerMock.Verify(broker =>
+				broker.LogErrorAsync(It.Is(SameExceptionAs(
+					expectedTransactionServiceException))),
+						Times.Once);
+
+			this.storageBrokerMock.VerifyNoOtherCalls();
+			this.datetimeBrokerMock.VerifyNoOtherCalls();
+			this.loggingBrokerMock.VerifyNoOtherCalls();
+		}
 	}
 }
