@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Tracker.Core.Api.Brokers.DateTimes;
 using Tracker.Core.Api.Brokers.Loggings;
 using Tracker.Core.Api.Brokers.Storages;
 using Tracker.Core.Api.Models.Foundations.Categories;
@@ -11,13 +12,16 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
     {
         private readonly IStorageBroker storageBroker;
         private readonly ILoggingBroker loggingBroker;
+        private readonly IDateTimeBroker dateTimeBroker;
 
         public CategoryService(
             IStorageBroker storageBroker,
-            ILoggingBroker loggingBroker)
+            ILoggingBroker loggingBroker,
+            IDateTimeBroker dateTimeBroker)
         {
             this.storageBroker = storageBroker;
             this.loggingBroker = loggingBroker;
+            this.dateTimeBroker = dateTimeBroker;
         }
 
         public async ValueTask<Category> AddCategoryAsync(Category category) =>
