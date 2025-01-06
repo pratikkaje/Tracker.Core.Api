@@ -2,6 +2,7 @@
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Xeptions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 
 namespace Tracker.Core.Api.Services.Foundations.Categories
 {
@@ -18,6 +19,10 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
             catch (NullCategoryException nullCategoryException)
             {
                 throw await CreateAndLogValidationExceptionAsync(nullCategoryException);
+            }
+            catch (InvalidCategoryException invalidCategoryException)
+            {
+                throw await CreateAndLogValidationExceptionAsync(invalidCategoryException);
             }
         }
 
