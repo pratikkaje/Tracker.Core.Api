@@ -8,7 +8,7 @@ using Tracker.Core.Api.Models.Foundations.Categories;
 
 namespace Tracker.Core.Api.Services.Foundations.Categories
 {
-    internal class CategoryService : ICategoryService
+    internal partial class CategoryService : ICategoryService
     {
         private readonly IStorageBroker storageBroker;
         private readonly ILoggingBroker loggingBroker;
@@ -24,8 +24,12 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
             this.dateTimeBroker = dateTimeBroker;
         }
 
-        public async ValueTask<Category> AddCategoryAsync(Category category) =>
-            await this.storageBroker.InsertCategoryAsync(category);
+        public ValueTask<Category> AddCategoryAsync(Category category) =>
+        TryCatch(async () =>
+        {
+            await ValidateCategoryOnAddAsync(category);
+            return await this.storageBroker.InsertCategoryAsync(category);
+        });
 
         public async ValueTask<IQueryable<Category>> RetrieveAllCategoriesAsync() =>
             await this.storageBroker.SelectAllCategoriesAsync();
