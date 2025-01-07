@@ -34,6 +34,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 
         }
 
+        public static Category CreateRandomCategory(DateTimeOffset date) =>
+            CreateCategoryFiller(date).Create();
+
         public static Category CreateRandomCategory() =>
             CreateCategoryFiller(DateTimeOffset.UtcNow).Create();
 
@@ -51,6 +54,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 
             return filler;
         }
+
+        private static string GetRandomStringWithLengthOf(int length) =>
+            new MnemonicString(wordCount: 1, wordMinLength: length, wordMaxLength: length).GetValue();
 
         private static DateTimeOffset GetRandomDateTimeOffset() =>
             new DateTimeRange(earliestDate: new DateTime()).GetValue();
