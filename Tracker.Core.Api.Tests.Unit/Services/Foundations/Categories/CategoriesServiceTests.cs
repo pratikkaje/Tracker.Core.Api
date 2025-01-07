@@ -47,9 +47,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
         private static Filler<Category> CreateCategoryFiller(DateTimeOffset dates)
         {
             var filler = new Filler<Category>();
+            var someUser = GetRandomString();
 
             filler.Setup()
                 .OnType<DateTimeOffset>().Use(dates)
+                .OnProperty(category => category.CreatedBy).Use(someUser)
+                .OnProperty(category => category.UpdatedBy).Use(someUser)
                 .OnProperty(category => category.User).IgnoreIt();
 
             return filler;

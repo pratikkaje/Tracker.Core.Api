@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Force.DeepCloner;
 using Moq;
@@ -12,7 +13,8 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
         public async Task ShouldAddCategoryAsync()
         {
             // given
-            Category randomCategory = CreateRandomCategory();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Category randomCategory = CreateRandomCategory(randomDateTimeOffset);
             Category inputCategory = randomCategory;
             Category insertedCategory = inputCategory.DeepClone();
             Category expectedCategory = insertedCategory.DeepClone();
