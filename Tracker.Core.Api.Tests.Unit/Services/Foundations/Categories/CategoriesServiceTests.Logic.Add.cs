@@ -19,6 +19,10 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             Category insertedCategory = inputCategory.DeepClone();
             Category expectedCategory = insertedCategory.DeepClone();
 
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
             this.storageBrokerMock.Setup(broker =>
                 broker.InsertCategoryAsync(inputCategory))
                     .ReturnsAsync(insertedCategory);
@@ -30,10 +34,15 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             // then
             actualCategory.Should().BeEquivalentTo(expectedCategory);
 
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
             this.storageBrokerMock.Verify(broker =>
                 broker.InsertCategoryAsync(inputCategory),
                     Times.Once());
 
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
         }
