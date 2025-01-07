@@ -55,6 +55,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             return filler;
         }
 
+        private static string GetRandomString() =>
+            new MnemonicString().GetValue();
+
         private static string GetRandomStringWithLengthOf(int length) =>
             new MnemonicString(wordCount: 1, wordMinLength: length, wordMaxLength: length).GetValue();
 
