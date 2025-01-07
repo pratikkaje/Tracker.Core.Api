@@ -7,6 +7,7 @@ using FluentAssertions;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 {
@@ -262,6 +263,73 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
                         Times.Never);
 
             //this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(-61)]
+        public async Task ShouldThrowValidationExceptionOnAddIfCreatedDateIsNotRecentAndLogItAsync(int invalidSeconds)
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Category randomCategory = CreateRandomCategory(randomDateTimeOffset);
+            Category invalidCategory = randomCategory;
+
+            DateTimeOffset now = randomDateTimeOffset;
+
+            DateTimeOffset invalidDate =
+                now.AddSeconds(invalidSeconds);
+
+            invalidCategory.CreatedDate = invalidDate;
+            invalidCategory.UpdatedDate = invalidDate;
+
+            DateTimeOffset startDate = now.AddSeconds(-60);
+            DateTimeOffset endDate = now;
+
+            var invalidCategoryException =
+                new InvalidCategoryException(
+                    message: "Category is invalid, fix the errors and try again.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.CreatedDate),
+                values: "Date is not recent. Expected a value between " +
+                        $"{startDate} and {endDate} but found {invalidDate}");
+
+            CategoryValidationException expectedCategoryValidationException =
+                new CategoryValidationException(
+                    message: "Category validation error occurred, fix errors and try again.",
+                    innerException: invalidCategoryException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(now);
+            // when
+            ValueTask<Category> addCategoryTask =
+                this.categoryService.AddCategoryAsync(invalidCategory);
+
+            CategoryValidationException actualCategoryValidationException =
+                await Assert.ThrowsAsync<CategoryValidationException>(addCategoryTask.AsTask);
+
+            // then
+            actualCategoryValidationException.Should()
+                .BeEquivalentTo(expectedCategoryValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once());
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertCategoryAsync(It.IsAny<Category>()),
+                    Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
