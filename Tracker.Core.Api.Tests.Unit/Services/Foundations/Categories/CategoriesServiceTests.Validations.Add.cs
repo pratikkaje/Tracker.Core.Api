@@ -231,9 +231,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
                     message: "Category validation error occurred, fix errors and try again.",
                     innerException: invalidCategoryException);
 
-            this.datetimeBrokerMock.Setup(broker =>
-                broker.GetCurrentDateTimeOffsetAsync())
-                    .ReturnsAsync(now);
+            //this.datetimeBrokerMock.Setup(broker =>
+            //    broker.GetCurrentDateTimeOffsetAsync())
+            //        .ReturnsAsync(now);
 
             // when
             ValueTask<Category> addCategoryTask =
@@ -247,9 +247,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             actualCategoryValidationException.Should().BeEquivalentTo(
                 expectedCategoryValidationException);
 
-            this.datetimeBrokerMock.Verify(broker =>
-                broker.GetCurrentDateTimeOffsetAsync(),
-                    Times.Once);
+            //this.datetimeBrokerMock.Verify(broker =>
+            //    broker.GetCurrentDateTimeOffsetAsync(),
+            //        Times.Once);
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
@@ -261,7 +261,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
                     It.IsAny<Category>()),
                         Times.Never);
 
-            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            //this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }

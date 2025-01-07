@@ -20,9 +20,37 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
                 (Rule: await IsInvalidAsync(category.CreatedDate), Parameter: nameof(Category.CreatedDate)),
                 (Rule: await IsInvalidAsync(category.UpdatedDate), Parameter: nameof(Category.UpdatedDate)),
 
-                (Rule: await IsInvalidLengthAsync(category.Name, 255), Parameter: nameof(Category.Name))
+                (Rule: await IsInvalidLengthAsync(category.Name, 255), Parameter: nameof(Category.Name)),
+
+                (Rule: await IsNotSameAsync(
+                    first: category.UpdatedBy,
+                    second: category.CreatedBy,
+                    secondName: nameof(Category.CreatedBy)), Parameter: nameof(Category.UpdatedBy)),
+
+                (Rule: await IsNotSameAsync(
+                    firstDate: category.UpdatedDate,
+                    secondDate: category.CreatedDate,
+                    secondDateName: nameof(Category.CreatedDate)), Parameter: nameof(Category.UpdatedDate))
                 );
         }
+
+        private static async ValueTask<dynamic> IsNotSameAsync(
+            string first,
+            string second,
+            string secondName) => new
+            {
+                Condition = first != second,
+                Message = $"Text is not same as {secondName}"
+            };
+
+        private static async ValueTask<dynamic> IsNotSameAsync(
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
+            string secondDateName) => new
+            {
+                Condition = firstDate != secondDate,
+                Message = $"Date is not same as {secondDateName}"
+            };
 
         private static async ValueTask<dynamic> IsInvalidLengthAsync(string text, int maxLength) => new
         {
