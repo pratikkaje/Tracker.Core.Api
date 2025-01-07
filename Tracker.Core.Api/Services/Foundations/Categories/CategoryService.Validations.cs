@@ -18,9 +18,20 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
                 (Rule: await IsInvalidAsync(category.CreatedBy), Parameter: nameof(Category.CreatedBy)),
                 (Rule: await IsInvalidAsync(category.UpdatedBy), Parameter: nameof(Category.UpdatedBy)),
                 (Rule: await IsInvalidAsync(category.CreatedDate), Parameter: nameof(Category.CreatedDate)),
-                (Rule: await IsInvalidAsync(category.UpdatedDate), Parameter: nameof(Category.UpdatedDate))
+                (Rule: await IsInvalidAsync(category.UpdatedDate), Parameter: nameof(Category.UpdatedDate)),
+
+                (Rule: await IsInvalidLengthAsync(category.Name, 255), Parameter: nameof(Category.Name))
                 );
         }
+
+        private static async ValueTask<dynamic> IsInvalidLengthAsync(string text, int maxLength) => new
+        {
+            Condition = await IsExceedingLengthAsync(text, maxLength),
+            Message = $"Text exceeds max length of {maxLength} characters."
+        };
+
+        private static async ValueTask<bool> IsExceedingLengthAsync(string text, int maxLength) =>
+            (text ?? string.Empty).Length > maxLength;
 
         private static async ValueTask<dynamic> IsInvalidAsync(DateTimeOffset date) => new
         {
