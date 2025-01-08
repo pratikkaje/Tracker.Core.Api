@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using Microsoft.Data.SqlClient;
 using Moq;
 using Tracker.Core.Api.Brokers.DateTimes;
 using Tracker.Core.Api.Brokers.Loggings;
@@ -32,6 +34,12 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
                 dateTimeBroker: this.datetimeBrokerMock.Object
                 );
 
+        }
+
+        private SqlException CreateSqlException()
+        {
+            return (SqlException)RuntimeHelpers.GetUninitializedObject(
+                type: typeof(SqlException));
         }
 
         public static Category CreateRandomCategory(DateTimeOffset date) =>
