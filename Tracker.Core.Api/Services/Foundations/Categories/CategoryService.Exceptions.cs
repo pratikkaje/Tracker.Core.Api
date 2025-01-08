@@ -4,6 +4,7 @@ using Tracker.Core.Api.Models.Foundations.Categories;
 using Xeptions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Microsoft.Data.SqlClient;
+using EFxceptions.Models.Exceptions;
 
 namespace Tracker.Core.Api.Services.Foundations.Categories
 {
@@ -34,6 +35,30 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
 
                 throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageCategoryException);
             }
+            catch (DuplicateKeyException duplicateKeyException)
+            {
+                var alreadyExistsCategoryException =
+                    new AlreadyExistsCategoryException(
+                        message: "Category already exists error occurred.",
+                        innerException: duplicateKeyException,
+                        data: duplicateKeyException.Data);
+
+                throw await CreateAndLogDependencyValidationExceptionAsync(alreadyExistsCategoryException);
+            }
+        }
+
+        private async ValueTask<CategoryDependencyValidationException>
+            CreateAndLogDependencyValidationExceptionAsync(Xeption exception)
+        {
+            var categoryDependencyValidationException =
+                new CategoryDependencyValidationException(
+                    message: "Category dependency validation error occurred, fix errors and try again.",
+                    innerException: exception,
+                    data: exception.Data);
+
+            await this.loggingBroker.LogErrorAsync(categoryDependencyValidationException);
+
+            return categoryDependencyValidationException;
         }
 
         private async ValueTask<CategoryDependencyException> CreateAndLogCriticalDependencyExceptionAsync(Xeption exception)
