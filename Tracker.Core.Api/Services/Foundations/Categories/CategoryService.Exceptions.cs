@@ -6,6 +6,7 @@ using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Microsoft.Data.SqlClient;
 using EFxceptions.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Tracker.Core.Api.Services.Foundations.Categories
 {
@@ -55,6 +56,27 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
 
                 throw await CreateAndLogDependencyExceptionAsync(failedOperationCategoryException);
             }
+            catch (Exception serviceException)
+            {
+                var failedServiceCategoryException =
+                    new FailedServiceCategoryException(
+                        message: "Failed service category error occurred, contact support.",
+                        innerException: serviceException);
+
+                throw await CreateAndLogServiceExceptionAsync(failedServiceCategoryException);
+            }
+        }
+
+        private async ValueTask<CategoryServiceException> CreateAndLogServiceExceptionAsync(Xeption exception)
+        {
+            var categoryServiceException =
+                new CategoryServiceException(
+                    message: "Service error occurred, contact support.",
+                    innerException: exception);
+
+            await this.loggingBroker.LogErrorAsync(categoryServiceException);
+
+            return categoryServiceException;
         }
 
         private async ValueTask<CategoryDependencyException>
