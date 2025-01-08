@@ -3,6 +3,7 @@ using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Xeptions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
+using Microsoft.Data.SqlClient;
 
 namespace Tracker.Core.Api.Services.Foundations.Categories
 {
@@ -24,6 +25,27 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
             {
                 throw await CreateAndLogValidationExceptionAsync(invalidCategoryException);
             }
+            catch (SqlException sqlException)
+            {
+                var failedStorageCategoryException =
+                    new FailedStorageCategoryException(
+                        message: "Category storage failed, contact support.",
+                        innerException: sqlException);
+
+                throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageCategoryException);
+            }
+        }
+
+        private async ValueTask<CategoryDependencyException> CreateAndLogCriticalDependencyExceptionAsync(Xeption exception)
+        {
+            var categoryDependencyException =
+                new CategoryDependencyException(
+                    message: "Category dependency error occurred, contact support.",
+                    innerException: exception);
+
+            await this.loggingBroker.LogCriticalAsync(categoryDependencyException);
+
+            return categoryDependencyException;
         }
 
         private async ValueTask<CategoryValidationException> CreateAndLogValidationExceptionAsync(Xeption exception)
