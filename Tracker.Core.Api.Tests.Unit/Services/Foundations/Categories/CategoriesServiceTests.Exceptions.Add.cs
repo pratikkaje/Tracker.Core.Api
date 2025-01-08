@@ -122,7 +122,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
         }
 
         [Fact]
-        public async Task ShouldThrowDependencyExceptionOnAddIfDependencyErrorOccurredAndLogItAsync()
+        public async Task ShouldThrowDependencyExceptionOnAddIfDependencyErrorOccursAndLogItAsync()
         {
             // given
             Category someCategory = CreateRandomCategory();

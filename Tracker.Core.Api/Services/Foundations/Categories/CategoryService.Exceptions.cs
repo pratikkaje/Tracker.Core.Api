@@ -5,6 +5,7 @@ using Xeptions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Microsoft.Data.SqlClient;
 using EFxceptions.Models.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Tracker.Core.Api.Services.Foundations.Categories
 {
@@ -45,6 +46,28 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
 
                 throw await CreateAndLogDependencyValidationExceptionAsync(alreadyExistsCategoryException);
             }
+            catch (DbUpdateException dbUpdateException)
+            {
+                var failedOperationCategoryException =
+                    new FailedOperationCategoryException(
+                        message: "Failed operation category error occurred, contact support.",
+                        innerException: dbUpdateException);
+
+                throw await CreateAndLogDependencyExceptionAsync(failedOperationCategoryException);
+            }
+        }
+
+        private async ValueTask<CategoryDependencyException>
+            CreateAndLogDependencyExceptionAsync(Xeption exception)
+        {
+            var categoryDependencyException =
+                new CategoryDependencyException(
+                    message: "Category dependency error occurred, contact support.",
+                    innerException: exception);
+
+            await this.loggingBroker.LogErrorAsync(categoryDependencyException);
+
+            return categoryDependencyException;
         }
 
         private async ValueTask<CategoryDependencyValidationException>
