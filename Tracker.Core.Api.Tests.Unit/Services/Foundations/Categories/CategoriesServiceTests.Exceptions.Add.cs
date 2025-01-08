@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EFxceptions.Models.Exceptions;
+using FluentAssertions;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
@@ -55,6 +57,63 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
                 broker.InsertCategoryAsync(
                     It.IsAny<Category>()),
                         Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyValidationExceptionOnAddIfCategoryAlreadyExistsAndLogItAsync()
+        {
+            // given
+            Category someCategory = CreateRandomCategory();
+
+            var duplicateKeyException =
+                new DuplicateKeyException(
+                    message: "Duplicate key error occurred");
+
+            var alreadyExistsCategoryException =
+                new AlreadyExistsCategoryException(
+                    message: "Category already exists error occurred.",
+                    innerException: duplicateKeyException,
+                    data: duplicateKeyException.Data);
+
+            var expectedCategoryDependencyValidationException =
+                new CategoryDependencyValidationException(
+                    message: "Category dependency validation error occurred, fix errors and try again.",
+                    innerException: alreadyExistsCategoryException,
+                    data: alreadyExistsCategoryException.Data);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ThrowsAsync(duplicateKeyException);
+
+            // when
+            ValueTask<Category> addCategoryTask =
+                this.categoryService.AddCategoryAsync(
+                    someCategory);
+
+            CategoryDependencyValidationException actualCategoryDependencyValidationException =
+                await Assert.ThrowsAsync<CategoryDependencyValidationException>(
+                    testCode: addCategoryTask.AsTask);
+
+            // then
+            actualCategoryDependencyValidationException.Should().BeEquivalentTo(
+                expectedCategoryDependencyValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryDependencyValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertCategoryAsync(It.IsAny<Category>()),
+                    Times.Never);
 
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
