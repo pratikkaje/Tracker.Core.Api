@@ -7,12 +7,31 @@ using Microsoft.Data.SqlClient;
 using EFxceptions.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 
 namespace Tracker.Core.Api.Services.Foundations.Categories
 {
     internal partial class CategoryService
     {
         private delegate ValueTask<Category> ReturningCategoryFunction();
+        private delegate ValueTask<IQueryable<Category>> ReturningCategoriesFunction();
+
+        private async ValueTask<IQueryable<Category>> TryCatch(ReturningCategoriesFunction returningCategoriesFunction)
+        {
+            try
+            {
+                return await returningCategoriesFunction();
+            }
+            catch (SqlException sqlException)
+            {
+                var failedStorageCategoryException =
+                    new FailedStorageCategoryException(
+                        message: "Failed category storage error occurred, contact support.",
+                        innerException: sqlException);
+
+                throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageCategoryException);
+            }
+        }
 
         private async ValueTask<Category> TryCatch(ReturningCategoryFunction returningCategoryFunction)
         {
