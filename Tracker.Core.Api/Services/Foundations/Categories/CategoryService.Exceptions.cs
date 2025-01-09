@@ -31,6 +31,15 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
 
                 throw await CreateAndLogCriticalDependencyExceptionAsync(failedStorageCategoryException);
             }
+            catch (Exception serviceException)
+            {
+                var failedServiceCategoryException =
+                    new FailedServiceCategoryException(
+                        message: "Failed service category error occurred, contact support.",
+                        innerException: serviceException);
+
+                throw await CreateAndLogServiceExceptionAsync(failedServiceCategoryException);
+            }
         }
 
         private async ValueTask<Category> TryCatch(ReturningCategoryFunction returningCategoryFunction)
