@@ -62,5 +62,55 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowServiceErrorOnRetrieveAllWhenServiceErrorOccursAndLogItAsync()
+        {
+            // given
+            var serviceError = new Exception();
+
+            var failedServiceCategoryException =
+                new FailedServiceCategoryException(
+                    message: "Failed service category error occurred, contact support.",
+                    innerException: serviceError);
+
+            var expectedCategoryServiceException =
+                new CategoryServiceException(
+                    message: "Service error occurred, contact support.",
+                    innerException: failedServiceCategoryException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectAllCategoriesAsync())
+                    .ThrowsAsync(serviceError);
+
+            // when
+            ValueTask<IQueryable<Category>> retrieveAllCategorysTask =
+                this.categoryService.RetrieveAllCategoriesAsync();
+
+            CategoryServiceException actualCategoryServiceException =
+                await Assert.ThrowsAsync<CategoryServiceException>(
+                    testCode: retrieveAllCategorysTask.AsTask);
+
+            // then
+            actualCategoryServiceException.Should().BeEquivalentTo(
+                expectedCategoryServiceException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectAllCategoriesAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryServiceException))),
+                        Times.Once);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Never);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
