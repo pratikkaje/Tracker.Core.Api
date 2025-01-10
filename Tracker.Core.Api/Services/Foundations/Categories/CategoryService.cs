@@ -37,7 +37,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
             return await this.storageBroker.SelectAllCategoriesAsync();
         });            
 
-        public async ValueTask<Category> RetrieveByIdAsync(Guid categoryId) =>
+        public async ValueTask<Category> RetrieveCategoryByIdAsync(Guid categoryId) =>
             await this.storageBroker.SelectCategoryByIdAsync(categoryId);
 
         public async ValueTask<Category> ModifyCategoryAsync(Category category)
