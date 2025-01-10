@@ -56,6 +56,10 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
             {
                 throw await CreateAndLogValidationExceptionAsync(invalidCategoryException);
             }
+            catch (NotFoundCategoryException notFoundCategoryException)
+            {
+                throw await CreateAndLogValidationExceptionAsync(notFoundCategoryException);
+            }
             catch (SqlException sqlException)
             {
                 var failedStorageCategoryException =

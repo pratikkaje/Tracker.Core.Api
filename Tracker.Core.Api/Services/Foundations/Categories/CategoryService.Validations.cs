@@ -40,6 +40,15 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
             Validate((Rule: await IsInvalidAsync(categoryId), Parameter: nameof(Category.Id)));
         }
 
+        private async ValueTask ValidateStorageCategoryAsync(Category category, Guid categoryID)
+        {
+            if(category is null)
+            {
+                throw new NotFoundCategoryException(
+                    message: $"Category not found with id: {categoryID}");
+            }
+        }
+
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
         {
             var (isNotRecent, startDate, endDate) = await IsDateNotRecentAsync(date);

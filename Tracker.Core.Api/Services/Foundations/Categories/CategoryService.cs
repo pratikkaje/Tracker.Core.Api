@@ -41,7 +41,12 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
         TryCatch(async () =>
         {
             await ValidateCategoryIdAsync(categoryId);
-            return await this.storageBroker.SelectCategoryByIdAsync(categoryId);
+
+            Category maybeCategory = await this.storageBroker.SelectCategoryByIdAsync(categoryId);
+            
+            await ValidateStorageCategoryAsync(maybeCategory, categoryId);
+
+            return maybeCategory;
         });
             
 
