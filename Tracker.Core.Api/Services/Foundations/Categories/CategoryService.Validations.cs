@@ -35,6 +35,11 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
                 (Rule: await IsNotRecentAsync(category.CreatedDate),Parameter: nameof(Category.CreatedDate)));
         }
 
+        private async ValueTask ValidateCategoryIdAsync(Guid categoryId)
+        {
+            Validate((Rule: await IsInvalidAsync(categoryId), Parameter: nameof(Category.Id)));
+        }
+
         private async ValueTask<dynamic> IsNotRecentAsync(DateTimeOffset date)
         {
             var (isNotRecent, startDate, endDate) = await IsDateNotRecentAsync(date);

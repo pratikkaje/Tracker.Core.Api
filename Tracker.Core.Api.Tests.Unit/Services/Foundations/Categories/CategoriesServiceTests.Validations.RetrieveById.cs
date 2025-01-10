@@ -24,7 +24,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 
             invalidCategoryException.AddData(
                 key: nameof(Category.Id),
-                values: "Id is invalid");
+                values: "Id is invalid.");
 
             var expectedCategoryValidationException =
                 new CategoryValidationException(

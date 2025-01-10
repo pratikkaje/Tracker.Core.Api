@@ -35,10 +35,15 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
         TryCatch(async () => 
         {
             return await this.storageBroker.SelectAllCategoriesAsync();
-        });            
+        });
 
-        public async ValueTask<Category> RetrieveCategoryByIdAsync(Guid categoryId) =>
-            await this.storageBroker.SelectCategoryByIdAsync(categoryId);
+        public ValueTask<Category> RetrieveCategoryByIdAsync(Guid categoryId) =>
+        TryCatch(async () =>
+        {
+            await ValidateCategoryIdAsync(categoryId);
+            return await this.storageBroker.SelectCategoryByIdAsync(categoryId);
+        });
+            
 
         public async ValueTask<Category> ModifyCategoryAsync(Category category)
         {
