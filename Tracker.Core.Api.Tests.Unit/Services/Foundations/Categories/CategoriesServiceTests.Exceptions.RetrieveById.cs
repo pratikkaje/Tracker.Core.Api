@@ -62,5 +62,56 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowServiceExceptionOnRetrieveByIdIfServiceErrorOccursAndLogItAsync()
+        {
+            // given
+            var someCategoryId = Guid.NewGuid();
+            var serviceException = new Exception();
+
+            var failedServiceCategoryException =
+                new FailedServiceCategoryException(
+                    message: "Failed service category error occurred, contact support.",
+                    innerException: serviceException);
+
+            var expectedCategoryServiceException =
+                new CategoryServiceException(
+                    message: "Service error occurred, contact support.",
+                    innerException: failedServiceCategoryException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectCategoryByIdAsync(It.IsAny<Guid>()))
+                    .ThrowsAsync(serviceException);
+
+            // when
+            ValueTask<Category> retrieveCategoryByIdTask =
+                this.categoryService.RetrieveCategoryByIdAsync(someCategoryId);
+
+            CategoryServiceException actualCategoryServiceException =
+                await Assert.ThrowsAsync<CategoryServiceException>(
+                    testCode: retrieveCategoryByIdTask.AsTask);
+
+            // then
+            actualCategoryServiceException.Should().BeEquivalentTo(
+                expectedCategoryServiceException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectCategoryByIdAsync(It.IsAny<Guid>()),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+            broker.LogErrorAsync(It.Is(SameExceptionAs(
+                expectedCategoryServiceException))),
+                    Times.Once);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Never);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
