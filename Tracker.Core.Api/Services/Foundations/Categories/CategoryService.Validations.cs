@@ -35,6 +35,12 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
                 (Rule: await IsNotRecentAsync(category.CreatedDate),Parameter: nameof(Category.CreatedDate)));
         }
 
+
+        public async ValueTask ValidateCategoryOnModifyAsync(Category category)
+        {
+            ValidateCategoryIsNotNull(category);
+        }
+
         private async ValueTask ValidateCategoryIdAsync(Guid categoryId)
         {
             Validate((Rule: await IsInvalidAsync(categoryId), Parameter: nameof(Category.Id)));
