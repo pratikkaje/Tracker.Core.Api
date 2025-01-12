@@ -54,7 +54,9 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
                     secondDate: category.CreatedDate,
                     secondDateName: nameof(Category.CreatedDate)), Parameter: nameof(Category.UpdatedDate)),
 
-                (Rule: await IsInvalidLengthAsync(category.Name, 255), Parameter: nameof(Category.Name)));
+                (Rule: await IsInvalidLengthAsync(category.Name, 255), Parameter: nameof(Category.Name)),
+
+                (Rule: await IsNotRecentAsync(category.UpdatedDate), Parameter: nameof(category.UpdatedDate)));
         }
 
         private static async ValueTask<dynamic> IsSameAsync(
