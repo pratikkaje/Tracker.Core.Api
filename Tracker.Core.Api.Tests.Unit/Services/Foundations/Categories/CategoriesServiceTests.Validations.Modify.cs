@@ -141,5 +141,62 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfCategoryHasInvalidLengthPropertiesAndLogItAsync()
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            DateTimeOffset now = randomDateTimeOffset;
+            Category randomCategory = CreateRandomModifyCategory(now);
+            Category invalidCategory = randomCategory;
+
+            invalidCategory.Name = GetRandomStringWithLengthOf(256);
+
+            var invalidCategoryException =
+                new InvalidCategoryException(
+                message: "Category is invalid, fix the errors and try again.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.Name),
+                values: $"Text exceeds max length of {invalidCategory.Name.Length - 1} characters.");
+
+            var expectedCategoryValidationException = new CategoryValidationException(
+                message: "Category validation error occurred, fix errors and try again.",
+                innerException: invalidCategoryException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(now);
+
+            // when
+            ValueTask<Category> addCategoryTask =
+                this.categoryService.ModifyCategoryAsync(invalidCategory);
+
+            CategoryValidationException actualCategoryValidationException =
+                await Assert.ThrowsAsync<CategoryValidationException>(addCategoryTask.AsTask);
+
+            // then
+            actualCategoryValidationException.Should().BeEquivalentTo(
+                expectedCategoryValidationException);
+
+            //this.datetimeBrokerMock.Verify(broker =>
+            //    broker.GetCurrentDateTimeOffsetAsync(),
+            //        Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertCategoryAsync(
+                    It.IsAny<Category>()),
+                        Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }

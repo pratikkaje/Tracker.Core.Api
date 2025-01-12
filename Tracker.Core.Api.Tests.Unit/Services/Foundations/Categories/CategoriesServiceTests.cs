@@ -52,6 +52,19 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             CreateCategoryFiller(GetRandomDateTimeOffset())
                 .Create(GetRandomNumber()).AsQueryable();
 
+        private static Category CreateRandomModifyCategory(DateTimeOffset dateTimeOffset)
+        {
+            int randomDaysInThePast = CreateRandomNegativeNumber();
+            Category randomCategory = CreateRandomCategory(dateTimeOffset);
+
+            randomCategory.CreatedDate = dateTimeOffset.AddDays(randomDaysInThePast);
+
+            return randomCategory;
+        }
+
+        private static int CreateRandomNegativeNumber() =>
+            -1 * new IntRange(min: 2, max: 10).GetValue();
+
         private static Filler<Category> CreateCategoryFiller(DateTimeOffset dates)
         {
             var filler = new Filler<Category>();
