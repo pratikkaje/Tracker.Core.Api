@@ -32,7 +32,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
         });
 
         public ValueTask<IQueryable<Category>> RetrieveAllCategoriesAsync() =>
-        TryCatch(async () => 
+        TryCatch(async () =>
         {
             return await this.storageBroker.SelectAllCategoriesAsync();
         });
@@ -43,7 +43,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
             await ValidateCategoryIdAsync(categoryId);
 
             Category maybeCategory = await this.storageBroker.SelectCategoryByIdAsync(categoryId);
-            
+
             await ValidateStorageCategoryAsync(maybeCategory, categoryId);
 
             return maybeCategory;
@@ -51,11 +51,11 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
 
 
         public ValueTask<Category> ModifyCategoryAsync(Category category) =>
-        TryCatch(async () => 
+        TryCatch(async () =>
         {
             await ValidateCategoryOnModifyAsync(category);
 
-            Category maybeCategory = 
+            Category maybeCategory =
             await this.storageBroker.SelectCategoryByIdAsync(category.Id);
 
             await ValidateStorageCategoryAsync(maybeCategory, category.Id);

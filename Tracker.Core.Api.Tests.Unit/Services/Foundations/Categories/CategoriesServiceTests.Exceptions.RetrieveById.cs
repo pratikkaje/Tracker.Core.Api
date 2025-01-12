@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -37,7 +34,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             ValueTask<Category> retrieveCategoryByIdTask =
                 this.categoryService.RetrieveCategoryByIdAsync(someCategoryId);
 
-            CategoryDependencyException actualCategoryDependencyException = 
+            CategoryDependencyException actualCategoryDependencyException =
                 await Assert.ThrowsAsync<CategoryDependencyException>(
                     testCode: retrieveCategoryByIdTask.AsTask);
 

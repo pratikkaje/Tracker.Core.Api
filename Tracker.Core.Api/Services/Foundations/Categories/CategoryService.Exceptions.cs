@@ -1,13 +1,12 @@
-﻿using System.Threading.Tasks;
-using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Categories;
-using Xeptions;
-using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
-using Microsoft.Data.SqlClient;
-using EFxceptions.Models.Exceptions;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
+using EFxceptions.Models.Exceptions;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
+using Xeptions;
 
 namespace Tracker.Core.Api.Services.Foundations.Categories
 {
