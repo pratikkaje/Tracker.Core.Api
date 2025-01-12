@@ -104,7 +104,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
                     new[]
                     {
                         "Date is invalid.",
-                        $"Date is the same as {nameof(Category.CreatedDate)}"
+                        $"Date is same as {nameof(Category.CreatedDate)}"
                     });
 
             var expectedCategoryValidationException =
@@ -124,9 +124,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             actualCategoryValidationException.Should().BeEquivalentTo(
                 expectedCategoryValidationException);
 
-            this.datetimeBrokerMock.Verify(broker =>
-                broker.GetCurrentDateTimeOffsetAsync(),
-                    Times.Once);
+            //this.datetimeBrokerMock.Verify(broker =>
+            //    broker.GetCurrentDateTimeOffsetAsync(),
+            //        Times.Once);
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(

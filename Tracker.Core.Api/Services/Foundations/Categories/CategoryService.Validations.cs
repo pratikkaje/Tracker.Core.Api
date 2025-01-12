@@ -39,7 +39,30 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
         public async ValueTask ValidateCategoryOnModifyAsync(Category category)
         {
             ValidateCategoryIsNotNull(category);
+
+            Validate(
+                (Rule: await IsInvalidAsync(category.Id), Parameter: nameof(Category.Id)),
+                (Rule: await IsInvalidAsync(category.UserId), Parameter: nameof(Category.UserId)),
+                (Rule: await IsInvalidAsync(category.Name), Parameter: nameof(Category.Name)),
+                (Rule: await IsInvalidAsync(category.CreatedBy), Parameter: nameof(Category.CreatedBy)),
+                (Rule: await IsInvalidAsync(category.UpdatedBy), Parameter: nameof(Category.UpdatedBy)),
+                (Rule: await IsInvalidAsync(category.CreatedDate), Parameter: nameof(Category.CreatedDate)),
+                (Rule: await IsInvalidAsync(category.UpdatedDate), Parameter: nameof(Category.UpdatedDate)),
+
+                (Rule: await IsSameAsync(
+                    firstDate: category.UpdatedDate,
+                    secondDate: category.CreatedDate,
+                    secondDateName: nameof(Category.CreatedDate)), Parameter: nameof(Category.UpdatedDate)));
         }
+
+        private static async ValueTask<dynamic> IsSameAsync(
+            DateTimeOffset firstDate, 
+            DateTimeOffset secondDate, 
+            string secondDateName) => new
+            {
+                Condition = firstDate == secondDate,
+                Message = $"Date is same as {secondDateName}"
+            };
 
         private async ValueTask ValidateCategoryIdAsync(Guid categoryId)
         {
