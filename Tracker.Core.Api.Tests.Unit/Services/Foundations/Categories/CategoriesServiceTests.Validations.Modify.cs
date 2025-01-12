@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Force.DeepCloner;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 {
@@ -313,6 +315,73 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
                     expectedCategoryValidationException))),
                     Times.Once);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfCreatedAuditInfoHasChangedAndLogItAsync()
+        {
+            //given
+            int randomMinutes = CreateRandomNegativeNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Category randomCategory = CreateRandomModifyCategory(randomDateTimeOffset);
+            Category invalidCategory = randomCategory;
+            Category storedCategory = randomCategory.DeepClone();
+            storedCategory.CreatedBy = GetRandomString();
+            storedCategory.CreatedDate = storedCategory.CreatedDate.AddMinutes(randomMinutes);
+            storedCategory.UpdatedDate = storedCategory.UpdatedDate.AddMinutes(randomMinutes);
+            Guid CategoryId = invalidCategory.Id;
+
+            var invalidCategoryException = new InvalidCategoryException(
+                message: "Category is invalid, fix the errors and try again.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.CreatedBy),
+                values: $"Text is not same as {nameof(Category.CreatedBy)}");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.CreatedDate),
+                values: $"Date is not same as {nameof(Category.CreatedDate)}");
+
+            var expectedCategoryValidationException = new CategoryValidationException(
+                message: "Category validation error occurred, fix errors and try again.",
+                innerException: invalidCategoryException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectCategoryByIdAsync(CategoryId))
+                    .ReturnsAsync(storedCategory);
+
+            // when
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(invalidCategory);
+
+            CategoryValidationException actualCategoryValidationException =
+                await Assert.ThrowsAsync<CategoryValidationException>(
+                    testCode: modifyCategoryTask.AsTask);
+
+            // then
+            actualCategoryValidationException.Should().BeEquivalentTo(
+                expectedCategoryValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectCategoryByIdAsync(invalidCategory.Id),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(
+                    SameExceptionAs(expectedCategoryValidationException))),
+                        Times.Once);
 
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
