@@ -55,7 +55,10 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
         {
             await ValidateCategoryOnModifyAsync(category);
 
-            Category maybeCategory = await this.storageBroker.SelectCategoryByIdAsync(category.Id);
+            Category maybeCategory = 
+            await this.storageBroker.SelectCategoryByIdAsync(category.Id);
+
+            await ValidateStorageCategoryAsync(maybeCategory, category.Id);
 
             return await this.storageBroker.UpdateCategoryAsync(category);
         });
