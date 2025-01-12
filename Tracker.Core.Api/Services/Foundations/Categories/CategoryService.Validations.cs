@@ -74,7 +74,14 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
                     secondDate: storageCategory.CreatedDate,
                     secondDateName: nameof(Category.CreatedDate)),
 
-                Parameter: nameof(Category.CreatedDate)));
+                Parameter: nameof(Category.CreatedDate)),
+
+                (Rule: await IsSameAsync(
+                    firstDate: inputCategory.UpdatedDate,
+                    secondDate: storageCategory.UpdatedDate,
+                    secondDateName: nameof(Category.UpdatedDate)),
+
+                Parameter: nameof(Category.UpdatedDate)));
         }
 
         private static async ValueTask<dynamic> IsSameAsync(

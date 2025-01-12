@@ -14,7 +14,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
         {
             // given
             DateTimeOffset randomDate = GetRandomDateTimeOffset();
-            Category randomCategory = CreateRandomCategory();
+            Category randomCategory = CreateRandomModifyCategory(randomDate);
             Category inputCategory = randomCategory;
             Category storageCategory = inputCategory.DeepClone();
             storageCategory.UpdatedDate = randomDate;

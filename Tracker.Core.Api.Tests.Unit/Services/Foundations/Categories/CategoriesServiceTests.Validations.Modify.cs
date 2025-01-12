@@ -388,7 +388,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
         }
 
         [Fact]
-        public async Task ShouldThrowValidationExceptionOnModifyIfStorageUpdatedDateSameAsUpdatedDateAndLogItAsync()
+        public async Task ShouldThrowValidationExceptionOnModifyIfStorageUpdatedDateSameIsAsUpdatedDateAndLogItAsync()
         {
             // given
             DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
