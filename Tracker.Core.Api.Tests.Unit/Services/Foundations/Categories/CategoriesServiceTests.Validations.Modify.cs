@@ -198,5 +198,67 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(-61)]
+        public async Task ShouldThrowValidationExceptionOnModifyIfUpdatedDateIsNotRecentAndLogItAsync(
+            int invalidSeconds)
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            DateTimeOffset now = randomDateTimeOffset;
+            DateTimeOffset startDate = now.AddSeconds(-60);
+            DateTimeOffset endDate = now.AddSeconds(0);
+            Category randomCategory = CreateRandomCategory(randomDateTimeOffset);
+            randomCategory.UpdatedDate = randomDateTimeOffset.AddSeconds(invalidSeconds);
+
+            var invalidCategoryException =
+                new InvalidCategoryException(
+                message: "Category is invalid, fix the errors and try again.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.UpdatedDate),
+                values: $"Date is not recent." +
+                $" Expected a value between {startDate} and {endDate} but found {randomCategory.UpdatedDate}");
+
+            var expectedCategoryValidationException =
+                new CategoryValidationException(
+                    message: "Category validation error occurred, fix errors and try again.",
+                    innerException: invalidCategoryException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            // when
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(randomCategory);
+
+            CategoryValidationException actualCategoryValidationException =
+                await Assert.ThrowsAsync<CategoryValidationException>(
+                    testCode: modifyCategoryTask.AsTask);
+
+            // then
+            actualCategoryValidationException.Should()
+                .BeEquivalentTo(expectedCategoryValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(
+                    SameExceptionAs(expectedCategoryValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.UpdateCategoryAsync(It.IsAny<Category>()),
+                    Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
