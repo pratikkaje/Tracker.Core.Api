@@ -28,7 +28,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 
             // when
             ValueTask<Category> addCategoryTask =
-                this.categoryService.AddCategoryAsync(nullCategory);
+                this.categoryService.ModifyCategoryAsync(nullCategory);
 
             CategoryValidationException actualCategoryValidationException =
                 await Assert.ThrowsAsync<CategoryValidationException>(
@@ -50,6 +50,96 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public async Task ShouldThrowValidationExceptionOnModifyIfCategoryIsInvalidAndLogItAsync(
+                string invalidString)
+        {
+            // given
+            var invalidCategory = new Category
+            {
+                Id = Guid.Empty,
+                UserId = Guid.Empty,
+                Name = invalidString,
+                CreatedBy = invalidString,
+                CreatedDate = default,
+                UpdatedBy = invalidString,
+                UpdatedDate = default,
+            };
+
+            var invalidCategoryException = new InvalidCategoryException(
+                message: "Category is invalid, fix the errors and try again.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.Id),
+                values: "Id is invalid.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.UserId),
+                values: "Id is invalid.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.Name),
+                values: "Text is required.");
+
+            invalidCategoryException.AddData(
+               key: nameof(Category.CreatedBy),
+               values: "Text is required.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.UpdatedBy),
+                values: "Text is required.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.CreatedDate),
+                values: "Date is invalid.");
+
+            invalidCategoryException.AddData(
+                key: nameof(Category.UpdatedDate),
+                values:
+                    new[]
+                    {
+                        "Date is invalid.",
+                        $"Date is the same as {nameof(Category.CreatedDate)}"
+                    });
+
+            var expectedCategoryValidationException =
+                new CategoryValidationException(
+                    message: "Category validation error occurred, fix errors and try again.",
+                    innerException: invalidCategoryException);
+
+            // when
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(invalidCategory);
+
+            CategoryValidationException actualCategoryValidationException =
+                await Assert.ThrowsAsync<CategoryValidationException>(
+                    testCode: modifyCategoryTask.AsTask);
+
+            // then
+            actualCategoryValidationException.Should().BeEquivalentTo(
+                expectedCategoryValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(
+                    SameExceptionAs(expectedCategoryValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertCategoryAsync(It.IsAny<Category>()),
+                    Times.Never);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
         }
     }
 }
