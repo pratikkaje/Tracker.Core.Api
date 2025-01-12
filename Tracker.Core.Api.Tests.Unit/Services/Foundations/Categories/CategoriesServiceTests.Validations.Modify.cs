@@ -260,5 +260,64 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfStorageCategoryDoesNotExistAndLogItAsync()
+        {
+            // given
+            int randomNegative = CreateRandomNegativeNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Category randomCategory = CreateRandomCategory(randomDateTimeOffset);
+            Category nonExistingCategory = randomCategory;
+            nonExistingCategory.CreatedDate = randomDateTimeOffset.AddMinutes(randomNegative);
+            Category nullCategory = null;
+
+            var notFoundCategoryException =
+                new NotFoundCategoryException(
+                    message: $"Category not found with id: {nonExistingCategory.Id}");
+
+            var expectedCategoryValidationException =
+                new CategoryValidationException(
+                    message: "Category validation error occurred, fix errors and try again.",
+                    innerException: notFoundCategoryException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectCategoryByIdAsync(nonExistingCategory.Id))
+                    .ReturnsAsync(nullCategory);
+
+            // when
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(nonExistingCategory);
+
+            CategoryValidationException actualCategoryValidationException =
+                await Assert.ThrowsAsync<CategoryValidationException>(
+                    testCode: modifyCategoryTask.AsTask);
+
+            // then
+            actualCategoryValidationException.Should()
+                .BeEquivalentTo(expectedCategoryValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectCategoryByIdAsync(nonExistingCategory.Id),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryValidationException))),
+                    Times.Once);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
     }
 }
