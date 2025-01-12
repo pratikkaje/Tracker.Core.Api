@@ -59,6 +59,24 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
                 (Rule: await IsNotRecentAsync(category.UpdatedDate), Parameter: nameof(category.UpdatedDate)));
         }
 
+        private async ValueTask ValidateAgainstStorageCategoryOnModifyAsync(Category inputCategory, Category storageCategory)
+        {
+            Validate(
+                (Rule: await IsNotSameAsync(
+                    first: inputCategory.CreatedBy,
+                    second: storageCategory.CreatedBy,
+                    secondName: nameof(Category.CreatedBy)),
+
+                Parameter: nameof(Category.CreatedBy)),
+
+                (Rule: await IsNotSameAsync(
+                    firstDate: inputCategory.CreatedDate,
+                    secondDate: storageCategory.CreatedDate,
+                    secondDateName: nameof(Category.CreatedDate)),
+
+                Parameter: nameof(Category.CreatedDate)));
+        }
+
         private static async ValueTask<dynamic> IsSameAsync(
             DateTimeOffset firstDate,
             DateTimeOffset secondDate,
