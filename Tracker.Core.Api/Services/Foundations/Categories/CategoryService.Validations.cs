@@ -14,7 +14,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
             Validate(
                 (Rule: await IsInvalidAsync(category.Id), Parameter: nameof(Category.Id)),
                 (Rule: await IsInvalidAsync(category.UserId), Parameter: nameof(Category.UserId)),
-                (Rule: await IsInvalidAsync(category.Name),Parameter: nameof(Category.Name)),
+                (Rule: await IsInvalidAsync(category.Name), Parameter: nameof(Category.Name)),
                 (Rule: await IsInvalidAsync(category.CreatedBy), Parameter: nameof(Category.CreatedBy)),
                 (Rule: await IsInvalidAsync(category.UpdatedBy), Parameter: nameof(Category.UpdatedBy)),
                 (Rule: await IsInvalidAsync(category.CreatedDate), Parameter: nameof(Category.CreatedDate)),
@@ -32,7 +32,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
                     secondDate: category.CreatedDate,
                     secondDateName: nameof(Category.CreatedDate)), Parameter: nameof(Category.UpdatedDate)),
 
-                (Rule: await IsNotRecentAsync(category.CreatedDate),Parameter: nameof(Category.CreatedDate)));
+                (Rule: await IsNotRecentAsync(category.CreatedDate), Parameter: nameof(Category.CreatedDate)));
         }
 
 
@@ -52,12 +52,14 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
                 (Rule: await IsSameAsync(
                     firstDate: category.UpdatedDate,
                     secondDate: category.CreatedDate,
-                    secondDateName: nameof(Category.CreatedDate)), Parameter: nameof(Category.UpdatedDate)));
+                    secondDateName: nameof(Category.CreatedDate)), Parameter: nameof(Category.UpdatedDate)),
+
+                (Rule: await IsInvalidLengthAsync(category.Name, 255), Parameter: nameof(Category.Name)));
         }
 
         private static async ValueTask<dynamic> IsSameAsync(
-            DateTimeOffset firstDate, 
-            DateTimeOffset secondDate, 
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
             string secondDateName) => new
             {
                 Condition = firstDate == secondDate,
@@ -71,7 +73,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
 
         private async ValueTask ValidateStorageCategoryAsync(Category category, Guid categoryID)
         {
-            if(category is null)
+            if (category is null)
             {
                 throw new NotFoundCategoryException(
                     message: $"Category not found with id: {categoryID}");
