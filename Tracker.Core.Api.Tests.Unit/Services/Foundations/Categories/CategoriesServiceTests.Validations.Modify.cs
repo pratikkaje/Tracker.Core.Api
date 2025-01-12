@@ -180,9 +180,9 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             actualCategoryValidationException.Should().BeEquivalentTo(
                 expectedCategoryValidationException);
 
-            //this.datetimeBrokerMock.Verify(broker =>
-            //    broker.GetCurrentDateTimeOffsetAsync(),
-            //        Times.Once);
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
