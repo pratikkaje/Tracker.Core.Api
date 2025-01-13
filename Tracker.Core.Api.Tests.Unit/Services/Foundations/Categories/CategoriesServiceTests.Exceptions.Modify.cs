@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 {
@@ -66,6 +66,69 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyExceptionOnModifyIfDatabaseUpdateExceptionOccursAndLogItAsync()
+        {
+            // given
+            int minutesInPast = CreateRandomNegativeNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+
+            Category randomCategory =
+                CreateRandomCategory(randomDateTimeOffset);
+
+            randomCategory.CreatedDate =
+                randomDateTimeOffset.AddMinutes(minutesInPast);
+
+            var dbUpdateException = new DbUpdateException();
+
+            var failedOperationCategoryException =
+                new FailedOperationCategoryException(
+                    message: "Failed operation category error occurred, contact support.",
+                    innerException: dbUpdateException);
+
+            var expectedCategoryDependencyException =
+                new CategoryDependencyException(
+                    message: "Category dependency error occurred, contact support.",
+                    innerException: failedOperationCategoryException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectCategoryByIdAsync(randomCategory.Id))
+                    .ThrowsAsync(dbUpdateException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            // when
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(randomCategory);
+
+            CategoryDependencyException actualCategoryDependencyException =
+                await Assert.ThrowsAsync<CategoryDependencyException>(
+                    testCode: modifyCategoryTask.AsTask);
+
+            // then
+            actualCategoryDependencyException.Should().BeEquivalentTo(
+                expectedCategoryDependencyException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectCategoryByIdAsync(randomCategory.Id),
+                    Times.Once);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryDependencyException))),
+                        Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
         }
     }
