@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 {
@@ -130,6 +131,62 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyValidationExceptionOnModifyIfDbUpdateConcurrencyOccursAndLogItAsync()
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Category randomCategory = CreateRandomCategory(randomDateTimeOffset);
+
+            var dbUpdateConcurrencyException =
+                new DbUpdateConcurrencyException();
+
+            var lockedCategoryException =
+                new LockedCategoryException(
+                    message: "Locked category record error occurred, please try again.",
+                    innerException: dbUpdateConcurrencyException,
+                    data: dbUpdateConcurrencyException.Data);
+
+            var expectedCategoryDependencyValidationException =
+                new CategoryDependencyValidationException(
+                    message: "Category dependency validation error occurred, fix errors and try again.",
+                    innerException: lockedCategoryException,
+                    data: lockedCategoryException.Data);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ThrowsAsync(dbUpdateConcurrencyException);
+
+            // when
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(randomCategory);
+
+            CategoryDependencyValidationException actualCategoryDependencyValidationException =
+                await Assert.ThrowsAsync<CategoryDependencyValidationException>(
+                    testCode: modifyCategoryTask.AsTask);
+
+            // then
+            actualCategoryDependencyValidationException.Should().BeEquivalentTo(
+                expectedCategoryDependencyValidationException);
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryDependencyValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectCategoryByIdAsync(randomCategory.Id),
+                    Times.Never());
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
         }
     }
 }
