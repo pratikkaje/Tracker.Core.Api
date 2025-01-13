@@ -188,5 +188,69 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowServiceExceptionOnModifyIfServiceErrorOccursAndLogItAsync()
+        {
+            // given
+            int minutesInPast = CreateRandomNegativeNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+
+            Category randomCategory =
+                CreateRandomCategory(randomDateTimeOffset);
+
+            randomCategory.CreatedDate =
+                randomDateTimeOffset.AddMinutes(minutesInPast);
+
+            var serviceException = new Exception();
+
+            var failedServiceCategoryException =
+                new FailedServiceCategoryException(
+                    message: "Failed service category error occurred, contact support.",
+                    innerException: serviceException);
+
+            var expectedCategoryServiceException =
+                new CategoryServiceException(
+                    message: "Service error occurred, contact support.",
+                    innerException: failedServiceCategoryException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectCategoryByIdAsync(randomCategory.Id))
+                    .ThrowsAsync(serviceException);
+
+            this.datetimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffsetAsync())
+                    .ReturnsAsync(randomDateTimeOffset);
+
+            // when
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(randomCategory);
+
+            CategoryServiceException actualCategoryServiceException =
+                await Assert.ThrowsAsync<CategoryServiceException>(
+                    testCode: modifyCategoryTask.AsTask);
+
+            // then
+            actualCategoryServiceException.Should().BeEquivalentTo(
+                expectedCategoryServiceException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectCategoryByIdAsync(randomCategory.Id),
+                    Times.Once());
+
+            this.datetimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffsetAsync(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryServiceException))),
+                        Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
     }
 }
