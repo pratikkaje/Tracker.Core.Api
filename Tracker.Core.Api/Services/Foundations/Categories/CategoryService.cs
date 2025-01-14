@@ -71,10 +71,12 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
 
             await ValidateCategoryIdAsync(categoryId);
 
-            Category storageCategory = 
+            Category maybeCategory = 
                 await this.storageBroker.SelectCategoryByIdAsync(categoryId);
 
-            return await this.storageBroker.DeleteCategoryAsync(storageCategory);
+            await ValidateStorageCategoryAsync(maybeCategory, categoryId);
+
+            return await this.storageBroker.DeleteCategoryAsync(maybeCategory);
         });
     }
 }
