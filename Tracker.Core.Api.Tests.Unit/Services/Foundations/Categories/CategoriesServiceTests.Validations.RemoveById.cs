@@ -61,5 +61,56 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnRemoveByIdIfNotFoundAndLogItAsync()
+        {
+            // given
+            Guid someCategoryId = Guid.NewGuid();
+            Category noCategory = null;
+
+            var notFoundCategoryException =
+                new NotFoundCategoryException(
+                    message: $"Category not found with id: {someCategoryId}");
+
+            var expectedCategoryValidationException =
+                new CategoryValidationException(
+                    message: "Category validation error occurred, fix errors and try again.",
+                    innerException: notFoundCategoryException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectCategoryByIdAsync(someCategoryId))
+                    .ReturnsAsync(noCategory);
+
+            // when
+            ValueTask<Category> removeCategoryByIdTask =
+                this.categoryService.RemoveCategoryByIdAsync(someCategoryId);
+
+            CategoryValidationException actualCategoryValidationException =
+                await Assert.ThrowsAsync<CategoryValidationException>(
+                    removeCategoryByIdTask.AsTask);
+
+            // then
+            actualCategoryValidationException.Should().BeEquivalentTo(
+                expectedCategoryValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectCategoryByIdAsync(someCategoryId),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.DeleteCategoryAsync(
+                    It.IsAny<Category>()),
+                        Times.Never);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
