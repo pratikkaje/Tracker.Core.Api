@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
@@ -9,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Users;
 
 namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 {
