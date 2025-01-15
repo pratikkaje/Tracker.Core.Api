@@ -23,7 +23,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 
             // when
             Category actualCategory =
-                await this.categoryService.RetrieveByIdAsync(inputCategory.Id);
+                await this.categoryService.RetrieveCategoryByIdAsync(inputCategory.Id);
 
             // then
             actualCategory.Should().BeEquivalentTo(expectedCategory);

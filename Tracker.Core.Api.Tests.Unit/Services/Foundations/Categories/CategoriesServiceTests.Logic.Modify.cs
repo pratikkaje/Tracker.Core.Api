@@ -14,11 +14,14 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
         {
             // given
             DateTimeOffset randomDate = GetRandomDateTimeOffset();
-            Category randomCategory = CreateRandomCategory();
-            Category inputCategory = randomCategory;
+
+            Category randomCategory =
+                CreateRandomModifyCategory(randomDate);
+
+            Category inputCategory = randomCategory.DeepClone();
             Category storageCategory = inputCategory.DeepClone();
-            storageCategory.UpdatedDate = randomDate;
-            Category modifiedCategory = storageCategory.DeepClone();
+            storageCategory.UpdatedDate = storageCategory.CreatedDate;
+            Category modifiedCategory = inputCategory.DeepClone();
             Category expectedCategory = modifiedCategory.DeepClone();
 
             this.storageBrokerMock.Setup(broker =>

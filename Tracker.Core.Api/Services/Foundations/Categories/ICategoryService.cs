@@ -9,7 +9,7 @@ namespace Tracker.Core.Api.Services.Foundations.Categories
     {
         ValueTask<Category> AddCategoryAsync(Category category);
         ValueTask<IQueryable<Category>> RetrieveAllCategoriesAsync();
-        ValueTask<Category> RetrieveByIdAsync(Guid categoryId);
+        ValueTask<Category> RetrieveCategoryByIdAsync(Guid categoryId);
         ValueTask<Category> ModifyCategoryAsync(Category category);
         ValueTask<Category> RemoveCategoryByIdAsync(Guid categoryId);
     }

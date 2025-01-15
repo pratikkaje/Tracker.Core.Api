@@ -4,61 +4,61 @@ using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Tracker.Core.Api.Models.Foundations.Users;
-using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
+using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
 
-namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
+namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
 {
-    public partial class UsersServiceTests
+    public partial class CategoriesServiceTests
     {
         [Fact]
         public async Task ShouldThrowCriticalDependencyExceptionOnModifyIfSqlErrorOccursAndLogItAsync()
         {
             // given
-            User someUser = CreateRandomUser();
+            Category someCategory = CreateRandomCategory();
             SqlException sqlException = CreateSqlException();
 
-            var failedUserStorageException =
-                new FailedStorageUserException(
-                    message: "Failed user storage error occurred, contact support.",
+            var failedCategoryStorageException =
+                new FailedStorageCategoryException(
+                    message: "Category storage failed, contact support.",
                         innerException: sqlException);
 
-            var expectedUserDependencyException =
-                new UserDependencyException(
-                    message: "User dependency error occurred, contact support.",
-                        innerException: failedUserStorageException);
+            var expectedCategoryDependencyException =
+                new CategoryDependencyException(
+                    message: "Category dependency error occurred, contact support.",
+                        innerException: failedCategoryStorageException);
 
             this.datetimeBrokerMock.Setup(broker =>
                 broker.GetCurrentDateTimeOffsetAsync())
                     .ThrowsAsync(sqlException);
 
             // when
-            ValueTask<User> modifyUserTask =
-                this.userService.ModifyUserAsync(someUser);
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(someCategory);
 
-            UserDependencyException actualUserDependencyException =
-                await Assert.ThrowsAsync<UserDependencyException>(
-                    testCode: modifyUserTask.AsTask);
+            CategoryDependencyException actualCategoryDependencyException =
+                await Assert.ThrowsAsync<CategoryDependencyException>(
+                    testCode: modifyCategoryTask.AsTask);
 
             // then
-            actualUserDependencyException.Should().BeEquivalentTo(
-                expectedUserDependencyException);
+            actualCategoryDependencyException.Should().BeEquivalentTo(
+                expectedCategoryDependencyException);
 
             this.datetimeBrokerMock.Verify(broker =>
                 broker.GetCurrentDateTimeOffsetAsync(),
                     Times.Once);
 
             this.storageBrokerMock.Verify(broker =>
-                broker.SelectUserByIdAsync(someUser.Id),
+                broker.SelectCategoryByIdAsync(someCategory.Id),
                     Times.Never);
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogCriticalAsync(It.Is(SameExceptionAs(
-                    expectedUserDependencyException))),
+                    expectedCategoryDependencyException))),
                         Times.Once);
 
             this.storageBrokerMock.Verify(broker =>
-                broker.UpdateUserAsync(someUser),
+                broker.UpdateCategoryAsync(someCategory),
                     Times.Never);
 
             this.datetimeBrokerMock.VerifyNoOtherCalls();
@@ -73,26 +73,26 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             int minutesInPast = CreateRandomNegativeNumber();
             DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
 
-            User randomUser =
-                CreateRandomUser(randomDateTimeOffset);
+            Category randomCategory =
+                CreateRandomCategory(randomDateTimeOffset);
 
-            randomUser.CreatedDate =
+            randomCategory.CreatedDate =
                 randomDateTimeOffset.AddMinutes(minutesInPast);
 
             var dbUpdateException = new DbUpdateException();
 
-            var failedOperationUserException =
-                new FailedOperationUserException(
-                    message: "Failed operation user error occurred, contact support.",
+            var failedOperationCategoryException =
+                new FailedOperationCategoryException(
+                    message: "Failed operation category error occurred, contact support.",
                     innerException: dbUpdateException);
 
-            var expectedUserDependencyException =
-                new UserDependencyException(
-                    message: "User dependency error occurred, contact support.",
-                    innerException: failedOperationUserException);
+            var expectedCategoryDependencyException =
+                new CategoryDependencyException(
+                    message: "Category dependency error occurred, contact support.",
+                    innerException: failedOperationCategoryException);
 
             this.storageBrokerMock.Setup(broker =>
-                broker.SelectUserByIdAsync(randomUser.Id))
+                broker.SelectCategoryByIdAsync(randomCategory.Id))
                     .ThrowsAsync(dbUpdateException);
 
             this.datetimeBrokerMock.Setup(broker =>
@@ -100,19 +100,19 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     .ReturnsAsync(randomDateTimeOffset);
 
             // when
-            ValueTask<User> modifyUserTask =
-                this.userService.ModifyUserAsync(randomUser);
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(randomCategory);
 
-            UserDependencyException actualUserDependencyException =
-                await Assert.ThrowsAsync<UserDependencyException>(
-                    testCode: modifyUserTask.AsTask);
+            CategoryDependencyException actualCategoryDependencyException =
+                await Assert.ThrowsAsync<CategoryDependencyException>(
+                    testCode: modifyCategoryTask.AsTask);
 
             // then
-            actualUserDependencyException.Should().BeEquivalentTo(
-                expectedUserDependencyException);
+            actualCategoryDependencyException.Should().BeEquivalentTo(
+                expectedCategoryDependencyException);
 
             this.storageBrokerMock.Verify(broker =>
-                broker.SelectUserByIdAsync(randomUser.Id),
+                broker.SelectCategoryByIdAsync(randomCategory.Id),
                     Times.Once);
 
             this.datetimeBrokerMock.Verify(broker =>
@@ -121,7 +121,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
-                    expectedUserDependencyException))),
+                    expectedCategoryDependencyException))),
                         Times.Once);
 
             this.storageBrokerMock.VerifyNoOtherCalls();
@@ -134,38 +134,38 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
         {
             // given
             DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
-            User randomUser = CreateRandomUser(randomDateTimeOffset);
+            Category randomCategory = CreateRandomCategory(randomDateTimeOffset);
 
             var dbUpdateConcurrencyException =
                 new DbUpdateConcurrencyException();
 
-            var lockedUserException =
-                new LockedUserException(
-                    message: "Locked user record error occurred, please try again.",
+            var lockedCategoryException =
+                new LockedCategoryException(
+                    message: "Locked category record error occurred, please try again.",
                     innerException: dbUpdateConcurrencyException,
                     data: dbUpdateConcurrencyException.Data);
 
-            var expectedUserDependencyValidationException =
-                new UserDependencyValidationException(
-                    message: "User dependency validation error occurred, fix errors and try again.",
-                    innerException: lockedUserException,
-                    data: lockedUserException.Data);
+            var expectedCategoryDependencyValidationException =
+                new CategoryDependencyValidationException(
+                    message: "Category dependency validation error occurred, fix errors and try again.",
+                    innerException: lockedCategoryException,
+                    data: lockedCategoryException.Data);
 
             this.datetimeBrokerMock.Setup(broker =>
                 broker.GetCurrentDateTimeOffsetAsync())
                     .ThrowsAsync(dbUpdateConcurrencyException);
 
             // when
-            ValueTask<User> modifyUserTask =
-                this.userService.ModifyUserAsync(randomUser);
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(randomCategory);
 
-            UserDependencyValidationException actualUserDependencyValidationException =
-                await Assert.ThrowsAsync<UserDependencyValidationException>(
-                    testCode: modifyUserTask.AsTask);
+            CategoryDependencyValidationException actualCategoryDependencyValidationException =
+                await Assert.ThrowsAsync<CategoryDependencyValidationException>(
+                    testCode: modifyCategoryTask.AsTask);
 
             // then
-            actualUserDependencyValidationException.Should().BeEquivalentTo(
-                expectedUserDependencyValidationException);
+            actualCategoryDependencyValidationException.Should().BeEquivalentTo(
+                expectedCategoryDependencyValidationException);
 
             this.datetimeBrokerMock.Verify(broker =>
                 broker.GetCurrentDateTimeOffsetAsync(),
@@ -173,11 +173,11 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
-                    expectedUserDependencyValidationException))),
+                    expectedCategoryDependencyValidationException))),
                         Times.Once);
 
             this.storageBrokerMock.Verify(broker =>
-                broker.SelectUserByIdAsync(randomUser.Id),
+                broker.SelectCategoryByIdAsync(randomCategory.Id),
                     Times.Never());
 
             this.datetimeBrokerMock.VerifyNoOtherCalls();
@@ -192,26 +192,26 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
             int minutesInPast = CreateRandomNegativeNumber();
             DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
 
-            User randomUser =
-                CreateRandomUser(randomDateTimeOffset);
+            Category randomCategory =
+                CreateRandomCategory(randomDateTimeOffset);
 
-            randomUser.CreatedDate =
+            randomCategory.CreatedDate =
                 randomDateTimeOffset.AddMinutes(minutesInPast);
 
             var serviceException = new Exception();
 
-            var failedServiceUserException =
-                new FailedServiceUserException(
-                    message: "Failed service user error occurred, contact support.",
+            var failedServiceCategoryException =
+                new FailedServiceCategoryException(
+                    message: "Failed service category error occurred, contact support.",
                     innerException: serviceException);
 
-            var expectedUserServiceException =
-                new UserServiceException(
+            var expectedCategoryServiceException =
+                new CategoryServiceException(
                     message: "Service error occurred, contact support.",
-                    innerException: failedServiceUserException);
+                    innerException: failedServiceCategoryException);
 
             this.storageBrokerMock.Setup(broker =>
-                broker.SelectUserByIdAsync(randomUser.Id))
+                broker.SelectCategoryByIdAsync(randomCategory.Id))
                     .ThrowsAsync(serviceException);
 
             this.datetimeBrokerMock.Setup(broker =>
@@ -219,19 +219,19 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     .ReturnsAsync(randomDateTimeOffset);
 
             // when
-            ValueTask<User> modifyUserTask =
-                this.userService.ModifyUserAsync(randomUser);
+            ValueTask<Category> modifyCategoryTask =
+                this.categoryService.ModifyCategoryAsync(randomCategory);
 
-            UserServiceException actualUserServiceException =
-                await Assert.ThrowsAsync<UserServiceException>(
-                    testCode: modifyUserTask.AsTask);
+            CategoryServiceException actualCategoryServiceException =
+                await Assert.ThrowsAsync<CategoryServiceException>(
+                    testCode: modifyCategoryTask.AsTask);
 
             // then
-            actualUserServiceException.Should().BeEquivalentTo(
-                expectedUserServiceException);
+            actualCategoryServiceException.Should().BeEquivalentTo(
+                expectedCategoryServiceException);
 
             this.storageBrokerMock.Verify(broker =>
-                broker.SelectUserByIdAsync(randomUser.Id),
+                broker.SelectCategoryByIdAsync(randomCategory.Id),
                     Times.Once());
 
             this.datetimeBrokerMock.Verify(broker =>
@@ -240,12 +240,13 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogErrorAsync(It.Is(SameExceptionAs(
-                    expectedUserServiceException))),
+                    expectedCategoryServiceException))),
                         Times.Once);
 
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
         }
+
     }
 }

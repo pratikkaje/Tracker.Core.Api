@@ -35,7 +35,7 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Users
                     .ReturnsAsync(expectedUser);
 
             // when
-            User actualUser = 
+            User actualUser =
                 await this.userService.ModifyUserAsync(inputUser);
 
             // then
