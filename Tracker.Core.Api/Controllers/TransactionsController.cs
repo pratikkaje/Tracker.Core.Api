@@ -54,7 +54,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet]
         public async ValueTask<ActionResult<IQueryable<Transaction>>> GetTransactionsAsync()
         {
-            throw new NotImplementedException();
+            IQueryable<Transaction> transactions =
+                await this.transactionService.RetrieveAllTransactionsAsync();
+
+            return Ok(transactions);
         }
     }
 }
