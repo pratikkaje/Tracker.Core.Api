@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Transactions;
@@ -47,6 +49,12 @@ namespace Tracker.Core.Api.Controllers
             {
                 return InternalServerError(transactionServiceException);
             }
+        }
+
+        [HttpGet]
+        public async ValueTask<ActionResult<IQueryable<Transaction>>> GetTransactionsAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }
