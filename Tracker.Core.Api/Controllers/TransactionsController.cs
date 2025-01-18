@@ -54,10 +54,21 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet]
         public async ValueTask<ActionResult<IQueryable<Transaction>>> GetTransactionsAsync()
         {
-            IQueryable<Transaction> transactions =
-                await this.transactionService.RetrieveAllTransactionsAsync();
+            try
+            {
+                IQueryable<Transaction> transactions =
+                    await this.transactionService.RetrieveAllTransactionsAsync();
 
-            return Ok(transactions);
+                return Ok(transactions);
+            }
+            catch (TransactionDependencyException transactionDependencyException)
+            {
+                return InternalServerError(transactionDependencyException);
+            }
+            catch (TransactionServiceException transactionServiceException)
+            {
+                return InternalServerError(transactionServiceException);
+            }
         }
     }
 }
