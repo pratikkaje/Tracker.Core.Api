@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Transactions;
@@ -38,6 +40,26 @@ namespace Tracker.Core.Api.Controllers
             catch (TransactionDependencyValidationException transactionDependencyValidationException)
             {
                 return BadRequest(transactionDependencyValidationException.InnerException);
+            }
+            catch (TransactionDependencyException transactionDependencyException)
+            {
+                return InternalServerError(transactionDependencyException);
+            }
+            catch (TransactionServiceException transactionServiceException)
+            {
+                return InternalServerError(transactionServiceException);
+            }
+        }
+
+        [HttpGet]
+        public async ValueTask<ActionResult<IQueryable<Transaction>>> GetTransactionsAsync()
+        {
+            try
+            {
+                IQueryable<Transaction> transactions =
+                    await this.transactionService.RetrieveAllTransactionsAsync();
+
+                return Ok(transactions);
             }
             catch (TransactionDependencyException transactionDependencyException)
             {
