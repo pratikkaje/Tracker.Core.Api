@@ -70,5 +70,15 @@ namespace Tracker.Core.Api.Controllers
                 return InternalServerError(transactionServiceException);
             }
         }
+
+        [HttpGet("{transactionId}")]
+        public async ValueTask<ActionResult<Transaction>> GetTransactionByIdAsync(Guid transactionId)
+        {
+                Transaction transaction =
+                    await this.transactionService.RetrieveTransactionByIdAsync(transactionId);
+
+                return Ok(transaction);
+        }
+
     }
 }
