@@ -74,10 +74,27 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet("{transactionId}")]
         public async ValueTask<ActionResult<Transaction>> GetTransactionByIdAsync(Guid transactionId)
         {
+            try
+            {
                 Transaction transaction =
                     await this.transactionService.RetrieveTransactionByIdAsync(transactionId);
 
                 return Ok(transaction);
+            }
+            catch (TransactionValidationException transactionValidationException)
+                when (transactionValidationException.InnerException is NotFoundTransactionException)
+            {
+                return NotFound(transactionValidationException.InnerException);
+            }
+            catch (TransactionValidationException transactionValidationException)
+            {
+                return BadRequest(transactionValidationException.InnerException);
+            }
+            catch (TransactionDependencyValidationException transactionDependencyValidationException)
+            {
+                return BadRequest(transactionDependencyValidationException.InnerException);
+            }
+
         }
 
     }
