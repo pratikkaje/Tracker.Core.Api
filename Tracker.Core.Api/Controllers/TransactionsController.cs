@@ -108,7 +108,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpPut]
         public async ValueTask<ActionResult<Transaction>> PutTransactionAsync(Transaction transaction)
         {
-            throw new NotImplementedException();
+            Transaction modifiedTransaction = 
+                await this.transactionService.ModifyTransactionAsync(transaction);
+
+            return Ok(modifiedTransaction);
         }
     }
 }
