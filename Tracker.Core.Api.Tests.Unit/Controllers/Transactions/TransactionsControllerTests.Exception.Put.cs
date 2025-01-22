@@ -8,6 +8,7 @@ using Moq;
 using RESTFulSense.Clients.Extensions;
 using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Transactions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Xeptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
@@ -62,6 +63,46 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
             this.transactionServiceMock.Setup(service =>
                 service.ModifyTransactionAsync(It.IsAny<Transaction>()))
                     .ThrowsAsync(validationException);
+
+            // when
+            ActionResult<Transaction> actualActionResult =
+                await this.transactionsController.PutTransactionAsync(someTransaction);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.transactionServiceMock.Verify(service =>
+                service.ModifyTransactionAsync(It.IsAny<Transaction>()),
+                    Times.Once);
+
+            this.transactionServiceMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldReturnNotFoundOnPutIfItemDoesNotExistAsync()
+        {
+            // given
+            Transaction someTransaction = CreateRandomTransaction();
+            string someMessage = GetRandomString();
+
+            var notFoundTransactionException =
+                new NotFoundTransactionException(
+                    message: someMessage);
+
+            var transactionValidationException =
+                new TransactionValidationException(
+                    message: someMessage,
+                    innerException: notFoundTransactionException);
+
+            NotFoundObjectResult expectedNotFoundObjectResult =
+                NotFound(notFoundTransactionException);
+
+            var expectedActionResult =
+                new ActionResult<Transaction>(expectedNotFoundObjectResult);
+
+            this.transactionServiceMock.Setup(service =>
+                service.ModifyTransactionAsync(It.IsAny<Transaction>()))
+                    .ThrowsAsync(transactionValidationException);
 
             // when
             ActionResult<Transaction> actualActionResult =
