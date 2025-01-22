@@ -108,10 +108,31 @@ namespace Tracker.Core.Api.Controllers
         [HttpPut]
         public async ValueTask<ActionResult<Transaction>> PutTransactionAsync(Transaction transaction)
         {
-            Transaction modifiedTransaction = 
-                await this.transactionService.ModifyTransactionAsync(transaction);
+            try
+            {
+                Transaction modifiedTransaction =
+                    await this.transactionService.ModifyTransactionAsync(transaction);
 
-            return Ok(modifiedTransaction);
+                return Ok(modifiedTransaction);
+            }
+            catch (TransactionValidationException transactionValidationException)
+                when (transactionValidationException.InnerException is NotFoundTransactionException)
+            {
+                return NotFound(transactionValidationException.InnerException);
+            }
+            catch (TransactionValidationException transactionValidationException)
+            {
+                return BadRequest(transactionValidationException.InnerException);
+            }
+            catch (TransactionDependencyValidationException transactionDependencyValidationException)
+                when (transactionDependencyValidationException.InnerException is AlreadyExistsTransactionException)
+            {
+                return Conflict(transactionDependencyValidationException.InnerException);
+            }
+            catch (TransactionDependencyValidationException transactionDependencyValidationException)
+            {
+                return BadRequest(transactionDependencyValidationException.InnerException);
+            }
         }
     }
 }
