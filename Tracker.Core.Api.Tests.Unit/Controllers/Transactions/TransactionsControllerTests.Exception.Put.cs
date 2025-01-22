@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using RESTFulSense.Clients.Extensions;
+using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Transactions;
 using Xeptions;
 
@@ -22,6 +23,38 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
 
             BadRequestObjectResult expectedBadRequestObjectResult =
                 BadRequest(validationException.InnerException);
+
+            var expectedActionResult =
+                new ActionResult<Transaction>(expectedBadRequestObjectResult);
+
+            this.transactionServiceMock.Setup(service =>
+                service.ModifyTransactionAsync(It.IsAny<Transaction>()))
+                    .ThrowsAsync(validationException);
+
+            // when
+            ActionResult<Transaction> actualActionResult =
+                await this.transactionsController.PutTransactionAsync(someTransaction);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.transactionServiceMock.Verify(service =>
+                service.ModifyTransactionAsync(It.IsAny<Transaction>()),
+                    Times.Once);
+
+            this.transactionServiceMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [MemberData(nameof(ServerExceptions))]
+        public async Task ShouldReturnInternalServerErrorOnPutIfServerErrorOccurredAsync(
+            Xeption validationException)
+        {
+            // given
+            Transaction someTransaction = CreateRandomTransaction();
+
+            InternalServerErrorObjectResult expectedBadRequestObjectResult =
+                InternalServerError(validationException);
 
             var expectedActionResult =
                 new ActionResult<Transaction>(expectedBadRequestObjectResult);
