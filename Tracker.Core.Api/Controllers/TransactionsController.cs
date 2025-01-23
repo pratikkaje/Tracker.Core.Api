@@ -146,7 +146,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpDelete("{transactionId}")]
         public async ValueTask<ActionResult<Transaction>> DeleteTransactionByIdAsync(Guid transactionId)
         {
-            throw new NotImplementedException();
+            Transaction deleteTransaction =
+                await this.transactionService.RemoveTransactionByIdAsync(transactionId);
+
+            return Ok(deleteTransaction);
         }
     }
 }
