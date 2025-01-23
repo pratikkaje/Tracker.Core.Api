@@ -142,5 +142,11 @@ namespace Tracker.Core.Api.Controllers
                 return InternalServerError(transactionServiceException);
             }
         }
+
+        [HttpDelete("{transactionId}")]
+        public async ValueTask<ActionResult<Transaction>> DeleteTransactionByIdAsync(Guid transactionId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
