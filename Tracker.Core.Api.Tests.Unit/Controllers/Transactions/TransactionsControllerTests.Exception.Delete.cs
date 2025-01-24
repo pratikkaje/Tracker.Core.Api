@@ -118,5 +118,48 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Transactions
             this.transactionServiceMock.VerifyNoOtherCalls();
         }
 
+        [Fact]
+        public async Task ShouldReturnLockedOnDeleteIfRecordIsLockedAsync()
+        {
+            // given
+            Guid someId = Guid.NewGuid();
+            var someInnerException = new Exception();
+            string someMessage = GetRandomString();
+
+            var lockedTransactionException =
+                new LockedTransactionException(
+                    message: someMessage,
+                    innerException: someInnerException,
+                    data: someInnerException.Data);
+
+            var transactionDependencyValidationException =
+                new TransactionDependencyValidationException(
+                    message: someMessage,
+                    innerException: lockedTransactionException);
+
+            LockedObjectResult expectedConflictObjectResult =
+                Locked(lockedTransactionException);
+
+            var expectedActionResult =
+                new ActionResult<Transaction>(expectedConflictObjectResult);
+
+            this.transactionServiceMock.Setup(service =>
+                service.RemoveTransactionByIdAsync(It.IsAny<Guid>()))
+                    .ThrowsAsync(transactionDependencyValidationException);
+
+            // when
+            ActionResult<Transaction> actualActionResult =
+                await this.transactionsController.DeleteTransactionByIdAsync(someId);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.transactionServiceMock.Verify(service =>
+                service.RemoveTransactionByIdAsync(It.IsAny<Guid>()),
+                    Times.Once);
+
+            this.transactionServiceMock.VerifyNoOtherCalls();
+        }
+
     }
 }
