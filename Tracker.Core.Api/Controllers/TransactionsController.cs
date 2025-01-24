@@ -146,10 +146,31 @@ namespace Tracker.Core.Api.Controllers
         [HttpDelete("{transactionId}")]
         public async ValueTask<ActionResult<Transaction>> DeleteTransactionByIdAsync(Guid transactionId)
         {
-            Transaction deleteTransaction =
-                await this.transactionService.RemoveTransactionByIdAsync(transactionId);
+            try
+            {
+                Transaction deleteTransaction =
+                    await this.transactionService.RemoveTransactionByIdAsync(transactionId);
 
-            return Ok(deleteTransaction);
+                return Ok(deleteTransaction);
+            }
+            catch (TransactionValidationException transactionValidationException)
+                when (transactionValidationException.InnerException is NotFoundTransactionException)
+            {
+                return NotFound(transactionValidationException.InnerException);
+            }
+            catch (TransactionValidationException transactionValidationException)
+            {
+                return BadRequest(transactionValidationException.InnerException);
+            }
+            catch (TransactionDependencyValidationException transactionDependencyValidationException)
+                when (transactionDependencyValidationException.InnerException is LockedTransactionException)
+            {
+                return Locked(transactionDependencyValidationException.InnerException);
+            }
+            catch (TransactionDependencyValidationException transactionDependencyValidationException)
+            {
+                return BadRequest(transactionDependencyValidationException.InnerException);
+            }
         }
     }
 }
