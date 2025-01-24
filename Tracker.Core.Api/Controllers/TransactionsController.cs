@@ -171,6 +171,14 @@ namespace Tracker.Core.Api.Controllers
             {
                 return BadRequest(transactionDependencyValidationException.InnerException);
             }
+            catch (TransactionDependencyException transactionDependencyException)
+            {
+                return InternalServerError(transactionDependencyException);
+            }
+            catch (TransactionServiceException transactionServiceException)
+            {
+                return InternalServerError(transactionServiceException);
+            }
         }
     }
 }
