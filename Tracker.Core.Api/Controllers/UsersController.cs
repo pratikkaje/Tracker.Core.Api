@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Users;
@@ -19,7 +18,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpPost]
         public async ValueTask<ActionResult<User>> PostUserAsync(User user)
         {
-            throw new NotImplementedException();
+            User addedUser =
+                await this.userService.AddUserAsync(user);
+
+            return Created(addedUser);
         }
     }
 }
