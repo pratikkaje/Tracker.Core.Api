@@ -8,6 +8,7 @@ using RESTFulSense.Controllers;
 using Tracker.Core.Api.Controllers;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Users;
+using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Transactions;
 using Tracker.Core.Api.Services.Foundations.Users;
 using Tynamix.ObjectFiller;
@@ -33,17 +34,29 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
         {
             var someInnerException = new Xeption();
             string someMessage = GetRandomString();
+            var someDictionaryData = GetRandomDictionaryData();
 
             return new TheoryData<Xeption>
             {
-                new TransactionValidationException(
+                new UserValidationException(
                     message: someMessage,
                     innerException: someInnerException),
 
-                new TransactionDependencyValidationException(
+                new UserDependencyValidationException(
                     message: someMessage,
-                    innerException: someInnerException)
+                    innerException: someInnerException,
+                    data: someDictionaryData)
             };
+        }
+
+        private static Dictionary<string, string[]> GetRandomDictionaryData()
+        {
+            var filler = new Filler<Dictionary<string, string[]>>();
+
+            filler.Setup()
+                .DictionaryItemCount(maxCount: 10);
+
+            return filler.Create();
         }
 
         private static string GetRandomString() =>
