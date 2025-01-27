@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 using Moq;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Controllers;
-using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
-using Tracker.Core.Api.Services.Foundations.Transactions;
+using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Services.Foundations.Users;
 using Tynamix.ObjectFiller;
 using Xeptions;
@@ -28,6 +26,23 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
             this.usersController =
                 new UsersController(
                     userService: this.userServiceMock.Object);
+        }
+
+        public static TheoryData<Xeption> ServerExceptions()
+        {
+            var someInnerException = new Xeption();
+            string someMessage = GetRandomString();
+
+            return new TheoryData<Xeption>
+            {
+                new UserDependencyException(
+                    message: someMessage,
+                    innerException: someInnerException),
+
+                new UserServiceException(
+                    message: someMessage,
+                    innerException: someInnerException)
+            };
         }
 
         public static TheoryData<Xeption> ValidationExceptions()

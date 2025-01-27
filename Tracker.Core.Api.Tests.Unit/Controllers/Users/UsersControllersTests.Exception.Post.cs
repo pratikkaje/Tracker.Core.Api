@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using RESTFulSense.Clients.Extensions;
+using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Xeptions;
 
@@ -30,6 +31,38 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
             this.userServiceMock.Setup(service =>
                 service.AddUserAsync(It.IsAny<User>()))
                     .ThrowsAsync(validationException);
+
+            // when
+            ActionResult<User> actualActionResult =
+                await this.usersController.PostUserAsync(someUser);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.userServiceMock.Verify(service =>
+                service.AddUserAsync(It.IsAny<User>()),
+                    Times.Once);
+
+            this.userServiceMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [MemberData(nameof(ServerExceptions))]
+        public async Task ShouldReturnInternalServerErrorOnPostIfServerErrorOccurredAsync(
+            Xeption serverException)
+        {
+            // given
+            User someUser = CreateRandomUser();
+
+            InternalServerErrorObjectResult expectedInternalServerErrorObjectResult =
+                InternalServerError(serverException);
+
+            var expectedActionResult =
+                new ActionResult<User>(expectedInternalServerErrorObjectResult);
+
+            this.userServiceMock.Setup(service =>
+                service.AddUserAsync(It.IsAny<User>()))
+                    .ThrowsAsync(serverException);
 
             // when
             ActionResult<User> actualActionResult =
