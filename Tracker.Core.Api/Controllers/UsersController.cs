@@ -55,7 +55,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet]
         public async ValueTask<ActionResult<IQueryable<User>>> GetUsersAsync()
         {
-            throw new NotImplementedException();
+            IQueryable<User> users = 
+                await this.userService.RetrieveAllUsersAsync();
+
+            return Ok(users);
         }
     }
 }
