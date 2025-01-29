@@ -55,10 +55,21 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet]
         public async ValueTask<ActionResult<IQueryable<User>>> GetUsersAsync()
         {
-            IQueryable<User> users = 
-                await this.userService.RetrieveAllUsersAsync();
+            try
+            {
+                IQueryable<User> users =
+                    await this.userService.RetrieveAllUsersAsync();
 
-            return Ok(users);
+                return Ok(users);
+            }
+            catch (UserDependencyException userDependencyException)
+            {
+                return InternalServerError(userDependencyException);
+            }
+            catch (UserServiceException userServiceException)
+            {
+                return InternalServerError(userServiceException);
+            }
         }
     }
 }
