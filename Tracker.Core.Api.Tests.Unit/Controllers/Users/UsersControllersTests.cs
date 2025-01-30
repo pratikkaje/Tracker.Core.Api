@@ -86,6 +86,15 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
         private static User CreateRandomUser() =>
             CreateRandomUserFiller().Create();
 
+        private static int GetRandomNumber() =>
+            new IntRange(min: 2, max: 10).GetValue();
+
+        private static IQueryable<User> CreateRandomUsers()
+        {
+            return CreateRandomUserFiller()
+                .Create(GetRandomNumber()).AsQueryable();
+        }
+
         private static Filler<User> CreateRandomUserFiller()
         {
             var filler = new Filler<User>();

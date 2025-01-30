@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
@@ -39,6 +41,26 @@ namespace Tracker.Core.Api.Controllers
             catch (UserDependencyValidationException userDependencyValidationException)
             {
                 return BadRequest(userDependencyValidationException.InnerException);
+            }
+            catch (UserDependencyException userDependencyException)
+            {
+                return InternalServerError(userDependencyException);
+            }
+            catch (UserServiceException userServiceException)
+            {
+                return InternalServerError(userServiceException);
+            }
+        }
+
+        [HttpGet]
+        public async ValueTask<ActionResult<IQueryable<User>>> GetUsersAsync()
+        {
+            try
+            {
+                IQueryable<User> users =
+                    await this.userService.RetrieveAllUsersAsync();
+
+                return Ok(users);
             }
             catch (UserDependencyException userDependencyException)
             {
