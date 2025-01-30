@@ -14,12 +14,12 @@ using Xeptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
 {
-    public partial class UsersControllersTests : RESTFulController
+    public partial class UsersControllerTests : RESTFulController
     {
         private readonly Mock<IUserService> userServiceMock;
         private readonly UsersController usersController;
 
-        public UsersControllersTests()
+        public UsersControllerTests()
         {
             this.userServiceMock = new Mock<IUserService>();
 

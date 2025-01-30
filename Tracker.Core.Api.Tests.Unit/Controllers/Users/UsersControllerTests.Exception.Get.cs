@@ -12,7 +12,7 @@ using Xeptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
 {
-    public partial class UsersControllersTests
+    public partial class UsersControllerTests
     {
         [Theory]
         [MemberData(nameof(ServerExceptions))]

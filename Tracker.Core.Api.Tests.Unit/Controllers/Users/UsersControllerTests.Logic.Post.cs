@@ -12,7 +12,7 @@ using Tracker.Core.Api.Models.Foundations.Users;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
 {
-    public partial class UsersControllersTests
+    public partial class UsersControllerTests
     {
         [Fact]
         public async Task ShouldReturnCreatedOnPostAsync()

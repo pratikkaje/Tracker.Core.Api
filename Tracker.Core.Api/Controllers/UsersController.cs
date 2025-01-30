@@ -71,5 +71,11 @@ namespace Tracker.Core.Api.Controllers
                 return InternalServerError(userServiceException);
             }
         }
+
+        [HttpGet("{userId}")]
+        public async ValueTask<ActionResult<User>> GetUserByIdAsync(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
