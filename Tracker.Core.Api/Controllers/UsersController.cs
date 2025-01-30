@@ -75,7 +75,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet("{userId}")]
         public async ValueTask<ActionResult<User>> GetUserByIdAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            User user = 
+                await this.userService.RetrieveUserByIdAsync(userId);
+
+            return Ok(user);
         }
     }
 }
