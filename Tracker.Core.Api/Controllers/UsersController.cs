@@ -75,10 +75,27 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet("{userId}")]
         public async ValueTask<ActionResult<User>> GetUserByIdAsync(Guid userId)
         {
-            User user = 
-                await this.userService.RetrieveUserByIdAsync(userId);
+            try
+            {
+                User user =
+                    await this.userService.RetrieveUserByIdAsync(userId);
 
-            return Ok(user);
+                return Ok(user);
+            }
+            catch (UserValidationException userValidationException)
+                when (userValidationException.InnerException is NotFoundUserException)
+            {
+                return NotFound(userValidationException.InnerException);
+            }
+            catch (UserValidationException userValidationException)
+            {
+                return BadRequest(userValidationException.InnerException);
+            }
+            catch (UserDependencyValidationException userDependencyValidationException)
+            {
+                return BadRequest(userDependencyValidationException.InnerException);
+            }
+
         }
     }
 }
