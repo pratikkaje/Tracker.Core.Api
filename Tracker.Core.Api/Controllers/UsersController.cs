@@ -71,5 +71,38 @@ namespace Tracker.Core.Api.Controllers
                 return InternalServerError(userServiceException);
             }
         }
+
+        [HttpGet("{userId}")]
+        public async ValueTask<ActionResult<User>> GetUserByIdAsync(Guid userId)
+        {
+            try
+            {
+                User user =
+                    await this.userService.RetrieveUserByIdAsync(userId);
+
+                return Ok(user);
+            }
+            catch (UserValidationException userValidationException)
+                when (userValidationException.InnerException is NotFoundUserException)
+            {
+                return NotFound(userValidationException.InnerException);
+            }
+            catch (UserValidationException userValidationException)
+            {
+                return BadRequest(userValidationException.InnerException);
+            }
+            catch (UserDependencyValidationException userDependencyValidationException)
+            {
+                return BadRequest(userDependencyValidationException.InnerException);
+            }
+            catch (UserDependencyException userDependencyException)
+            {
+                return InternalServerError(userDependencyException);
+            }
+            catch (UserServiceException userServiceException)
+            {
+                return InternalServerError(userServiceException);
+            }
+        }
     }
 }
