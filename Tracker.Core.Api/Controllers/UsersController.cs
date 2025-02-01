@@ -104,5 +104,11 @@ namespace Tracker.Core.Api.Controllers
                 return InternalServerError(userServiceException);
             }
         }
+
+        [HttpPut]
+        public async ValueTask<ActionResult<User>> PutUserAsync(User user)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
