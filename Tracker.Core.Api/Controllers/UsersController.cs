@@ -108,7 +108,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpPut]
         public async ValueTask<ActionResult<User>> PutUserAsync(User user)
         {
-            throw new NotImplementedException();
+            User modifiedUser = 
+                await this.userService.ModifyUserAsync(user);
+
+            return Ok(modifiedUser);
         }
     }
 }
