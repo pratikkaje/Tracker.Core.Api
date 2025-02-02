@@ -104,5 +104,43 @@ namespace Tracker.Core.Api.Controllers
                 return InternalServerError(userServiceException);
             }
         }
+
+        [HttpPut]
+        public async ValueTask<ActionResult<User>> PutUserAsync(User user)
+        {
+            try
+            {
+                User modifiedUser =
+                    await this.userService.ModifyUserAsync(user);
+
+                return Ok(modifiedUser);
+            }
+            catch (UserValidationException userValidationException)
+                when (userValidationException.InnerException is NotFoundUserException)
+            {
+                return NotFound(userValidationException.InnerException);
+            }
+            catch (UserValidationException userValidationException)
+            {
+                return BadRequest(userValidationException.InnerException);
+            }
+            catch (UserDependencyValidationException userDependencyValidationException)
+                when (userDependencyValidationException.InnerException is AlreadyExistsUserException)
+            {
+                return Conflict(userDependencyValidationException.InnerException);
+            }
+            catch (UserDependencyValidationException userDependencyValidationException)
+            {
+                return BadRequest(userDependencyValidationException.InnerException);
+            }
+            catch (UserDependencyException userDependencyException)
+            {
+                return InternalServerError(userDependencyException);
+            }
+            catch (UserServiceException userServiceException)
+            {
+                return InternalServerError(userServiceException);
+            }
+        }
     }
 }
