@@ -133,6 +133,14 @@ namespace Tracker.Core.Api.Controllers
             {
                 return BadRequest(userDependencyValidationException.InnerException);
             }
+            catch (UserDependencyException userDependencyException)
+            {
+                return InternalServerError(userDependencyException);
+            }
+            catch (UserServiceException userServiceException)
+            {
+                return InternalServerError(userServiceException);
+            }
         }
     }
 }
