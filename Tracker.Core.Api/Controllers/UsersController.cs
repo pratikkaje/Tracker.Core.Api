@@ -142,5 +142,11 @@ namespace Tracker.Core.Api.Controllers
                 return InternalServerError(userServiceException);
             }
         }
+
+        [HttpDelete("{userId}")]
+        public async ValueTask<ActionResult<User>> DeleteUserByIdAsync(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
