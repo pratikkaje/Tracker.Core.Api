@@ -6,7 +6,6 @@ using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Services.Foundations.Users;
-using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 
 namespace Tracker.Core.Api.Controllers
 {
@@ -170,6 +169,14 @@ namespace Tracker.Core.Api.Controllers
             catch (UserDependencyValidationException userDependencyValidationException)
             {
                 return BadRequest(userDependencyValidationException.InnerException);
+            }
+            catch (UserDependencyException userDependencyException)
+            {
+                return InternalServerError(userDependencyException);
+            }
+            catch (UserServiceException userServiceException)
+            {
+                return InternalServerError(userServiceException);
             }
         }
     }
