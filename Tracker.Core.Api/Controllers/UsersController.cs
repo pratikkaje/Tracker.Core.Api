@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Users;
-using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Users;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 
 namespace Tracker.Core.Api.Controllers
 {
@@ -146,10 +146,31 @@ namespace Tracker.Core.Api.Controllers
         [HttpDelete("{userId}")]
         public async ValueTask<ActionResult<User>> DeleteUserByIdAsync(Guid userId)
         {
-            User deleteUser =
-                await this.userService.RemoveUserByIdAsync(userId);
+            try
+            {
+                User deleteUser =
+                    await this.userService.RemoveUserByIdAsync(userId);
 
-            return Ok(deleteUser);
+                return Ok(deleteUser);
+            }
+            catch (UserValidationException userValidationException)
+                when (userValidationException.InnerException is NotFoundUserException)
+            {
+                return NotFound(userValidationException.InnerException);
+            }
+            catch (UserValidationException userValidationException)
+            {
+                return BadRequest(userValidationException.InnerException);
+            }
+            catch (UserDependencyValidationException userDependencyValidationException)
+                when (userDependencyValidationException.InnerException is LockedUserException)
+            {
+                return Locked(userDependencyValidationException.InnerException);
+            }
+            catch (UserDependencyValidationException userDependencyValidationException)
+            {
+                return BadRequest(userDependencyValidationException.InnerException);
+            }
         }
     }
 }
