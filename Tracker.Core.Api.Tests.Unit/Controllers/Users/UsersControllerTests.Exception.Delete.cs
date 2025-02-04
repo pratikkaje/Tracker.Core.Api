@@ -118,5 +118,49 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
 
             this.userServiceMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldReturnLockedOnDeleteIfRecordIsLockedAsync()
+        {
+            // given
+            Guid someId = Guid.NewGuid();
+            var someInnerException = new Exception();
+            string someMessage = GetRandomString();
+
+            var lockedUserException =
+                new LockedUserException(
+                    message: someMessage,
+                    innerException: someInnerException,
+                    data: someInnerException.Data);
+
+            var userDependencyValidationException =
+                new UserDependencyValidationException(
+                    message: someMessage,
+                    innerException: lockedUserException,
+                    data: lockedUserException.Data);
+
+            LockedObjectResult expectedConflictObjectResult =
+                Locked(lockedUserException);
+
+            var expectedActionResult =
+                new ActionResult<User>(expectedConflictObjectResult);
+
+            this.userServiceMock.Setup(service =>
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()))
+                    .ThrowsAsync(userDependencyValidationException);
+
+            // when
+            ActionResult<User> actualActionResult =
+                await this.usersController.DeleteUserByIdAsync(someId);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.userServiceMock.Verify(service =>
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()),
+                    Times.Once);
+
+            this.userServiceMock.VerifyNoOtherCalls();
+        }
     }
 }
