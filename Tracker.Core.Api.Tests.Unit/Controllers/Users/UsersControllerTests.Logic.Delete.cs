@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Force.DeepCloner;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -10,12 +11,12 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
     public partial class UsersControllerTests
     {
         [Fact]
-        public async Task ShouldReturnOkOnPutAsync()
+        public async Task ShouldRemoveUserOnDeleteByIdAsync()
         {
             // given
             User randomUser = CreateRandomUser();
-            User inputUser = randomUser;
-            User storageUser = inputUser.DeepClone();
+            Guid inputId = randomUser.Id;
+            User storageUser = randomUser;
             User expectedUser = storageUser.DeepClone();
 
             var expectedObjectResult =
@@ -25,19 +26,19 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
                 new ActionResult<User>(expectedObjectResult);
 
             userServiceMock
-                .Setup(service => service.ModifyUserAsync(inputUser))
+                .Setup(service => service.RemoveUserByIdAsync(It.IsAny<Guid>()))
                     .ReturnsAsync(storageUser);
 
             // when
             ActionResult<User> actualActionResult =
-                await usersController.PutUserAsync(randomUser);
+                await usersController.DeleteUserByIdAsync(inputId);
 
             // then
             actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
 
             userServiceMock
-               .Verify(service => service.ModifyUserAsync(inputUser),
-                   Times.Once);
+                .Verify(service => service.RemoveUserByIdAsync(It.IsAny<Guid>()),
+                    Times.Once);
 
             userServiceMock.VerifyNoOtherCalls();
         }

@@ -14,10 +14,10 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
     {
         [Theory]
         [MemberData(nameof(ValidationExceptions))]
-        public async Task ShouldReturnBadRequestOnPutIfValidationErrorOccursAsync(Xeption validationException)
+        public async Task ShouldReturnBadRequestOnDeleteIfValidationErrorOccursAsync(Xeption validationException)
         {
             // given
-            User someUser = CreateRandomUser();
+            Guid someId = Guid.NewGuid();
 
             BadRequestObjectResult expectedBadRequestObjectResult =
                 BadRequest(validationException.InnerException);
@@ -26,18 +26,18 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
                 new ActionResult<User>(expectedBadRequestObjectResult);
 
             this.userServiceMock.Setup(service =>
-                service.ModifyUserAsync(It.IsAny<User>()))
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()))
                     .ThrowsAsync(validationException);
 
             // when
             ActionResult<User> actualActionResult =
-                await this.usersController.PutUserAsync(someUser);
+                await this.usersController.DeleteUserByIdAsync(someId);
 
             // then
             actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
 
             this.userServiceMock.Verify(service =>
-                service.ModifyUserAsync(It.IsAny<User>()),
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()),
                     Times.Once);
 
             this.userServiceMock.VerifyNoOtherCalls();
@@ -45,11 +45,11 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
 
         [Theory]
         [MemberData(nameof(ServerExceptions))]
-        public async Task ShouldReturnInternalServerErrorOnPutIfServerErrorOccurredAsync(
+        public async Task ShouldReturnInternalServerErrorOnDeleteIfServerErrorOccurredAsync(
             Xeption validationException)
         {
             // given
-            User someUser = CreateRandomUser();
+            Guid someId = Guid.NewGuid();
 
             InternalServerErrorObjectResult expectedBadRequestObjectResult =
                 InternalServerError(validationException);
@@ -58,28 +58,28 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
                 new ActionResult<User>(expectedBadRequestObjectResult);
 
             this.userServiceMock.Setup(service =>
-                service.ModifyUserAsync(It.IsAny<User>()))
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()))
                     .ThrowsAsync(validationException);
 
             // when
             ActionResult<User> actualActionResult =
-                await this.usersController.PutUserAsync(someUser);
+                await this.usersController.DeleteUserByIdAsync(someId);
 
             // then
             actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
 
             this.userServiceMock.Verify(service =>
-                service.ModifyUserAsync(It.IsAny<User>()),
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()),
                     Times.Once);
 
             this.userServiceMock.VerifyNoOtherCalls();
         }
 
         [Fact]
-        public async Task ShouldReturnNotFoundOnPutIfItemDoesNotExistAsync()
+        public async Task ShouldReturnNotFoundOnDeleteIfItemDoesNotExistAsync()
         {
             // given
-            User someUser = CreateRandomUser();
+            Guid someId = Guid.NewGuid();
             string someMessage = GetRandomString();
 
             var notFoundUserException =
@@ -98,33 +98,33 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
                 new ActionResult<User>(expectedNotFoundObjectResult);
 
             this.userServiceMock.Setup(service =>
-                service.ModifyUserAsync(It.IsAny<User>()))
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()))
                     .ThrowsAsync(userValidationException);
 
             // when
             ActionResult<User> actualActionResult =
-                await this.usersController.PutUserAsync(someUser);
+                await this.usersController.DeleteUserByIdAsync(someId);
 
             // then
             actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
 
             this.userServiceMock.Verify(service =>
-                service.ModifyUserAsync(It.IsAny<User>()),
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()),
                     Times.Once);
 
             this.userServiceMock.VerifyNoOtherCalls();
         }
 
         [Fact]
-        public async Task ShouldReturnConflictOnPutIfAlreadyExistsUserErrorOccursAsync()
+        public async Task ShouldReturnLockedOnDeleteIfRecordIsLockedAsync()
         {
             // given
-            User someUser = CreateRandomUser();
+            Guid someId = Guid.NewGuid();
             var someInnerException = new Exception();
             string someMessage = GetRandomString();
 
-            var alreadyExistsUserException =
-                new AlreadyExistsUserException(
+            var lockedUserException =
+                new LockedUserException(
                     message: someMessage,
                     innerException: someInnerException,
                     data: someInnerException.Data);
@@ -132,33 +132,31 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Users
             var userDependencyValidationException =
                 new UserDependencyValidationException(
                     message: someMessage,
-                    innerException: alreadyExistsUserException,
-                    data: alreadyExistsUserException.Data);
+                    innerException: lockedUserException,
+                    data: lockedUserException.Data);
 
-
-            ConflictObjectResult expectedConflictObjectResult =
-                Conflict(alreadyExistsUserException);
+            LockedObjectResult expectedConflictObjectResult =
+                Locked(lockedUserException);
 
             var expectedActionResult =
                 new ActionResult<User>(expectedConflictObjectResult);
 
             this.userServiceMock.Setup(service =>
-                service.ModifyUserAsync(It.IsAny<User>()))
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()))
                     .ThrowsAsync(userDependencyValidationException);
 
             // when
             ActionResult<User> actualActionResult =
-                await this.usersController.PutUserAsync(someUser);
+                await this.usersController.DeleteUserByIdAsync(someId);
 
             // then
             actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
 
             this.userServiceMock.Verify(service =>
-                service.ModifyUserAsync(It.IsAny<User>()),
+                service.RemoveUserByIdAsync(It.IsAny<Guid>()),
                     Times.Once);
 
             this.userServiceMock.VerifyNoOtherCalls();
         }
-
     }
 }
