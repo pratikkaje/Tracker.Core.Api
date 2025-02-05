@@ -20,7 +20,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpPost]
         public async ValueTask<ActionResult<Category>> PostCategoryAsync(Category category)
         {
-            throw new NotImplementedException();
+            Category addedCategory =
+                await this.categoryService.AddCategoryAsync(category);
+
+            return Created(addedCategory);
         }
     }
 }
