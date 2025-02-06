@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using RESTFulSense.Clients.Extensions;
+using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Xeptions;
@@ -45,5 +46,38 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
 
             this.categoryServiceMock.VerifyNoOtherCalls();
         }
+
+        [Theory]
+        [MemberData(nameof(ServerExceptions))]
+        public async Task ShouldReturnInternalServerErrorOnPostIfServerErrorOccurredAsync(
+            Xeption serverException)
+        {
+            // given
+            Category someCategory = CreateRandomCategory();
+
+            InternalServerErrorObjectResult expectedInternalServerErrorObjectResult =
+                InternalServerError(serverException);
+
+            var expectedActionResult =
+                new ActionResult<Category>(expectedInternalServerErrorObjectResult);
+
+            this.categoryServiceMock.Setup(service =>
+                service.AddCategoryAsync(It.IsAny<Category>()))
+                    .ThrowsAsync(serverException);
+
+            // when
+            ActionResult<Category> actualActionResult =
+                await this.categoriesController.PostCategoryAsync(someCategory);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.categoryServiceMock.Verify(service =>
+                service.AddCategoryAsync(It.IsAny<Category>()),
+                    Times.Once);
+
+            this.categoryServiceMock.VerifyNoOtherCalls();
+        }
+
     }
 }

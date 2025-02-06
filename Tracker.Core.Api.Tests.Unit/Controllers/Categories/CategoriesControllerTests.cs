@@ -46,6 +46,23 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
             };
         }
 
+        public static TheoryData<Xeption> ServerExceptions()
+        {
+            var someInnerException = new Xeption();
+            string someMessage = GetRandomString();
+
+            return new TheoryData<Xeption>
+            {
+                new CategoryDependencyException(
+                    message: someMessage,
+                    innerException: someInnerException),
+
+                new CategoryServiceException(
+                    message: someMessage,
+                    innerException: someInnerException)
+            };
+        }
+
         private static string GetRandomString() =>
             new MnemonicString().GetValue();
 
