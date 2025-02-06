@@ -9,6 +9,8 @@ using Moq;
 using RESTFulSense.Clients.Extensions;
 using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Users;
 using Xeptions;
 
@@ -64,6 +66,49 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
             this.categoryServiceMock.Setup(service =>
                 service.AddCategoryAsync(It.IsAny<Category>()))
                     .ThrowsAsync(serverException);
+
+            // when
+            ActionResult<Category> actualActionResult =
+                await this.categoriesController.PostCategoryAsync(someCategory);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.categoryServiceMock.Verify(service =>
+                service.AddCategoryAsync(It.IsAny<Category>()),
+                    Times.Once);
+
+            this.categoryServiceMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldReturnConflictOnPostIfAlreadyExistsCategoryErrorOccurredAsync()
+        {
+            // given
+            Category someCategory = CreateRandomCategory();
+            var someInnerException = new Exception();
+            string someMessage = GetRandomString();
+
+            var alreadyExistsCategoryException =
+                new AlreadyExistsCategoryException(
+                    message: someMessage,
+                    innerException: someInnerException,
+                    data: someInnerException.Data);
+
+            var categoryDependencyValidationException =
+                new CategoryDependencyValidationException(
+                    message: someMessage,
+                    innerException: alreadyExistsCategoryException);
+
+            ConflictObjectResult expectedConflictObjectResult =
+                Conflict(alreadyExistsCategoryException);
+
+            var expectedActionResult =
+                new ActionResult<Category>(expectedConflictObjectResult);
+
+            this.categoryServiceMock.Setup(service =>
+                service.AddCategoryAsync(It.IsAny<Category>()))
+                    .ThrowsAsync(categoryDependencyValidationException);
 
             // when
             ActionResult<Category> actualActionResult =
