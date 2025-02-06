@@ -4,15 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Moq;
+using RESTFulSense.Controllers;
 using Tracker.Core.Api.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Categories;
 using Tracker.Core.Api.Services.Foundations.Transactions;
 using Tynamix.ObjectFiller;
+using Xeptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
 {
-    public partial class CategoriesControllerTests
+    public partial class CategoriesControllerTests : RESTFulController
     {
         private readonly Mock<ICategoryService> categoryServiceMock;
         private readonly CategoriesController categoriesController;
@@ -24,6 +27,26 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
                 new CategoriesController(
                     categoryService: this.categoryServiceMock.Object);
         }
+
+        public static TheoryData<Xeption> ValidationExceptions()
+        {
+            var someInnerException = new Xeption();
+            string someMessage = GetRandomString();
+
+            return new TheoryData<Xeption>
+            {
+                new TransactionValidationException(
+                    message: someMessage,
+                    innerException: someInnerException),
+
+                new TransactionDependencyValidationException(
+                    message: someMessage,
+                    innerException: someInnerException)
+            };
+        }
+
+        private static string GetRandomString() =>
+            new MnemonicString().GetValue();
 
         private static DateTimeOffset GetRandomDateTimeOffset() =>
             new DateTimeRange(earliestDate: new DateTime()).GetValue();
