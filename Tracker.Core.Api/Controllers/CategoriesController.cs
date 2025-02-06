@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
+using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Categories;
 
 namespace Tracker.Core.Api.Controllers
@@ -20,10 +22,26 @@ namespace Tracker.Core.Api.Controllers
         [HttpPost]
         public async ValueTask<ActionResult<Category>> PostCategoryAsync(Category category)
         {
-            Category addedCategory =
-                await this.categoryService.AddCategoryAsync(category);
+            try
+            {
+                Category addedCategory =
+                    await this.categoryService.AddCategoryAsync(category);
 
-            return Created(addedCategory);
+                return Created(addedCategory);
+            }
+            catch (CategoryValidationException categoryValidationException)
+            {
+                return BadRequest(categoryValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+                when (categoryDependencyValidationException.InnerException is AlreadyExistsCategoryException)
+            {
+                return Conflict(categoryDependencyValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+            {
+                return BadRequest(categoryDependencyValidationException.InnerException);
+            }
         }
     }
 }

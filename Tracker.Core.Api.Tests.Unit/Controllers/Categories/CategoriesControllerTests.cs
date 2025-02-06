@@ -7,6 +7,7 @@ using Moq;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Categories;
 using Tracker.Core.Api.Services.Foundations.Transactions;
@@ -35,11 +36,11 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
 
             return new TheoryData<Xeption>
             {
-                new TransactionValidationException(
+                new CategoryValidationException(
                     message: someMessage,
                     innerException: someInnerException),
 
-                new TransactionDependencyValidationException(
+                new CategoryDependencyValidationException(
                     message: someMessage,
                     innerException: someInnerException)
             };
