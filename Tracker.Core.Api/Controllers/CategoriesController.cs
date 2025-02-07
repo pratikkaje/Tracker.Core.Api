@@ -7,6 +7,7 @@ using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
+using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Services.Foundations.Categories;
 
 namespace Tracker.Core.Api.Controllers
@@ -56,7 +57,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet]
         public async ValueTask<ActionResult<IQueryable<Category>>> GetCategoriesAsync()
         {
-            throw new NotImplementedException();
+            IQueryable<Category> categories =
+                await this.categoryService.RetrieveAllCategoriesAsync();
+
+            return Ok(categories);
         }
     }
 }
