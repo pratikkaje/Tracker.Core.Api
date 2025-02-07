@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +51,12 @@ namespace Tracker.Core.Api.Controllers
             {
                 return InternalServerError(categoryServiceException);
             }
+        }
+
+        [HttpGet]
+        public async ValueTask<ActionResult<IQueryable<Category>>> GetCategoriesAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }
