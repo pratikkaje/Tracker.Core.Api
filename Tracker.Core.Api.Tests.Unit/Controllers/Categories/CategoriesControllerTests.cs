@@ -33,6 +33,7 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
         {
             var someInnerException = new Xeption();
             string someMessage = GetRandomString();
+            var someDictionaryData = GetRandomDictionaryData();
 
             return new TheoryData<Xeption>
             {
@@ -42,7 +43,8 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
 
                 new CategoryDependencyValidationException(
                     message: someMessage,
-                    innerException: someInnerException)
+                    innerException: someInnerException,
+                    data: someDictionaryData)
             };
         }
 
@@ -63,11 +65,27 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
             };
         }
 
+        private static Dictionary<string, string[]> GetRandomDictionaryData()
+        {
+            var filler = new Filler<Dictionary<string, string[]>>();
+
+            filler.Setup()
+                .DictionaryItemCount(maxCount: 10);
+
+            return filler.Create();
+        }
+
         private static string GetRandomString() =>
             new MnemonicString().GetValue();
 
         private static DateTimeOffset GetRandomDateTimeOffset() =>
             new DateTimeRange(earliestDate: new DateTime()).GetValue();
+
+        private static int GetRandomNumber() =>
+            new IntRange(min: 2, max: 10).GetValue();
+
+        private static IQueryable<Category> CreateRandomCategories() =>
+            CreateCategoryFiller().Create(count: GetRandomNumber()).AsQueryable();
 
         private static Category CreateRandomCategory() =>
             CreateCategoryFiller().Create();
