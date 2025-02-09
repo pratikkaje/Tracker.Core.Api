@@ -78,7 +78,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet("{categoryId}")]
         public async ValueTask<ActionResult<Category>> GetCategoryByIdAsync(Guid categoryId)
         {
-            throw new NotImplementedException();
+            Category category =
+                await this.categoryService.RetrieveCategoryByIdAsync(categoryId);
+
+            return Ok(category);
         }
     }
 }
