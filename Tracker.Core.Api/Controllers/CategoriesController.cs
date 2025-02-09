@@ -74,5 +74,11 @@ namespace Tracker.Core.Api.Controllers
                 return InternalServerError(categoryServiceException);
             }
         }
+
+        [HttpGet("{categoryId}")]
+        public async ValueTask<ActionResult<Category>> GetCategoryByIdAsync(Guid categoryId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
