@@ -78,10 +78,26 @@ namespace Tracker.Core.Api.Controllers
         [HttpGet("{categoryId}")]
         public async ValueTask<ActionResult<Category>> GetCategoryByIdAsync(Guid categoryId)
         {
-            Category category =
-                await this.categoryService.RetrieveCategoryByIdAsync(categoryId);
+            try
+            {
+                Category category =
+                    await this.categoryService.RetrieveCategoryByIdAsync(categoryId);
 
-            return Ok(category);
+                return Ok(category);
+            }
+            catch (CategoryValidationException categoryValidationException)
+                when (categoryValidationException.InnerException is NotFoundCategoryException)
+            {
+                return NotFound(categoryValidationException.InnerException);
+            }
+            catch (CategoryValidationException categoryValidationException)
+            {
+                return BadRequest(categoryValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+            {
+                return BadRequest(categoryDependencyValidationException.InnerException);
+            }
         }
     }
 }
