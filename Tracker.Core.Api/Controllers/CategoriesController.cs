@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Users;
-using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Categories;
 
 namespace Tracker.Core.Api.Controllers
@@ -97,6 +94,14 @@ namespace Tracker.Core.Api.Controllers
             catch (CategoryDependencyValidationException categoryDependencyValidationException)
             {
                 return BadRequest(categoryDependencyValidationException.InnerException);
+            }
+            catch (CategoryDependencyException categoryDependencyException)
+            {
+                return InternalServerError(categoryDependencyException);
+            }
+            catch (CategoryServiceException categoryServiceException)
+            {
+                return InternalServerError(categoryServiceException);
             }
         }
     }
