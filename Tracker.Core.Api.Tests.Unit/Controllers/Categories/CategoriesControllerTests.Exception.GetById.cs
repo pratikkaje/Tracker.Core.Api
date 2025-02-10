@@ -45,5 +45,39 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
 
             this.categoryServiceMock.VerifyNoOtherCalls();
         }
+
+        [Theory]
+        [MemberData(nameof(ServerExceptions))]
+        public async Task ShouldReturnInternalServerErrorOnGetByIdIfServerErrorOccursAsync(
+            Xeption serverException)
+        {
+            // given
+            Guid someId = Guid.NewGuid();
+
+            InternalServerErrorObjectResult expectedInternalServerErrorObjectResult =
+                InternalServerError(serverException);
+
+            var expectedActionResult =
+                new ActionResult<Category>(expectedInternalServerErrorObjectResult);
+
+            this.categoryServiceMock.Setup(service =>
+                service.RetrieveCategoryByIdAsync(It.IsAny<Guid>()))
+                    .ThrowsAsync(serverException);
+
+            // when
+            ActionResult<Category> actualActionResult =
+                await this.categoriesController.GetCategoryByIdAsync(someId);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.categoryServiceMock.Verify(service =>
+                service.RetrieveCategoryByIdAsync(It.IsAny<Guid>()),
+                    Times.Once);
+
+            this.categoryServiceMock.VerifyNoOtherCalls();
+        }
+
+
     }
 }
