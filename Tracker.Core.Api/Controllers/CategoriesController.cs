@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Transactions.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Users;
-using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Categories;
 
 namespace Tracker.Core.Api.Controllers
@@ -64,6 +61,39 @@ namespace Tracker.Core.Api.Controllers
                     await this.categoryService.RetrieveAllCategoriesAsync();
 
                 return Ok(categories);
+            }
+            catch (CategoryDependencyException categoryDependencyException)
+            {
+                return InternalServerError(categoryDependencyException);
+            }
+            catch (CategoryServiceException categoryServiceException)
+            {
+                return InternalServerError(categoryServiceException);
+            }
+        }
+
+        [HttpGet("{categoryId}")]
+        public async ValueTask<ActionResult<Category>> GetCategoryByIdAsync(Guid categoryId)
+        {
+            try
+            {
+                Category category =
+                    await this.categoryService.RetrieveCategoryByIdAsync(categoryId);
+
+                return Ok(category);
+            }
+            catch (CategoryValidationException categoryValidationException)
+                when (categoryValidationException.InnerException is NotFoundCategoryException)
+            {
+                return NotFound(categoryValidationException.InnerException);
+            }
+            catch (CategoryValidationException categoryValidationException)
+            {
+                return BadRequest(categoryValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+            {
+                return BadRequest(categoryDependencyValidationException.InnerException);
             }
             catch (CategoryDependencyException categoryDependencyException)
             {
