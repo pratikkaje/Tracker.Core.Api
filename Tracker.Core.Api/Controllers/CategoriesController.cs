@@ -109,7 +109,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpPut]
         public async ValueTask<ActionResult<Category>> PutCategoryAsync(Category category)
         {
-            throw new NotImplementedException();
+            Category modifiedCategory =
+                await this.categoryService.ModifyCategoryAsync(category);
+
+            return Ok(modifiedCategory);
         }
     }
 }
