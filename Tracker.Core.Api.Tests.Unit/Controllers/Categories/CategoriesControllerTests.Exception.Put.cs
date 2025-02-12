@@ -120,5 +120,50 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
             this.categoryServiceMock.VerifyNoOtherCalls();
         }
 
+        [Fact]
+        public async Task ShouldReturnConflictOnPutIfAlreadyExistsCategoryErrorOccursAsync()
+        {
+            // given
+            Category someCategory = CreateRandomCategory();
+            var someInnerException = new Exception();
+            string someMessage = GetRandomString();
+
+            var alreadyExistsCategoryException =
+                new AlreadyExistsCategoryException(
+                    message: someMessage,
+                    innerException: someInnerException,
+                    data: someInnerException.Data);
+
+            var categoryDependencyValidationException =
+                new CategoryDependencyValidationException(
+                    message: someMessage,
+                    innerException: alreadyExistsCategoryException,
+                    data: alreadyExistsCategoryException.Data);
+
+
+            ConflictObjectResult expectedConflictObjectResult =
+                Conflict(alreadyExistsCategoryException);
+
+            var expectedActionResult =
+                new ActionResult<Category>(expectedConflictObjectResult);
+
+            this.categoryServiceMock.Setup(service =>
+                service.ModifyCategoryAsync(It.IsAny<Category>()))
+                    .ThrowsAsync(categoryDependencyValidationException);
+
+            // when
+            ActionResult<Category> actualActionResult =
+                await this.categoriesController.PutCategoryAsync(someCategory);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.categoryServiceMock.Verify(service =>
+                service.ModifyCategoryAsync(It.IsAny<Category>()),
+                    Times.Once);
+
+            this.categoryServiceMock.VerifyNoOtherCalls();
+        }
+
     }
 }

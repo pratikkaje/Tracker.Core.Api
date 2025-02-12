@@ -127,9 +127,9 @@ namespace Tracker.Core.Api.Controllers
                 return BadRequest(categoryValidationException.InnerException);
             }
             catch (CategoryDependencyValidationException categoryDependencyValidationException)
-                when (categoryDependencyValidationException.InnerException is LockedCategoryException)
+                when (categoryDependencyValidationException.InnerException is AlreadyExistsCategoryException)
             {
-                return Locked(categoryDependencyValidationException.InnerException);
+                return Conflict(categoryDependencyValidationException.InnerException);
             }
             catch (CategoryDependencyValidationException categoryDependencyValidationException)
             {
@@ -143,7 +143,6 @@ namespace Tracker.Core.Api.Controllers
             {
                 return InternalServerError(categoryServiceException);
             }
-
         }
     }
 }
