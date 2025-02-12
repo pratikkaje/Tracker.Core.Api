@@ -135,6 +135,14 @@ namespace Tracker.Core.Api.Controllers
             {
                 return BadRequest(categoryDependencyValidationException.InnerException);
             }
+            catch (CategoryDependencyException categoryDependencyException)
+            {
+                return InternalServerError(categoryDependencyException);
+            }
+            catch (CategoryServiceException categoryServiceException)
+            {
+                return InternalServerError(categoryServiceException);
+            }
 
         }
     }
