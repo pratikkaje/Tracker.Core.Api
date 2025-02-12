@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Force.DeepCloner;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using RESTFulSense.Clients.Extensions;
-using Tracker.Core.Api.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories

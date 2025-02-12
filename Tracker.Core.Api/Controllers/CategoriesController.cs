@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Users;
-using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Categories;
 
 namespace Tracker.Core.Api.Controllers
@@ -112,7 +109,7 @@ namespace Tracker.Core.Api.Controllers
         {
             try
             {
-                Category modifiedCategory = 
+                Category modifiedCategory =
                     await this.categoryService.ModifyCategoryAsync(category);
 
                 return Ok(modifiedCategory);
