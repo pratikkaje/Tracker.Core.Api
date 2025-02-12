@@ -7,6 +7,7 @@ using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Users;
+using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Tracker.Core.Api.Services.Foundations.Categories;
 
 namespace Tracker.Core.Api.Controllers
@@ -109,10 +110,32 @@ namespace Tracker.Core.Api.Controllers
         [HttpPut]
         public async ValueTask<ActionResult<Category>> PutCategoryAsync(Category category)
         {
-            Category modifiedCategory =
-                await this.categoryService.ModifyCategoryAsync(category);
+            try
+            {
+                Category modifiedCategory = 
+                    await this.categoryService.ModifyCategoryAsync(category);
 
-            return Ok(modifiedCategory);
+                return Ok(modifiedCategory);
+            }
+            catch (CategoryValidationException categoryValidationException)
+                when (categoryValidationException.InnerException is NotFoundCategoryException)
+            {
+                return NotFound(categoryValidationException.InnerException);
+            }
+            catch (CategoryValidationException categoryValidationException)
+            {
+                return BadRequest(categoryValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+                when (categoryDependencyValidationException.InnerException is LockedCategoryException)
+            {
+                return Locked(categoryDependencyValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+            {
+                return BadRequest(categoryDependencyValidationException.InnerException);
+            }
+
         }
     }
 }
