@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
@@ -90,6 +89,44 @@ namespace Tracker.Core.Api.Controllers
             catch (CategoryValidationException categoryValidationException)
             {
                 return BadRequest(categoryValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+            {
+                return BadRequest(categoryDependencyValidationException.InnerException);
+            }
+            catch (CategoryDependencyException categoryDependencyException)
+            {
+                return InternalServerError(categoryDependencyException);
+            }
+            catch (CategoryServiceException categoryServiceException)
+            {
+                return InternalServerError(categoryServiceException);
+            }
+        }
+
+        [HttpPut]
+        public async ValueTask<ActionResult<Category>> PutCategoryAsync(Category category)
+        {
+            try
+            {
+                Category modifiedCategory =
+                    await this.categoryService.ModifyCategoryAsync(category);
+
+                return Ok(modifiedCategory);
+            }
+            catch (CategoryValidationException categoryValidationException)
+                when (categoryValidationException.InnerException is NotFoundCategoryException)
+            {
+                return NotFound(categoryValidationException.InnerException);
+            }
+            catch (CategoryValidationException categoryValidationException)
+            {
+                return BadRequest(categoryValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+                when (categoryDependencyValidationException.InnerException is AlreadyExistsCategoryException)
+            {
+                return Conflict(categoryDependencyValidationException.InnerException);
             }
             catch (CategoryDependencyValidationException categoryDependencyValidationException)
             {

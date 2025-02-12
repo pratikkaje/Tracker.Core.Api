@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using RESTFulSense.Clients.Extensions;
 using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Categories;
-using Tracker.Core.Api.Models.Foundations.Users;
 using Xeptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories

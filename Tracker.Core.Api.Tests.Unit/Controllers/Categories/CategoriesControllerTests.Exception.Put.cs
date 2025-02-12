@@ -14,7 +14,7 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
     {
         [Theory]
         [MemberData(nameof(ValidationExceptions))]
-        public async Task ShouldReturnBadRequestOnPostIfValidationErrorOccursAsync(Xeption validationException)
+        public async Task ShouldReturnBadRequestOnPutIfValidationErrorOccursAsync(Xeption validationException)
         {
             // given
             Category someCategory = CreateRandomCategory();
@@ -26,18 +26,18 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
                 new ActionResult<Category>(expectedBadRequestObjectResult);
 
             this.categoryServiceMock.Setup(service =>
-                service.AddCategoryAsync(It.IsAny<Category>()))
+                service.ModifyCategoryAsync(It.IsAny<Category>()))
                     .ThrowsAsync(validationException);
 
             // when
             ActionResult<Category> actualActionResult =
-                await this.categoriesController.PostCategoryAsync(someCategory);
+                await this.categoriesController.PutCategoryAsync(someCategory);
 
             // then
             actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
 
             this.categoryServiceMock.Verify(service =>
-                service.AddCategoryAsync(It.IsAny<Category>()),
+                service.ModifyCategoryAsync(It.IsAny<Category>()),
                     Times.Once);
 
             this.categoryServiceMock.VerifyNoOtherCalls();
@@ -45,38 +45,78 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
 
         [Theory]
         [MemberData(nameof(ServerExceptions))]
-        public async Task ShouldReturnInternalServerErrorOnPostIfServerErrorOccurredAsync(
-            Xeption serverException)
+        public async Task ShouldReturnInternalServerErrorOnPutIfServerErrorOccurredAsync(
+            Xeption validationException)
         {
             // given
             Category someCategory = CreateRandomCategory();
 
-            InternalServerErrorObjectResult expectedInternalServerErrorObjectResult =
-                InternalServerError(serverException);
+            InternalServerErrorObjectResult expectedBadRequestObjectResult =
+                InternalServerError(validationException);
 
             var expectedActionResult =
-                new ActionResult<Category>(expectedInternalServerErrorObjectResult);
+                new ActionResult<Category>(expectedBadRequestObjectResult);
 
             this.categoryServiceMock.Setup(service =>
-                service.AddCategoryAsync(It.IsAny<Category>()))
-                    .ThrowsAsync(serverException);
+                service.ModifyCategoryAsync(It.IsAny<Category>()))
+                    .ThrowsAsync(validationException);
 
             // when
             ActionResult<Category> actualActionResult =
-                await this.categoriesController.PostCategoryAsync(someCategory);
+                await this.categoriesController.PutCategoryAsync(someCategory);
 
             // then
             actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
 
             this.categoryServiceMock.Verify(service =>
-                service.AddCategoryAsync(It.IsAny<Category>()),
+                service.ModifyCategoryAsync(It.IsAny<Category>()),
                     Times.Once);
 
             this.categoryServiceMock.VerifyNoOtherCalls();
         }
 
         [Fact]
-        public async Task ShouldReturnConflictOnPostIfAlreadyExistsCategoryErrorOccurredAsync()
+        public async Task ShouldReturnNotFoundOnPutIfItemDoesNotExistAsync()
+        {
+            // given
+            Category someCategory = CreateRandomCategory();
+            string someMessage = GetRandomString();
+
+            var notFoundCategoryException =
+                new NotFoundCategoryException(
+                    message: someMessage);
+
+            var categoryValidationException =
+                new CategoryValidationException(
+                    message: someMessage,
+                    innerException: notFoundCategoryException);
+
+            NotFoundObjectResult expectedNotFoundObjectResult =
+                NotFound(notFoundCategoryException);
+
+            var expectedActionResult =
+                new ActionResult<Category>(expectedNotFoundObjectResult);
+
+            this.categoryServiceMock.Setup(service =>
+                service.ModifyCategoryAsync(It.IsAny<Category>()))
+                    .ThrowsAsync(categoryValidationException);
+
+            // when
+            ActionResult<Category> actualActionResult =
+                await this.categoriesController.PutCategoryAsync(someCategory);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.categoryServiceMock.Verify(service =>
+                service.ModifyCategoryAsync(It.IsAny<Category>()),
+                    Times.Once);
+
+            this.categoryServiceMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldReturnConflictOnPutIfAlreadyExistsCategoryErrorOccursAsync()
         {
             // given
             Category someCategory = CreateRandomCategory();
@@ -92,7 +132,9 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
             var categoryDependencyValidationException =
                 new CategoryDependencyValidationException(
                     message: someMessage,
-                    innerException: alreadyExistsCategoryException);
+                    innerException: alreadyExistsCategoryException,
+                    data: alreadyExistsCategoryException.Data);
+
 
             ConflictObjectResult expectedConflictObjectResult =
                 Conflict(alreadyExistsCategoryException);
@@ -101,18 +143,18 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
                 new ActionResult<Category>(expectedConflictObjectResult);
 
             this.categoryServiceMock.Setup(service =>
-                service.AddCategoryAsync(It.IsAny<Category>()))
+                service.ModifyCategoryAsync(It.IsAny<Category>()))
                     .ThrowsAsync(categoryDependencyValidationException);
 
             // when
             ActionResult<Category> actualActionResult =
-                await this.categoriesController.PostCategoryAsync(someCategory);
+                await this.categoriesController.PutCategoryAsync(someCategory);
 
             // then
             actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
 
             this.categoryServiceMock.Verify(service =>
-                service.AddCategoryAsync(It.IsAny<Category>()),
+                service.ModifyCategoryAsync(It.IsAny<Category>()),
                     Times.Once);
 
             this.categoryServiceMock.VerifyNoOtherCalls();

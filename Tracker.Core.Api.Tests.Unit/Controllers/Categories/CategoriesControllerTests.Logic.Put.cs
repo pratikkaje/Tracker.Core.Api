@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Force.DeepCloner;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -11,12 +10,12 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
     public partial class CategoriesControllerTests
     {
         [Fact]
-        public async Task ShouldReturnOkWithRecordOnGetByIdAsync()
+        public async Task ShouldReturnOkOnPutAsync()
         {
             // given
             Category randomCategory = CreateRandomCategory();
-            Guid inputId = randomCategory.Id;
-            Category storageCategory = randomCategory;
+            Category inputCategory = randomCategory;
+            Category storageCategory = inputCategory.DeepClone();
             Category expectedCategory = storageCategory.DeepClone();
 
             var expectedObjectResult =
@@ -25,21 +24,22 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
             var expectedActionResult =
                 new ActionResult<Category>(expectedObjectResult);
 
-            this.categoryServiceMock.Setup(service =>
-                service.RetrieveCategoryByIdAsync(inputId))
+            categoryServiceMock
+                .Setup(service => service.ModifyCategoryAsync(inputCategory))
                     .ReturnsAsync(storageCategory);
+
             // when
             ActionResult<Category> actualActionResult =
-                await categoriesController.GetCategoryByIdAsync(inputId);
+                await categoriesController.PutCategoryAsync(randomCategory);
 
             // then
             actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
 
-            this.categoryServiceMock.Verify(service =>
-                service.RetrieveCategoryByIdAsync(inputId),
-                    Times.Once());
+            categoryServiceMock
+               .Verify(service => service.ModifyCategoryAsync(inputCategory),
+                   Times.Once);
 
-            this.categoryServiceMock.VerifyNoOtherCalls();
+            categoryServiceMock.VerifyNoOtherCalls();
         }
     }
 }
