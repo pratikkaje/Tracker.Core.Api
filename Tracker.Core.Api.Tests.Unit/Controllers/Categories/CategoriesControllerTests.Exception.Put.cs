@@ -8,7 +8,9 @@ using Moq;
 using RESTFulSense.Clients.Extensions;
 using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Categories;
+using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
 using Tracker.Core.Api.Models.Foundations.Users;
+using Tracker.Core.Api.Models.Foundations.Users.Exceptions;
 using Xeptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
@@ -77,5 +79,46 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
 
             this.categoryServiceMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldReturnNotFoundOnPutIfItemDoesNotExistAsync()
+        {
+            // given
+            Category someCategory = CreateRandomCategory();
+            string someMessage = GetRandomString();
+
+            var notFoundCategoryException =
+                new NotFoundCategoryException(
+                    message: someMessage);
+
+            var categoryValidationException =
+                new CategoryValidationException(
+                    message: someMessage,
+                    innerException: notFoundCategoryException);
+
+            NotFoundObjectResult expectedNotFoundObjectResult =
+                NotFound(notFoundCategoryException);
+
+            var expectedActionResult =
+                new ActionResult<Category>(expectedNotFoundObjectResult);
+
+            this.categoryServiceMock.Setup(service =>
+                service.ModifyCategoryAsync(It.IsAny<Category>()))
+                    .ThrowsAsync(categoryValidationException);
+
+            // when
+            ActionResult<Category> actualActionResult =
+                await this.categoriesController.PutCategoryAsync(someCategory);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.categoryServiceMock.Verify(service =>
+                service.ModifyCategoryAsync(It.IsAny<Category>()),
+                    Times.Once);
+
+            this.categoryServiceMock.VerifyNoOtherCalls();
+        }
+
     }
 }
