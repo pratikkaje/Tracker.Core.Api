@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
+using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Services.Foundations.Categories;
 
 namespace Tracker.Core.Api.Controllers
@@ -140,6 +141,12 @@ namespace Tracker.Core.Api.Controllers
             {
                 return InternalServerError(categoryServiceException);
             }
+        }
+
+        [HttpDelete("{categoryId}")]
+        public async ValueTask<ActionResult<Category>> DeleteCategoryByIdAsync(Guid categoryId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
