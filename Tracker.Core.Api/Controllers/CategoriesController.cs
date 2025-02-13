@@ -146,7 +146,10 @@ namespace Tracker.Core.Api.Controllers
         [HttpDelete("{categoryId}")]
         public async ValueTask<ActionResult<Category>> DeleteCategoryByIdAsync(Guid categoryId)
         {
-            throw new NotImplementedException();
+            Category deleteCategory =
+                await this.categoryService.RemoveCategoryByIdAsync(categoryId);
+
+            return Ok(deleteCategory);
         }
     }
 }
