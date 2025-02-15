@@ -9,6 +9,7 @@ using RESTFulSense.Clients.Extensions;
 using RESTFulSense.Models;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Xeptions;
+using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
 
 namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
 {
@@ -62,6 +63,46 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
             this.categoryServiceMock.Setup(service =>
                 service.RemoveCategoryByIdAsync(It.IsAny<Guid>()))
                     .ThrowsAsync(validationException);
+
+            // when
+            ActionResult<Category> actualActionResult =
+                await this.categoriesController.DeleteCategoryByIdAsync(someId);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.categoryServiceMock.Verify(service =>
+                service.RemoveCategoryByIdAsync(It.IsAny<Guid>()),
+                    Times.Once);
+
+            this.categoryServiceMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldReturnNotFoundOnDeleteIfItemDoesNotExistAsync()
+        {
+            // given
+            Guid someId = Guid.NewGuid();
+            string someMessage = GetRandomString();
+
+            var notFoundCategoryException =
+                new NotFoundCategoryException(
+                    message: someMessage);
+
+            var categoryValidationException =
+                new CategoryValidationException(
+                    message: someMessage,
+                    innerException: notFoundCategoryException);
+
+            NotFoundObjectResult expectedNotFoundObjectResult =
+                NotFound(notFoundCategoryException);
+
+            var expectedActionResult =
+                new ActionResult<Category>(expectedNotFoundObjectResult);
+
+            this.categoryServiceMock.Setup(service =>
+                service.RemoveCategoryByIdAsync(It.IsAny<Guid>()))
+                    .ThrowsAsync(categoryValidationException);
 
             // when
             ActionResult<Category> actualActionResult =
