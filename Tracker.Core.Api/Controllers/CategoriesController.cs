@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using RESTFulSense.Controllers;
 using Tracker.Core.Api.Models.Foundations.Categories;
 using Tracker.Core.Api.Models.Foundations.Categories.Exceptions;
-using Tracker.Core.Api.Models.Foundations.Users;
 using Tracker.Core.Api.Services.Foundations.Categories;
 
 namespace Tracker.Core.Api.Controllers
@@ -146,10 +145,31 @@ namespace Tracker.Core.Api.Controllers
         [HttpDelete("{categoryId}")]
         public async ValueTask<ActionResult<Category>> DeleteCategoryByIdAsync(Guid categoryId)
         {
-            Category deleteCategory =
-                await this.categoryService.RemoveCategoryByIdAsync(categoryId);
+            try
+            {
+                Category deleteCategory =
+                    await this.categoryService.RemoveCategoryByIdAsync(categoryId);
 
-            return Ok(deleteCategory);
+                return Ok(deleteCategory);
+            }
+            catch (CategoryValidationException categoryValidationException)
+                when (categoryValidationException.InnerException is NotFoundCategoryException)
+            {
+                return NotFound(categoryValidationException.InnerException);
+            }
+            catch (CategoryValidationException categoryValidationException)
+            {
+                return BadRequest(categoryValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+                when (categoryDependencyValidationException.InnerException is LockedCategoryException)
+            {
+                return Locked(categoryDependencyValidationException.InnerException);
+            }
+            catch (CategoryDependencyValidationException categoryDependencyValidationException)
+            {
+                return BadRequest(categoryDependencyValidationException.InnerException);
+            }
         }
     }
 }
