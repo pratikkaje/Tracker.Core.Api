@@ -117,5 +117,49 @@ namespace Tracker.Core.Api.Tests.Unit.Controllers.Categories
 
             this.categoryServiceMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldReturnLockedOnDeleteIfRecordIsLockedAsync()
+        {
+            // given
+            Guid someId = Guid.NewGuid();
+            var someInnerException = new Exception();
+            string someMessage = GetRandomString();
+
+            var lockedCategoryException =
+                new LockedCategoryException(
+                    message: someMessage,
+                    innerException: someInnerException,
+                    data: someInnerException.Data);
+
+            var categoryDependencyValidationException =
+                new CategoryDependencyValidationException(
+                    message: someMessage,
+                    innerException: lockedCategoryException,
+                    data: lockedCategoryException.Data);
+
+            LockedObjectResult expectedConflictObjectResult =
+                Locked(lockedCategoryException);
+
+            var expectedActionResult =
+                new ActionResult<Category>(expectedConflictObjectResult);
+
+            this.categoryServiceMock.Setup(service =>
+                service.RemoveCategoryByIdAsync(It.IsAny<Guid>()))
+                    .ThrowsAsync(categoryDependencyValidationException);
+
+            // when
+            ActionResult<Category> actualActionResult =
+                await this.categoriesController.DeleteCategoryByIdAsync(someId);
+
+            // then
+            actualActionResult.ShouldBeEquivalentTo(expectedActionResult);
+
+            this.categoryServiceMock.Verify(service =>
+                service.RemoveCategoryByIdAsync(It.IsAny<Guid>()),
+                    Times.Once);
+
+            this.categoryServiceMock.VerifyNoOtherCalls();
+        }
     }
 }
