@@ -11,18 +11,18 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
         [Fact]
         public async Task ShouldPostUserAsync()
         {
-        //    // given
-        //    User randomUser = CreateRandomUser();
-        //    User inputUser = randomUser;
-        //    User expectedUser = inputUser;
+            // given
+            User randomUser = CreateRandomUser();
+            User inputUser = randomUser;
+            User expectedUser = inputUser;
 
-        //    // when
-        //    User actualUser =
-        //        await this.trackerCoreApiBroker.PostUserAsync(inputUser);
+            // when
+            User actualUser =
+                await this.trackerCoreApiBroker.PostUserAsync(inputUser);
 
-        //    // then
-        //    actualUser.Should().BeEquivalentTo(expectedUser);
-        //    await this.trackerCoreApiBroker.DeleteUserByIdAsync(actualUser.Id);
+            // then
+            //actualUser.Should().BeEquivalentTo(expectedUser);
+            await this.trackerCoreApiBroker.DeleteUserByIdAsync(actualUser.Id);
         }
     }
 }
