@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tracker.Core.Api.Tests.Acceptance.Brokers;
 using Tracker.Core.Api.Tests.Acceptance.Models.Users;
 using Tynamix.ObjectFiller;
@@ -16,10 +12,10 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
         public UsersApiTests(TrackerCoreApiBroker trackerCoreApiBroker) =>
             this.trackerCoreApiBroker = trackerCoreApiBroker;
 
-        private static string GetRandomEmail() => 
+        private static string GetRandomEmail() =>
             new EmailAddresses().GetValue();
 
-        private static User CreateRandomUser() => 
+        private static User CreateRandomUser() =>
             CreateRandomUserFiller().Create();
 
         private static Filler<User> CreateRandomUserFiller()

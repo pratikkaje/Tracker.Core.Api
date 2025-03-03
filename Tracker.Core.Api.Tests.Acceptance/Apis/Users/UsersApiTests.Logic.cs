@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using Tracker.Core.Api.Tests.Acceptance.Brokers;
 using Tracker.Core.Api.Tests.Acceptance.Models.Users;

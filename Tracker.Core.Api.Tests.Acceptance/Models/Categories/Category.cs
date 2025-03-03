@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tracker.Core.Api.Tests.Acceptance.Models.Transactions;
 using Tracker.Core.Api.Tests.Acceptance.Models.Users;
 
