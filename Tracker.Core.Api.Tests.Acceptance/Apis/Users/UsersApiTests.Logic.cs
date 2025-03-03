@@ -8,9 +8,9 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
     [Collection(nameof(ApiTestCollection))]
     public partial class UsersApiTests
     {
-        //[Fact]
-        //public async Task ShouldPostUserAsync()
-        //{
+        [Fact]
+        public async Task ShouldPostUserAsync()
+        {
         //    // given
         //    User randomUser = CreateRandomUser();
         //    User inputUser = randomUser;
@@ -23,6 +23,6 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
         //    // then
         //    actualUser.Should().BeEquivalentTo(expectedUser);
         //    await this.trackerCoreApiBroker.DeleteUserByIdAsync(actualUser.Id);
-        //}
+        }
     }
 }
