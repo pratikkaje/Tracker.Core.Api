@@ -28,6 +28,7 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
                 .OnProperty(user => user.Email).Use(GetRandomEmail())
                 .OnProperty(user => user.CreatedBy).Use(user)
                 .OnProperty(user => user.ModifiedBy).Use(user)
+                .OnProperty(user => user.Transactions).IgnoreIt()
                 .OnProperty(user => user.Categories).IgnoreIt();
 
             return filler;
