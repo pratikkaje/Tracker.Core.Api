@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tracker.Core.Api.Tests.Acceptance.Models.Users;
 
@@ -14,6 +15,9 @@ namespace Tracker.Core.Api.Tests.Acceptance.Brokers
 
         public async ValueTask<User> GetUserByIdAsync(Guid userId) =>
             await this.apiFactoryClient.GetContentAsync<User>($"{UserRelativeUrl}/{userId}");
+
+        public async ValueTask<IEnumerable<User>> GetAllUsersAsync() =>
+            await this.apiFactoryClient.GetContentAsync<IEnumerable<User>>(UserRelativeUrl);
 
         public async ValueTask<User> DeleteUserByIdAsync(Guid userId) =>
             await this.apiFactoryClient.DeleteContentAsync<User>($"{UserRelativeUrl}/{userId}");

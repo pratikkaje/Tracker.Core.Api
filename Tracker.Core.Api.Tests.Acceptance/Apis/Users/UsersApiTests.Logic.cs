@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Tracker.Core.Api.Tests.Acceptance.Brokers;
@@ -42,6 +44,30 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
             // then
             actualUser.Should().BeEquivalentTo(expectedUser);
             await this.trackerCoreApiBroker.DeleteUserByIdAsync(actualUser.Id);
+        }
+
+        [Fact]
+        public async Task ShouldGetAllUsersAsync()
+        {
+            // given
+            List<User> inputUsers = await PostRandomUsers();
+
+            IEnumerable<User> expectedUsers = inputUsers;
+
+            // when
+            IEnumerable<User> actualUsers =
+                await this.trackerCoreApiBroker.GetAllUsersAsync();
+
+            // then
+            foreach (User expectedUser in expectedUsers)
+            {
+                User actualUser =
+                    actualUsers.Single(user => user.Id == expectedUser.Id);
+
+                actualUser.Should().BeEquivalentTo(expectedUser);
+                await this.trackerCoreApiBroker.DeleteUserByIdAsync(actualUser.Id);
+            }
+
         }
 
     }
