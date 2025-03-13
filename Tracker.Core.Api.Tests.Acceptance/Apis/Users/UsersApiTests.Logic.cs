@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Force.DeepCloner;
 using Tracker.Core.Api.Tests.Acceptance.Brokers;
 using Tracker.Core.Api.Tests.Acceptance.Models.Users;
 
@@ -85,6 +86,22 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
             // then
             actualUser.Should().BeEquivalentTo(modifiedUser);
             await this.trackerCoreApiBroker.DeleteUserByIdAsync(actualUser.Id);
+        }
+
+        [Fact]
+        public async Task ShouldDeleteUserAsync()
+        {
+            // given
+            User randomUser = await PostRandomUser();
+            User inputUser = randomUser;
+            User expectedUser = inputUser.DeepClone();
+
+            // when
+            User deleteUser =
+                await this.trackerCoreApiBroker.DeleteUserByIdAsync(inputUser.Id);
+
+            // then
+            deleteUser.Should().BeEquivalentTo(expectedUser);
         }
 
     }
