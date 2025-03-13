@@ -70,5 +70,22 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
 
         }
 
+        [Fact]
+        public async Task ShouldPutUserAsync()
+        {
+            // given
+            User modifiedUser = await ModifyRandomUser();
+
+            // when
+            await this.trackerCoreApiBroker.PutUserAsync(modifiedUser);
+
+            User actualUser =
+                await this.trackerCoreApiBroker.GetUserByIdAsync(modifiedUser.Id);
+
+            // then
+            actualUser.Should().BeEquivalentTo(modifiedUser);
+            await this.trackerCoreApiBroker.DeleteUserByIdAsync(actualUser.Id);
+        }
+
     }
 }

@@ -19,6 +19,9 @@ namespace Tracker.Core.Api.Tests.Acceptance.Brokers
         public async ValueTask<IEnumerable<User>> GetAllUsersAsync() =>
             await this.apiFactoryClient.GetContentAsync<IEnumerable<User>>(UserRelativeUrl);
 
+        public async ValueTask<User> PutUserAsync(User user) =>
+            await this.apiFactoryClient.PutContentAsync(UserRelativeUrl, user);
+
         public async ValueTask<User> DeleteUserByIdAsync(Guid userId) =>
             await this.apiFactoryClient.DeleteContentAsync<User>($"{UserRelativeUrl}/{userId}");
     }

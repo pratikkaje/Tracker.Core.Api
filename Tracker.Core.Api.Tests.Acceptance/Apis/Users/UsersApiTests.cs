@@ -43,6 +43,23 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
                 .AsQueryable();
         }
 
+        private async ValueTask<User> ModifyRandomUser()
+        {
+            User randomUser = await PostRandomUser();
+            randomUser.UpdatedDate = DateTime.UtcNow;
+            randomUser.ModifiedBy = Guid.NewGuid().ToString();
+
+            return randomUser;
+        }
+
+        private async ValueTask<User> PostRandomUser()
+        {
+            User randomUser = CreateRandomUser();
+            await this.trackerCoreApiBroker.PostUserAsync(randomUser);
+
+            return randomUser;
+        }
+
         private static Filler<User> CreateRandomUserFiller()
         {
             var filler = new Filler<User>();
