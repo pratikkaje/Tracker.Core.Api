@@ -36,6 +36,32 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
         private static User CreateRandomUser() =>
             CreateRandomUserFiller().Create();
 
+        private async Task<List<Category>> PostRandomCategoriesAsync(Guid userId)
+        {
+            List<Category> categories = CreateRandomCategories(userId).ToList();
+
+            foreach (var category in categories)
+            {
+                await this.trackerCoreApiBroker.PostCategoryAsync(category);
+            }
+
+            return categories;
+        }
+
+        private static IQueryable<Category> CreateRandomCategories(Guid userId)
+        {
+            return CreateCategoryFiller(userId)
+                .Create(GetRandomNumber())
+                .AsQueryable();
+        }
+
+        private static int GetRandomNumber() =>
+            new IntRange(min: 2, max: 10).GetValue();
+
+        private static string GetRandomString() =>
+            new MnemonicString().GetValue();
+
+
         private static Filler<Category> CreateCategoryFiller(Guid userId)
         {
             var filler = new Filler<Category>();
@@ -52,8 +78,6 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
             return filler;
         }
 
-        private static string GetRandomString() =>
-            new MnemonicString().GetValue();
 
         private static Filler<User> CreateRandomUserFiller()
         {
