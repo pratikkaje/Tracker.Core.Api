@@ -77,5 +77,24 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
 
             await this.trackerCoreApiBroker.DeleteUserByIdAsync(randomUser.Id);
         }
+
+        [Fact]
+        public async Task ShouldPutCategoryAsync()
+        {
+            // given
+            User randomUser = await PostRandomUserAsync();
+            Category modifiedCategory = await ModifyRandomCategory(userId: randomUser.Id);
+
+            // when
+            await this.trackerCoreApiBroker.PutCategoryAsync(modifiedCategory);
+
+            Category actualCategory =
+                await this.trackerCoreApiBroker.GetCategoryByIdAsync(modifiedCategory.Id);
+
+            // then
+            actualCategory.Should().BeEquivalentTo(modifiedCategory);
+            await this.trackerCoreApiBroker.DeleteCategoryByIdAsync(actualCategory.Id);
+            await this.trackerCoreApiBroker.DeleteUserByIdAsync(randomUser.Id);
+        }
     }
 }

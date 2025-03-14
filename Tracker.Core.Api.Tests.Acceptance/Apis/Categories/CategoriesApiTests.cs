@@ -36,6 +36,15 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
         private static User CreateRandomUser() =>
             CreateRandomUserFiller().Create();
 
+        private async ValueTask<Category> ModifyRandomCategory(Guid userId)
+        {
+            Category randomCategory = await PostRandomCategory(userId);
+            randomCategory.UpdatedDate = DateTime.UtcNow;
+            randomCategory.UpdatedBy = Guid.NewGuid().ToString();
+
+            return randomCategory;
+        }
+
         private async Task<List<Category>> PostRandomCategoriesAsync(Guid userId)
         {
             List<Category> categories = CreateRandomCategories(userId).ToList();
