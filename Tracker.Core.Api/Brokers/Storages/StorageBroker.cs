@@ -32,6 +32,7 @@ namespace Tracker.Core.Api.Brokers.Storages
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             AddUserConfigurations(modelBuilder.Entity<User>());
             AddCategoryConfigurations(modelBuilder.Entity<Category>());
             AddTransactionConfigurations(modelBuilder.Entity<Transaction>());
