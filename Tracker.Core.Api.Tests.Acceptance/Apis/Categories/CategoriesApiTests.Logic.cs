@@ -16,7 +16,7 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
         public async Task ShouldPostCategoryAsync()
         {
             // given
-            User randomUser = await PostRandomUser();
+            User randomUser = await PostRandomUserAsync();
             Category randomCategory = CreateRandomCategory(randomUser.Id);//await PostRandomCategory(userId: randomUser.Id);
             Category inputCategory = randomCategory;
             Category expectedCategory = inputCategory.DeepClone();
@@ -24,6 +24,25 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
             // when
             Category actualCategory =
                 await this.trackerCoreApiBroker.PostCategoryAsync(inputCategory);
+
+            // then
+            actualCategory.Should().BeEquivalentTo(expectedCategory);
+            await this.trackerCoreApiBroker.DeleteCategoryByIdAsync(inputCategory.Id);
+            await this.trackerCoreApiBroker.DeleteUserByIdAsync(randomUser.Id);
+        }
+
+        [Fact]
+        public async Task ShouldGetCategoryByIdAsync()
+        {
+            // given
+            User randomUser = await PostRandomUserAsync();
+            Category randomCategory = await PostRandomCategory(userId: randomUser.Id);
+            Category inputCategory = randomCategory;
+            Category expectedCategory = inputCategory.DeepClone();
+
+            // when
+            Category actualCategory =
+                await this.trackerCoreApiBroker.GetCategoryByIdAsync(inputCategory.Id);
 
             // then
             actualCategory.Should().BeEquivalentTo(expectedCategory);

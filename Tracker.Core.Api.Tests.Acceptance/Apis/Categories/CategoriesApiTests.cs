@@ -27,7 +27,7 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
         public static Category CreateRandomCategory(Guid userId) =>
             CreateCategoryFiller(userId).Create();
 
-        private async ValueTask<User> PostRandomUser()
+        private async ValueTask<User> PostRandomUserAsync()
         {
             User randomUser = CreateRandomUser();
             return await this.trackerCoreApiBroker.PostUserAsync(randomUser);
@@ -46,7 +46,8 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
                 .OnProperty(category => category.UserId).Use(userId)
                 .OnProperty(category => category.CreatedBy).Use(someUser)
                 .OnProperty(category => category.UpdatedBy).Use(someUser)
-                .OnProperty(category => category.User).IgnoreIt();
+                .OnProperty(category => category.User).IgnoreIt()
+                .OnProperty(category => category.Transactions).IgnoreIt();
 
             return filler;
         }
