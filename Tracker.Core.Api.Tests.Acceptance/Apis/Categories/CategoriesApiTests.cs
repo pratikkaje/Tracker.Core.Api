@@ -70,7 +70,6 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
         private static string GetRandomString() =>
             new MnemonicString().GetValue();
 
-
         private static Filler<Category> CreateCategoryFiller(Guid userId)
         {
             var filler = new Filler<Category>();
@@ -86,7 +85,6 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Categories
 
             return filler;
         }
-
 
         private static Filler<User> CreateRandomUserFiller()
         {
