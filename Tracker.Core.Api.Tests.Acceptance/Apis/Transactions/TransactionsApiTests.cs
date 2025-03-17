@@ -63,8 +63,8 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
 
             filler.Setup()
                 .OnType<DateTimeOffset>().Use(DateTimeOffset.UtcNow)
-                .OnProperty(transaction => transaction.TransactionType).Use(GetRandomStringWithLengthOf(9))
-                .OnProperty(transaction => transaction.Amount).Use(GetRandomDecimal(totaldigits: 13, scale: 3))
+                .OnProperty(transaction => transaction.TransactionType).Use(GetRandomStringWithLengthOf(5))
+                .OnProperty(transaction => transaction.Amount).Use(GetRandomDecimal(totaldigits: 6, scale: 3))
                 .OnProperty(transaction => transaction.UserId).Use(userId)
                 .OnProperty(transaction => transaction.CategoryId).Use(categoryId)
                 .OnProperty(transaction => transaction.CreatedBy).Use(userId.ToString)
@@ -83,8 +83,8 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
             filler.Setup()
                 .OnType<DateTimeOffset>().Use(DateTimeOffset.UtcNow)
                 .OnProperty(category => category.UserId).Use(userId)
-                .OnProperty(category => category.CreatedBy).Use(someUser)
-                .OnProperty(category => category.UpdatedBy).Use(someUser)
+                .OnProperty(category => category.CreatedBy).Use(userId.ToString())
+                .OnProperty(category => category.UpdatedBy).Use(userId.ToString())
                 .OnProperty(category => category.User).IgnoreIt()
                 .OnProperty(category => category.Transactions).IgnoreIt();
 
