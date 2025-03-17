@@ -29,6 +29,7 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
 
             // then
             actualTransaction.Should().BeEquivalentTo(expectedTransaction);
+            await this.trackerCoreApiBroker.DeleteTransactionByIdAsync(inputTransaction.Id);
             await this.trackerCoreApiBroker.DeleteCategoryByIdAsync(randomCategory.Id);
             await this.trackerCoreApiBroker.DeleteUserByIdAsync(randomUser.Id);
         }
