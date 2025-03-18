@@ -38,6 +38,12 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
             return result;
         }
 
+        private async ValueTask<Transaction> PostRandomTransaction(Guid userId, Guid categoryId)
+        {
+            Transaction randomTransaction = CreateRandomTransaction(userId, categoryId);
+            return await this.trackerCoreApiBroker.PostTransactionAsync(randomTransaction);
+        }
+
 
         private async ValueTask<User> PostRandomUserAsync()
         {
