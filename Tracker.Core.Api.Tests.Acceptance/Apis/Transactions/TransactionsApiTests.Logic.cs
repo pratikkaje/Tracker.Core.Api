@@ -84,5 +84,31 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
             await this.trackerCoreApiBroker.DeleteCategoryByIdAsync(randomCategory.Id);
             await this.trackerCoreApiBroker.DeleteUserByIdAsync(randomUser.Id);
         }
+
+        [Fact]
+        public async Task ShouldPutTransactionAsync()
+        {
+            // given
+            User randomUser = await PostRandomUserAsync();
+
+            Category randomCategory = 
+                await PostRandomCategoryAsync(userId: randomUser.Id);
+            
+            Transaction modifiedTransaction = 
+                await ModifyRandomTransaction(userId: randomUser.Id,categoryId: randomCategory.Id);
+
+            // when
+            await this.trackerCoreApiBroker.PutTransactionAsync(modifiedTransaction);
+
+            Transaction actualTransaction =
+                await this.trackerCoreApiBroker.GetTransactionByIdAsync(modifiedTransaction.Id);
+
+            // then
+            actualTransaction.Should().BeEquivalentTo(modifiedTransaction);
+            await this.trackerCoreApiBroker.DeleteTransactionByIdAsync(actualTransaction.Id);
+            await this.trackerCoreApiBroker.DeleteCategoryByIdAsync(randomCategory.Id);
+            await this.trackerCoreApiBroker.DeleteUserByIdAsync(randomUser.Id);
+        }
+
     }
 }

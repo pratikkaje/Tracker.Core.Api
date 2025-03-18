@@ -38,6 +38,15 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
             return result;
         }
 
+        private async ValueTask<Transaction> ModifyRandomTransaction(Guid userId,Guid categoryId)
+        {
+            Transaction randomTransaction = await PostRandomTransaction(userId, categoryId);
+            randomTransaction.UpdatedDate = DateTime.UtcNow;
+            randomTransaction.UpdatedBy = Guid.NewGuid().ToString();
+
+            return randomTransaction;
+        }
+
         private async ValueTask<List<Transaction>> PostRandomTransactionsAsync(Guid userId, Guid categoryId)
         {
             List<Transaction> transactions = CreateRandomTransactions(userId, categoryId).ToList();
