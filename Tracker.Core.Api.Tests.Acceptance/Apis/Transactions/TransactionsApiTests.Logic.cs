@@ -91,11 +91,11 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
             // given
             User randomUser = await PostRandomUserAsync();
 
-            Category randomCategory = 
+            Category randomCategory =
                 await PostRandomCategoryAsync(userId: randomUser.Id);
-            
-            Transaction modifiedTransaction = 
-                await ModifyRandomTransaction(userId: randomUser.Id,categoryId: randomCategory.Id);
+
+            Transaction modifiedTransaction =
+                await ModifyRandomTransaction(userId: randomUser.Id, categoryId: randomCategory.Id);
 
             // when
             await this.trackerCoreApiBroker.PutTransactionAsync(modifiedTransaction);
@@ -110,5 +110,27 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
             await this.trackerCoreApiBroker.DeleteUserByIdAsync(randomUser.Id);
         }
 
+        [Fact]
+        public async Task ShouldDeleteTransactionAsync()
+        {
+            // given
+            User randomUser = await PostRandomUserAsync();
+            Category randomCategory = await PostRandomCategoryAsync(userId: randomUser.Id);
+
+            Transaction randomTransaction = 
+                await PostRandomTransaction(userId: randomUser.Id, categoryId: randomCategory.Id);
+
+            Transaction inputTransaction = randomTransaction;
+            Transaction expectedTransaction = inputTransaction.DeepClone();
+
+            // when
+            Transaction deletedTransaction =
+                await this.trackerCoreApiBroker.DeleteTransactionByIdAsync(inputTransaction.Id);
+
+            // then
+            deletedTransaction.Should().BeEquivalentTo(expectedTransaction);
+            await this.trackerCoreApiBroker.DeleteCategoryByIdAsync(randomCategory.Id);
+            await this.trackerCoreApiBroker.DeleteUserByIdAsync(randomUser.Id);
+        }
     }
 }
