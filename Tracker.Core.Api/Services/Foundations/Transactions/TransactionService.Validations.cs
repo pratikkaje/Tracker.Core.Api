@@ -193,7 +193,7 @@ namespace Tracker.Core.Api.Services.Foundations.Transactions
         private static async ValueTask<dynamic> IsInvalidLengthAsync(decimal value, int precision, int scale) => new
         {
             Condition = await IsExceedingLengthAsync(value, precision, scale),
-            Message = "Value exceeds 10 digits or 4 decimal places."
+            Message = "Value exceeds 14 digits or 4 decimal places."
         };
 
         private static async ValueTask<bool> IsExceedingLengthAsync(decimal value, int totaldigits, int scale)

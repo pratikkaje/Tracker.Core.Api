@@ -9,7 +9,6 @@ using Tracker.Core.Api.Tests.Acceptance.Models.Users;
 
 namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
 {
-    [Collection(nameof(ApiTestCollection))]
     public partial class UsersApiTests
     {
         [Fact]

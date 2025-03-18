@@ -8,6 +8,7 @@ using Tynamix.ObjectFiller;
 
 namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
 {
+    [Collection(nameof(ApiTestCollection))]
     public partial class UsersApiTests
     {
         private readonly TrackerCoreApiBroker trackerCoreApiBroker;
