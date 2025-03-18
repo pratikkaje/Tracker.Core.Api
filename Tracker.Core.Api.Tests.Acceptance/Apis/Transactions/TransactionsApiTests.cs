@@ -38,12 +38,23 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
             return result;
         }
 
+        private async ValueTask<List<Transaction>> PostRandomTransactionsAsync(Guid userId, Guid categoryId)
+        {
+            List<Transaction> transactions = CreateRandomTransactions(userId, categoryId).ToList();
+
+            foreach (var transaction in transactions)
+            {
+                await this.trackerCoreApiBroker.PostTransactionAsync(transaction);
+            }
+
+            return transactions;
+        }
+
         private async ValueTask<Transaction> PostRandomTransaction(Guid userId, Guid categoryId)
         {
             Transaction randomTransaction = CreateRandomTransaction(userId, categoryId);
             return await this.trackerCoreApiBroker.PostTransactionAsync(randomTransaction);
         }
-
 
         private async ValueTask<User> PostRandomUserAsync()
         {
@@ -57,11 +68,18 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Transactions
             return await this.trackerCoreApiBroker.PostCategoryAsync(randomCategory);
         }
 
+        private static IQueryable<Transaction> CreateRandomTransactions(Guid userId, Guid categoryId) =>
+            CreateTransactionFiller(userId, categoryId).Create(GetRandomCount()).AsQueryable();
+
         public static Category CreateRandomCategory(Guid userId) =>
             CreateCategoryFiller(userId).Create();
 
         private static User CreateRandomUser() =>
             CreateRandomUserFiller().Create();
+
+        private static int GetRandomCount() =>
+            new IntRange(min: 2, max: 10).GetValue();   
+
 
         private static Filler<Transaction> CreateTransactionFiller(Guid userId, Guid categoryId)
         {
