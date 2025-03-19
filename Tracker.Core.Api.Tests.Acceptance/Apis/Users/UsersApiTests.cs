@@ -68,7 +68,7 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
             filler.Setup()
                 .OnType<DateTimeOffset>().Use(DateTimeOffset.UtcNow)
                 .OnProperty(user => user.Email).Use(new EmailAddresses().GetValue)
-                .OnProperty(user => user.UserName).Use(new MnemonicString(wordCount: 100, wordMinLength: 5, wordMaxLength: 10))
+                //.OnProperty(user => user.UserName).Use(new MnemonicString(wordCount: 100, wordMinLength: 5, wordMaxLength: 10))
                 .OnProperty(user => user.CreatedBy).Use(user)
                 .OnProperty(user => user.ModifiedBy).Use(user)
                 .OnProperty(user => user.Transactions).IgnoreIt()
