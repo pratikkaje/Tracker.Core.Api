@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Force.DeepCloner;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -114,6 +115,68 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Transactions
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyExceptionOnRemoveByIdIfDependencyErrorOccursAndLogItAsync()
+        {
+            // given
+            Guid someTransactionId = Guid.NewGuid();
+            Transaction randomTransaction = CreateRandomTransaction();
+            Transaction storageTransaction = randomTransaction;
+            Transaction inputTransaction = storageTransaction;
+            Transaction removedTransaction = inputTransaction;
+            Transaction expectedTransaction = removedTransaction.DeepClone();
+
+            var dbUpdateException = new DbUpdateException();
+
+            var failedOperationTransactionException =
+                new FailedOperationTransactionException(
+                    message: "Failed operation transaction error occurred, contact support",
+                    innerException: dbUpdateException);
+
+            TransactionDependencyException expectedTransactionDependencyException =
+                new TransactionDependencyException(
+                    message: "Transaction dependency error occured, contact support.",
+                    innerException: failedOperationTransactionException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectTransactionByIdAsync(someTransactionId))
+                    .ReturnsAsync(storageTransaction);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.DeleteTransactionAsync(inputTransaction))
+                    .ThrowsAsync(dbUpdateException);
+
+
+            // when
+            ValueTask <Transaction> removeTransactionTask =
+                this.transactionService.RemoveTransactionByIdAsync(someTransactionId);
+
+            TransactionDependencyException actualTransactionDependencyException =
+                await Assert.ThrowsAsync<TransactionDependencyException>(
+                    removeTransactionTask.AsTask);
+
+            // then
+            actualTransactionDependencyException.Should().BeEquivalentTo(
+                expectedTransactionDependencyException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectTransactionByIdAsync(It.IsAny<Guid>()),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.DeleteTransactionAsync(It.IsAny<Transaction>()),
+                        Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedTransactionDependencyException))),
+                        Times.Once);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
         }
 
         [Fact]
