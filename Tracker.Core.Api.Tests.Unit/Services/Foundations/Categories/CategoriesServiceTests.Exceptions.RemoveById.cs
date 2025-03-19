@@ -178,7 +178,6 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.storageBrokerMock.VerifyNoOtherCalls();
         }
 
-
         [Fact]
         public async Task ShouldThrowServiceExceptionOnRemoveByIdIfServiceErrorOccursAndLogItAsync()
         {
