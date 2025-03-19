@@ -67,7 +67,6 @@ namespace Tracker.Core.Api.Tests.Acceptance.Apis.Users
                 actualUser.Should().BeEquivalentTo(expectedUser);
                 await this.trackerCoreApiBroker.DeleteUserByIdAsync(actualUser.Id);
             }
-
         }
 
         [Fact]
