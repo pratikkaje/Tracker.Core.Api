@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Force.DeepCloner;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -116,6 +117,67 @@ namespace Tracker.Core.Api.Tests.Unit.Services.Foundations.Categories
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.datetimeBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowDependencyExceptionOnRemoveByIdIfDependencyErrorOccursAndLogItAsync()
+        {
+            // given
+            Guid someCategoryId = Guid.NewGuid();
+            Category someCategory = CreateRandomCategory();
+            Category inputCategory = someCategory;
+            Category storageCategory = inputCategory;
+            Category expectedCategory = inputCategory.DeepClone();
+
+            var dbUpdateException = new DbUpdateException();
+
+            var failedOperationCategoryException =
+                new FailedOperationCategoryException(
+                    message: "Failed operation category  error occurred, contact support.",
+                    innerException: dbUpdateException);
+
+            var expectedCategoryDependencyException =
+                new CategoryDependencyException(
+                    message: "Category dependency error occurred, contact support.",
+                    innerException: failedOperationCategoryException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectCategoryByIdAsync(someCategoryId))
+                    .ReturnsAsync(storageCategory);
+
+            this.storageBrokerMock.Setup(broker => 
+                broker.DeleteCategoryAsync(storageCategory))
+                    .ThrowsAsync(dbUpdateException);
+
+            // when
+            ValueTask<Category> removeCategoryTask =
+                this.categoryService.RemoveCategoryByIdAsync(someCategoryId);
+
+            CategoryDependencyException actualCategoryDependencyException =
+                await Assert.ThrowsAsync<CategoryDependencyException>(
+                    testCode: removeCategoryTask.AsTask);
+
+            // then
+            actualCategoryDependencyException.Should().BeEquivalentTo(
+                expectedCategoryDependencyException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectCategoryByIdAsync(It.IsAny<Guid>()),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.DeleteCategoryAsync(It.IsAny<Category>()),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogErrorAsync(It.Is(SameExceptionAs(
+                    expectedCategoryDependencyException))),
+                        Times.Once);
+
+            this.datetimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+        }
+
 
         [Fact]
         public async Task ShouldThrowServiceExceptionOnRemoveByIdIfServiceErrorOccursAndLogItAsync()
