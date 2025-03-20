@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ADotNet" Version="3.0.4" />
+    <PackageReference Include="ADotNet" Version="4.1.0" />
+    <PackageReference Include="EFxceptions" Version="0.4.5" />
+    <PackageReference Include="FluentAssertions" Version="7.2.0" />
   </ItemGroup>
 
 </Project>
